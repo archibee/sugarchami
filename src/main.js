@@ -758,7 +758,7 @@ app.innerHTML = `
       </div>
       <div class="mini-game-grid">
         <article class="mini-game-card gauge-game" id="gauge-game">
-          <div class="mini-game-topline"><span>02 · 정밀 측정실</span><span class="mini-game-icon" aria-hidden="true">⌁</span></div>
+          <div class="mini-game-topline"><span>02 · 정밀 측정실</span><span class="mini-game-icon" aria-hidden="true">🧪</span></div>
           <h3>당도계 눈금 맞추기</h3>
           <p class="mini-game-copy">목표 구간을 지나가는 바늘을 팡! 멈춰요. 손 떨림은 연구의 일부입니다.</p>
           <div class="gauge-readout"><span>현재 측정값</span><b id="gauge-readout">—<small>°S</small></b></div>
@@ -772,7 +772,7 @@ app.innerHTML = `
         </article>
 
         <article class="mini-game-card fizz-game" id="fizz-game">
-          <div class="mini-game-topline"><span>03 · 기포 제거반</span><svg class="mini-game-icon asterisk-shape" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg></div>
+          <div class="mini-game-topline"><span>03 · 기포 제거반</span><span class="mini-game-icon" aria-hidden="true">🫧</span></div>
           <h3>차미 기포 빼기</h3>
           <p class="mini-game-copy">차미 안에 기포가 들어갔대요. 7초 동안 팡팡 눌러서 빼주세요!</p>
           <div class="fizz-stage">
