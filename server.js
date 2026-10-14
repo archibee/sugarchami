@@ -23,8 +23,10 @@ const trophyDefinitions = [
   { id: 'precision-10', icon: '🧭', title: '영점의 달인', detail: '정밀 측정 10회 성공' },
   { id: 'rapid-paws', icon: '🐾', title: '바쁜 앞발', detail: '거품 게임에서 18회 연타' },
   { id: 'fizz-master', icon: '🫧', title: '거품 과학자', detail: '거품 게임에서 30회 연타' },
-  { id: 'mini-game-fan', icon: '🎮', title: '연구소 순회', detail: '세 가지 게임을 모두 플레이' },
+  { id: 'mini-game-fan', icon: '🎮', title: '연구소 순회', detail: '네 가지 게임을 모두 플레이' },
   { id: 'collection-6', icon: '✨', title: '트로피 수집가', detail: '트로피 6개 수집' },
+  { id: 'chami-catcher', icon: '🐇', title: '재빠른 앞발', detail: '도망 차미 5마리 잡기' },
+  { id: 'chami-catcher-15', icon: '🧤', title: '수집왕 차미', detail: '도망 차미 15마리 잡기' },
 ]
 
 function loadLocalEnv() {
@@ -78,11 +80,11 @@ async function getVisitor(request, response) {
 
 async function readProfile(visitorId) {
   const [stats, trophies] = await Promise.all([
-    pool.query('SELECT completed_rounds, best_sugar, best_mashes, gauge_plays, precision_hits, mash_plays FROM visitor_stats WHERE visitor_id = $1', [visitorId]),
+    pool.query('SELECT completed_rounds, best_sugar, best_mashes, best_catches, catch_plays, gauge_plays, precision_hits, mash_plays FROM visitor_stats WHERE visitor_id = $1', [visitorId]),
     pool.query('SELECT trophy_id, earned_at FROM visitor_trophies WHERE visitor_id = $1 ORDER BY earned_at', [visitorId]),
   ])
   return {
-    stats: stats.rows[0] || { completed_rounds: 0, best_sugar: 0, best_mashes: 0, gauge_plays: 0, precision_hits: 0, mash_plays: 0 },
+    stats: stats.rows[0] || { completed_rounds: 0, best_sugar: 0, best_mashes: 0, best_catches: 0, catch_plays: 0, gauge_plays: 0, precision_hits: 0, mash_plays: 0 },
     trophies: trophies.rows.map((row) => ({ id: row.trophy_id, earnedAt: row.earned_at })),
   }
 }
@@ -109,6 +111,9 @@ async function recordGameEvent(visitorId, event) {
     } else if (event.type === 'mash_result') {
       if (!Number.isInteger(event.count) || event.count < 0 || event.count > 1000) throw Object.assign(new Error('Invalid mash result.'), { status: 400 })
       await client.query('UPDATE visitor_stats SET mash_plays = mash_plays + 1, best_mashes = GREATEST(best_mashes, $2), updated_at = now() WHERE visitor_id = $1', [visitorId, event.count])
+    } else if (event.type === 'catch_result') {
+      if (!Number.isInteger(event.count) || event.count < 0 || event.count > 1000) throw Object.assign(new Error('Invalid catch result.'), { status: 400 })
+      await client.query('UPDATE visitor_stats SET catch_plays = catch_plays + 1, best_catches = GREATEST(best_catches, $2), updated_at = now() WHERE visitor_id = $1', [visitorId, event.count])
     } else {
       throw Object.assign(new Error('Unknown game event.'), { status: 400 })
     }
@@ -124,8 +129,10 @@ async function recordGameEvent(visitorId, event) {
     unlock(earned, updated.precision_hits >= 10, 'precision-10')
     unlock(earned, updated.best_mashes >= 18, 'rapid-paws')
     unlock(earned, updated.best_mashes >= 30, 'fizz-master')
+    unlock(earned, updated.best_catches >= 5, 'chami-catcher')
+    unlock(earned, updated.best_catches >= 15, 'chami-catcher-15')
     if (event.type === 'round_complete' && event.sugars.every((value) => value >= 80)) earned.add('all-sweet')
-    unlock(earned, updated.completed_rounds > 0 && updated.gauge_plays > 0 && updated.mash_plays > 0, 'mini-game-fan')
+    unlock(earned, updated.completed_rounds > 0 && updated.gauge_plays > 0 && updated.mash_plays > 0 && updated.catch_plays > 0, 'mini-game-fan')
     await client.query(`INSERT INTO visitor_trophies (visitor_id, trophy_id)
       SELECT $1, unnest($2::text[]) ON CONFLICT DO NOTHING`, [visitorId, [...earned]])
     const trophyCount = Number((await client.query('SELECT count(*) FROM visitor_trophies WHERE visitor_id = $1', [visitorId])).rows[0].count)

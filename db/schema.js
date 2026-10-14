@@ -11,11 +11,16 @@ CREATE TABLE IF NOT EXISTS visitor_stats (
   completed_rounds integer NOT NULL DEFAULT 0 CHECK (completed_rounds >= 0),
   best_sugar integer NOT NULL DEFAULT 0 CHECK (best_sugar BETWEEN 0 AND 99),
   best_mashes integer NOT NULL DEFAULT 0 CHECK (best_mashes >= 0),
+  best_catches integer NOT NULL DEFAULT 0 CHECK (best_catches >= 0),
+  catch_plays integer NOT NULL DEFAULT 0 CHECK (catch_plays >= 0),
   gauge_plays integer NOT NULL DEFAULT 0 CHECK (gauge_plays >= 0),
   precision_hits integer NOT NULL DEFAULT 0 CHECK (precision_hits >= 0),
   mash_plays integer NOT NULL DEFAULT 0 CHECK (mash_plays >= 0),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE visitor_stats ADD COLUMN IF NOT EXISTS best_catches integer NOT NULL DEFAULT 0 CHECK (best_catches >= 0);
+ALTER TABLE visitor_stats ADD COLUMN IF NOT EXISTS catch_plays integer NOT NULL DEFAULT 0 CHECK (catch_plays >= 0);
 
 CREATE TABLE IF NOT EXISTS visitor_trophies (
   visitor_id uuid NOT NULL REFERENCES visitors(id) ON DELETE CASCADE,

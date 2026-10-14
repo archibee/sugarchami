@@ -14,8 +14,10 @@ const trophyCatalog = [
   { id: 'precision-10', icon: '🧭', title: '영점의 달인', detail: '정밀 측정 10회 성공' },
   { id: 'rapid-paws', icon: '🐾', title: '바쁜 앞발', detail: '거품 게임에서 18회 연타' },
   { id: 'fizz-master', icon: '🫧', title: '거품 과학자', detail: '거품 게임에서 30회 연타' },
-  { id: 'mini-game-fan', icon: '🎮', title: '연구소 순회', detail: '세 가지 게임을 모두 플레이' },
+  { id: 'mini-game-fan', icon: '🎮', title: '연구소 순회', detail: '네 가지 게임을 모두 플레이' },
   { id: 'collection-6', icon: '✨', title: '트로피 수집가', detail: '트로피 6개 수집' },
+  { id: 'chami-catcher', icon: '🐇', title: '재빠른 앞발', detail: '도망 차미 5마리 잡기' },
+  { id: 'chami-catcher-15', icon: '🧤', title: '수집왕 차미', detail: '도망 차미 15마리 잡기' },
 ]
 const measurementNotes = [
   '당도계가 잠깐 행복해졌습니다.',
@@ -36,6 +38,11 @@ let samples = []
 let roundSerial = 0
 let gaugeState = { running: false, target: 50, position: 50, startedAt: 0, frame: null }
 let fizzState = { running: false, count: 0, endsAt: 0, timer: null }
+let catchState = { running: false, count: 0, endsAt: 0, timer: null, mover: null }
+let quickPopTimer = null
+let knownTrophies = null
+let trophyToastTimer = null
+let profileSyncPromise = null
 
 function loadResearch() {
   const fresh = { completedRounds: 0, bestSugar: 0, bestMashes: 0, badges: [] }
@@ -75,7 +82,13 @@ function renderTrophies(definitions = [], earnedTrophies = []) {
 
 function applyServerProfile(profile) {
   const stats = profile.stats || {}
-  const earned = new Set((profile.trophies || []).map((trophy) => trophy.id))
+  const earnedTrophies = profile.trophies || []
+  const earned = new Set(earnedTrophies.map((trophy) => trophy.id))
+  if (knownTrophies) {
+    const newAwards = earnedTrophies.filter((trophy) => !knownTrophies.has(trophy.id))
+    if (newAwards.length) showTrophyToast(newAwards[0], profile.trophyDefinitions)
+  }
+  knownTrophies = earned
   research = {
     completedRounds: Number(stats.completed_rounds) || 0,
     bestSugar: Number(stats.best_sugar) || 0,
@@ -94,6 +107,27 @@ function applyServerProfile(profile) {
   renderTrophies(profile.trophyDefinitions, profile.trophies)
 }
 
+function showTrophyToast(award, definitions = []) {
+  const trophy = definitions.find((item) => item.id === award.id)
+  if (!trophy) return
+  document.querySelector('.trophy-toast')?.remove()
+  const toast = document.createElement('div')
+  toast.className = 'trophy-toast'
+  toast.setAttribute('role', 'status')
+  const icon = document.createElement('span')
+  icon.textContent = trophy.icon
+  const copy = document.createElement('span')
+  const label = document.createElement('small')
+  label.textContent = 'NEW TROPHY!'
+  const title = document.createElement('b')
+  title.textContent = trophy.title
+  copy.append(label, title)
+  toast.append(icon, copy)
+  document.body.append(toast)
+  window.clearTimeout(trophyToastTimer)
+  trophyToastTimer = window.setTimeout(() => toast.remove(), 3600)
+}
+
 async function syncServerProfile() {
   try {
     const response = await fetch('/api/profile', { credentials: 'same-origin' })
@@ -105,6 +139,7 @@ async function syncServerProfile() {
 
 async function submitGameEvent(event) {
   try {
+    if (profileSyncPromise) await profileSyncPromise
     const response = await fetch('/api/events', {
       method: 'POST',
       credentials: 'same-origin',
@@ -159,7 +194,7 @@ function renderSamples(animateId = null) {
   board.innerHTML = samples.map((sample) => `
     <article class="sample ${sample.revealed ? 'is-revealed' : ''} ${sample.winner ? 'is-sweetest' : ''} ${sample.id === animateId ? 'just-measured' : ''}" data-id="${sample.id}">
       <span class="sample-number">SAMPLE 0${sample.id}</span>
-      <span class="sample-figure">
+      <span class="sample-figure" style="--hit-tilt:${Math.round(Math.random() * 44 - 22)}deg; --hit-shift:${Math.round(Math.random() * 28 - 14)}px">
         <img src="/images/chami.png" alt="" />
         <span class="impact" aria-hidden="true">팡!${sample.revealed ? `<small>${sample.sugar}°S</small>` : ''}</span>
       </span>
@@ -169,6 +204,30 @@ function renderSamples(animateId = null) {
   `).join('')
 }
 
+function launchSugarBurst(sampleId) {
+  const section = document.querySelector('.lab-section')
+  const target = document.querySelector(`.sample[data-id="${sampleId}"] .sample-figure`)
+  if (!section || !target) return
+  const sectionRect = section.getBoundingClientRect()
+  const targetRect = target.getBoundingClientRect()
+  const burst = document.createElement('div')
+  burst.className = 'sugar-burst'
+  burst.setAttribute('aria-hidden', 'true')
+  burst.style.left = `${targetRect.left + targetRect.width / 2 - sectionRect.left}px`
+  burst.style.top = `${targetRect.top + targetRect.height / 2 - sectionRect.top}px`
+  for (let i = 0; i < 12; i += 1) {
+    const spark = document.createElement('i')
+    spark.style.setProperty('--spark-angle', `${i * 30}deg`)
+    spark.style.setProperty('--spark-distance', `${34 + Math.random() * 45}px`)
+    burst.append(spark)
+  }
+  const word = document.createElement('b')
+  word.textContent = ['POW!', 'PANG!', 'POP!'][Math.floor(Math.random() * 3)]
+  burst.append(word)
+  section.append(burst)
+  window.setTimeout(() => burst.remove(), 760)
+}
+
 function measureRandomSample() {
   const unopened = samples.filter((sample) => !sample.revealed)
   if (unopened.length === 0) return
@@ -176,6 +235,8 @@ function measureRandomSample() {
   const sample = unopened[Math.floor(Math.random() * unopened.length)]
   sample.revealed = true
   renderSamples(sample.id)
+  launchSugarBurst(sample.id)
+  if ('vibrate' in navigator) navigator.vibrate([42, 22, 76])
   const remaining = samples.filter((item) => !item.revealed).length
   document.querySelector('#progress-count').textContent = sampleCount - remaining
   document.querySelector('#lab-status').textContent = remaining > 0
@@ -329,6 +390,78 @@ function tapFizzButton() {
   requestAnimationFrame(() => document.querySelector('#fizz-game').classList.add('is-wobbling'))
 }
 
+function moveCatchTarget() {
+  const arena = document.querySelector('#catch-arena')
+  const target = document.querySelector('#catch-target')
+  if (!arena || !target) return
+  const maxX = Math.max(0, arena.clientWidth - target.offsetWidth)
+  const maxY = Math.max(0, arena.clientHeight - target.offsetHeight)
+  target.style.left = `${Math.random() * maxX}px`
+  target.style.top = `${Math.random() * maxY}px`
+}
+
+function finishCatchRound() {
+  clearInterval(catchState.timer)
+  clearInterval(catchState.mover)
+  catchState.running = false
+  submitGameEvent({ type: 'catch_result', count: catchState.count })
+  document.querySelector('#catch-target').disabled = true
+  document.querySelector('#catch-start-button').textContent = '한 판 더!'
+  document.querySelector('#catch-status').textContent = `${catchState.count}마리 포착! 차미가 연구소 CCTV 사각지대로 도망갔어요.`
+}
+
+function startCatchRound() {
+  if (catchState.running) return
+  catchState.running = true
+  catchState.count = 0
+  catchState.endsAt = Date.now() + 10000
+  document.querySelector('#catch-count').textContent = '0'
+  document.querySelector('#catch-clock').textContent = '10.0'
+  document.querySelector('#catch-timer-fill').style.transform = 'scaleX(1)'
+  document.querySelector('#catch-target').disabled = false
+  document.querySelector('#catch-start-button').textContent = '잡는 중…'
+  document.querySelector('#catch-status').textContent = '움직이는 차미를 눌러 포착하세요!'
+  moveCatchTarget()
+  catchState.mover = window.setInterval(moveCatchTarget, 580)
+  catchState.timer = window.setInterval(() => {
+    const remaining = Math.max(0, catchState.endsAt - Date.now())
+    document.querySelector('#catch-clock').textContent = (remaining / 1000).toFixed(1)
+    document.querySelector('#catch-timer-fill').style.transform = `scaleX(${remaining / 10000})`
+    if (remaining === 0) finishCatchRound()
+  }, 50)
+}
+
+function catchChami() {
+  if (!catchState.running) return
+  catchState.count += 1
+  document.querySelector('#catch-count').textContent = catchState.count
+  const target = document.querySelector('#catch-target')
+  target.classList.remove('is-caught')
+  requestAnimationFrame(() => target.classList.add('is-caught'))
+  const arena = document.querySelector('#catch-arena')
+  arena.classList.remove('has-catch')
+  requestAnimationFrame(() => arena.classList.add('has-catch'))
+  const combo = document.querySelector('#catch-combo')
+  combo.textContent = catchState.count > 1 ? `${catchState.count} COMBO!` : '잡았다!'
+  combo.classList.remove('is-visible')
+  requestAnimationFrame(() => combo.classList.add('is-visible'))
+  moveCatchTarget()
+  if ('vibrate' in navigator) navigator.vibrate(18)
+}
+
+function quickPop() {
+  if (quickPopTimer) return
+  if (samples.every((sample) => sample.revealed)) resetLab()
+  document.querySelector('#lab').scrollIntoView({ behavior: 'smooth', block: 'center' })
+  const button = document.querySelector('#quick-pop')
+  button.disabled = true
+  quickPopTimer = window.setTimeout(() => {
+    measureRandomSample()
+    button.disabled = false
+    quickPopTimer = null
+  }, 260)
+}
+
 app.innerHTML = `
   <header class="site-header">
     <a class="brand" href="#top" aria-label="차미 당도 연구소 홈">
@@ -455,9 +588,32 @@ app.innerHTML = `
   <footer class="site-footer"><span>CHAMI SUGAR LAB</span><span>작은 차미들의 당도를 연구하는 곳</span><span>FAN GAME · MADE WITH ♥</span></footer>
 `
 
+document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
+  <article class="mini-game-card catch-game" id="catch-game">
+    <div class="mini-game-topline"><span>04 · 도망 차미 포착</span><span class="mini-game-icon" aria-hidden="true">🐇</span></div>
+    <h3>차미 잡아라!</h3>
+    <p class="mini-game-copy">10초 동안 도망치는 차미를 눌러 포착하세요. 연속으로 잡으면 기록을 남겨요!</p>
+    <div class="catch-score"><b id="catch-count">0</b><span>마리 포착</span><small><b id="catch-clock">10.0</b>초 남음</small></div>
+    <div class="catch-arena" id="catch-arena" aria-label="움직이는 차미 포착 구역">
+      <button class="catch-target" id="catch-target" type="button" aria-label="도망치는 차미 잡기" disabled><img src="/images/chami.png" alt="차미" /></button>
+      <span class="catch-combo" id="catch-combo" aria-hidden="true">잡았다!</span>
+    </div>
+    <div class="fizz-timer catch-timer"><span id="catch-timer-fill"></span></div>
+    <button class="mini-game-button" id="catch-start-button" type="button">10초 포착 실험 시작</button>
+    <p class="mini-game-status" id="catch-status" role="status" aria-live="polite">5마리 잡으면 재빠른 앞발 트로피!</p>
+  </article>
+`)
+document.body.insertAdjacentHTML('beforeend', `
+  <nav class="quick-dock" aria-label="빠른 게임 메뉴">
+    <button id="quick-pop" type="button"><span aria-hidden="true">💥</span> 차미 팡!</button>
+    <a href="#mini-games"><span aria-hidden="true">🎮</span> 미니게임</a>
+    <a href="#trophy-shelf"><span aria-hidden="true">🏆</span> 트로피</a>
+  </nav>
+`)
+
 document.querySelector('.collection-section')?.insertAdjacentHTML('beforeend', `
-  <div class="trophy-shelf">
-    <div class="trophy-heading"><div><p class="kicker"><span></span> VISITOR ACHIEVEMENTS</p><h3>연구 트로피</h3><p>이 브라우저에 저장된 연구 기록과 달성 과제를 모아요.</p></div><strong><b id="trophy-count">0</b> / 12</strong></div>
+  <div class="trophy-shelf" id="trophy-shelf">
+    <div class="trophy-heading"><div><p class="kicker"><span></span> VISITOR ACHIEVEMENTS</p><h3>연구 트로피</h3><p>이 브라우저에 저장된 연구 기록과 달성 과제를 모아요.</p></div><strong><b id="trophy-count">0</b> / 14</strong></div>
     <div class="trophy-grid" id="trophy-grid" aria-live="polite"></div>
     <p class="visitor-note">로그인 없이 익명 방문 키로 저장합니다. 쿠키를 지우면 새 방문자로 시작합니다.</p>
   </div>
@@ -470,5 +626,8 @@ document.querySelector('#reset-button').addEventListener('click', resetLab)
 document.querySelector('#pop-button').addEventListener('click', measureRandomSample)
 document.querySelector('#gauge-button').addEventListener('click', useGauge)
 document.querySelector('#fizz-button').addEventListener('click', tapFizzButton)
+document.querySelector('#catch-start-button').addEventListener('click', startCatchRound)
+document.querySelector('#catch-target').addEventListener('click', catchChami)
+document.querySelector('#quick-pop').addEventListener('click', quickPop)
 renderCollection()
-syncServerProfile()
+profileSyncPromise = syncServerProfile()
