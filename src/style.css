@@ -237,8 +237,14 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .trophy-heading .kicker { margin-bottom: 9px; }
 .trophy-heading h3 { margin: 0 0 6px; font-size: 24px; letter-spacing: -.06em; }
 .trophy-heading p:not(.kicker) { margin: 0; color: var(--muted); font-size: 11px; }
-.trophy-heading > strong { flex: 0 0 auto; color: #a79b85; font-size: 11px; }
-.trophy-heading > strong b { color: #bf7044; font-size: 28px; }
+.trophy-heading-actions { flex: 0 0 auto; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; }
+.trophy-heading-actions > strong { color: #a79b85; font-size: 11px; }
+.trophy-heading-actions > strong b { color: #bf7044; font-size: 28px; }
+.download-trophy-button { min-height: 46px; padding: 0 17px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #b85e37; border-radius: 5px; background: linear-gradient(135deg, #e78852, #c75e38); color: #fff9ef; box-shadow: 0 5px 12px rgba(177,94,55,.2), inset 0 -3px 0 rgba(113,49,27,.2); font-size: 11px; font-weight: 800; cursor: pointer; transition: transform .16s, box-shadow .16s, opacity .16s; }
+.download-trophy-button:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(177,94,55,.28), inset 0 -3px 0 rgba(113,49,27,.2); }
+.download-trophy-button:disabled { opacity: .62; cursor: progress; }
+.download-trophy-button span { font-size: 16px; }
+.trophy-download-status { flex-basis: 100%; min-height: 14px; color: #9e613f; font-size: 10px; text-align: right; }
 .trophy-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 9px; }
 .trophy-card { min-width: 0; min-height: 146px; padding: 13px 11px; display: flex; flex-direction: column; align-items: flex-start; border: 1px solid #e8dfd1; border-radius: 5px; background: rgba(255,255,255,.68); }
 .trophy-card.is-locked { filter: saturate(.3); opacity: .64; }
@@ -327,6 +333,9 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
   .quick-dock { right: 50%; bottom: max(9px, env(safe-area-inset-bottom)); width: max-content; max-width: calc(100vw - 16px); transform: translateX(50%); }
   .quick-dock a, .quick-dock button { min-height: 48px; padding: 0 11px; gap: 5px; font-size: 10px; }
   .collection-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .trophy-heading { align-items: flex-start; flex-direction: column; }
+  .trophy-heading-actions { width: 100%; justify-content: space-between; }
+  .trophy-download-status { text-align: left; }
   .site-footer { padding: 18px 6%; flex-wrap: wrap; }
   .site-footer span:nth-child(2) { order: 3; width: 100%; }
 }

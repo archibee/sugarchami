@@ -43,6 +43,7 @@ let quickPopTimer = null
 let knownTrophies = null
 let trophyToastTimer = null
 let profileSyncPromise = null
+let lastServerProfile = null
 
 function loadResearch() {
   const fresh = { completedRounds: 0, bestSugar: 0, bestMashes: 0, badges: [] }
@@ -81,6 +82,7 @@ function renderTrophies(definitions = [], earnedTrophies = []) {
 }
 
 function applyServerProfile(profile) {
+  lastServerProfile = profile
   const stats = profile.stats || {}
   const earnedTrophies = profile.trophies || []
   const earned = new Set(earnedTrophies.map((trophy) => trophy.id))
@@ -126,6 +128,210 @@ function showTrophyToast(award, definitions = []) {
   document.body.append(toast)
   window.clearTimeout(trophyToastTimer)
   trophyToastTimer = window.setTimeout(() => toast.remove(), 3600)
+}
+
+function roundedPanel(ctx, x, y, width, height, radius, fill, stroke = null) {
+  ctx.beginPath()
+  ctx.roundRect(x, y, width, height, radius)
+  ctx.fillStyle = fill
+  ctx.fill()
+  if (stroke) {
+    ctx.strokeStyle = stroke
+    ctx.lineWidth = 2
+    ctx.stroke()
+  }
+}
+
+function drawContainedImage(ctx, image, x, y, width, height, alpha = 1) {
+  const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight)
+  const drawWidth = image.naturalWidth * scale
+  const drawHeight = image.naturalHeight * scale
+  ctx.save()
+  ctx.globalAlpha = alpha
+  ctx.drawImage(image, x + (width - drawWidth) / 2, y + (height - drawHeight) / 2, drawWidth, drawHeight)
+  ctx.restore()
+}
+
+function fitCanvasText(ctx, text, x, y, maxWidth, fontSize, color, weight = 700) {
+  let size = fontSize
+  ctx.textAlign = 'left'
+  ctx.textBaseline = 'alphabetic'
+  while (size > 12) {
+    ctx.font = `${weight} ${size}px Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif`
+    if (ctx.measureText(text).width <= maxWidth) break
+    size -= 2
+  }
+  ctx.fillStyle = color
+  ctx.fillText(text, x, y, maxWidth)
+}
+
+function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 2) {
+  const lines = []
+  let line = ''
+  let overflow = false
+  for (const char of text) {
+    if (line && ctx.measureText(line + char).width > maxWidth) {
+      lines.push(line)
+      line = char
+      if (lines.length === maxLines) { overflow = true; break }
+    } else line += char
+  }
+  if (lines.length < maxLines && line) lines.push(line)
+  if (overflow && lines.length) {
+    let last = lines[lines.length - 1]
+    while (last && ctx.measureText(`${last}…`).width > maxWidth) last = last.slice(0, -1)
+    lines[lines.length - 1] = `${last}…`
+  }
+  lines.slice(0, maxLines).forEach((part, index) => ctx.fillText(part, x, y + index * lineHeight))
+}
+
+async function downloadTrophyCard() {
+  const button = document.querySelector('#download-trophy-card')
+  const status = document.querySelector('#trophy-download-status')
+  button.disabled = true
+  status.textContent = '공유 카드를 그리고 있어요…'
+  try {
+    await document.fonts?.ready
+    const image = new Image()
+    image.src = '/images/sitri-hero-expanded.png'
+    await image.decode()
+
+    const profile = lastServerProfile || {}
+    const stats = profile.stats || {
+      completed_rounds: research.completedRounds,
+      best_sugar: research.bestSugar,
+      best_mashes: research.bestMashes,
+    }
+    const definitions = profile.trophyDefinitions || trophyCatalog
+    const serverEarned = new Set((profile.trophies || []).map((item) => item.id))
+    if (!lastServerProfile) {
+      const badgeMap = { 'first-round': 'first-round', 'sugar-overload': 'sweet-95', 'all-sweet': 'all-sweet', 'steady-hand': 'precision', 'rapid-paws': 'rapid-paws', veteran: 'rounds-5' }
+      research.badges.forEach((id) => { if (badgeMap[id]) serverEarned.add(badgeMap[id]) })
+    }
+
+    const canvas = document.createElement('canvas')
+    canvas.width = 1200
+    canvas.height = 2100
+    const ctx = canvas.getContext('2d')
+    if (!ctx) throw new Error('Canvas is unavailable.')
+
+    const background = ctx.createLinearGradient(0, 0, 1400, 2100)
+    background.addColorStop(0, '#f8f0df')
+    background.addColorStop(.52, '#eee3cc')
+    background.addColorStop(1, '#ddd0b5')
+    ctx.fillStyle = background
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    const sitriHeight = canvas.height
+    const sitriWidth = image.naturalWidth * (sitriHeight / image.naturalHeight)
+    ctx.drawImage(image, (canvas.width - sitriWidth) / 2, 0, sitriWidth, sitriHeight)
+    const cardShade = ctx.createLinearGradient(0, 0, 0, canvas.height)
+    cardShade.addColorStop(0, 'rgba(24,22,20,.10)')
+    cardShade.addColorStop(.38, 'rgba(24,22,20,0)')
+    cardShade.addColorStop(1, 'rgba(24,22,20,.22)')
+    ctx.fillStyle = cardShade
+    ctx.fillRect(0, 0, canvas.width, canvas.height)
+    ctx.shadowColor = 'rgba(0,0,0,.48)'
+    ctx.shadowBlur = 8
+    ctx.shadowOffsetY = 2
+
+    roundedPanel(ctx, 92, 90, 325, 52, 26, 'rgba(32,30,28,.24)', 'rgba(255,255,255,.48)')
+    ctx.font = '800 15px Pretendard, sans-serif'
+    ctx.fillStyle = '#fff4df'
+    ctx.textBaseline = 'middle'
+    ctx.fillText('CHAMI SUGAR LAB  ·  RESEARCH FILE', 117, 116, 275)
+    ctx.textBaseline = 'alphabetic'
+    ctx.font = '800 24px Pretendard, sans-serif'
+    ctx.fillStyle = '#bd6841'
+    fitCanvasText(ctx, 'SITRI OFFICIAL RESEARCH ARCHIVE', 100, 238, 510, 24, '#fff1d8', 800)
+    fitCanvasText(ctx, '차미 당도 연구 결과', 750, 280, 410, 58, '#fff8ed', 900)
+    ctx.font = '500 23px Pretendard, sans-serif'
+    ctx.fillStyle = 'rgba(255,248,237,.82)'
+    ctx.fillText('시트리의 연구 기록과 트로피', 755, 326, 405)
+
+    roundedPanel(ctx, 720, 380, 465, 340, 24, 'rgba(38,34,30,.16)', 'rgba(255,255,255,.42)')
+    const metrics = [
+      { label: '완료한 연구', value: `${Number(stats.completed_rounds) || 0}`, unit: 'ROUND' },
+      { label: '최고 당도', value: `${Number(stats.best_sugar) || 0}`, unit: '°S' },
+      { label: '최고 팡팡', value: `${Number(stats.best_mashes) || 0}`, unit: '연타' },
+    ]
+    metrics.forEach((metric, index) => {
+      const x = 740 + index * 138
+      ctx.font = '600 19px Pretendard, sans-serif'
+      ctx.fillStyle = 'rgba(255,244,225,.78)'
+      fitCanvasText(ctx, metric.label, x, 438, 128, 19, 'rgba(255,248,237,.94)', 600)
+      ctx.font = '900 54px Pretendard, sans-serif'
+      ctx.fillStyle = index === 1 ? '#ffb174' : '#fff8ed'
+      ctx.fillText(metric.value, x, 512, 125)
+      ctx.font = '700 18px Pretendard, sans-serif'
+      ctx.fillStyle = 'rgba(255,244,225,.68)'
+      ctx.fillText(metric.unit, x, 544)
+    })
+    const earnedCount = serverEarned.size
+    roundedPanel(ctx, 740, 600, 420, 22, 11, 'rgba(255,249,239,.24)')
+    const progress = earnedCount / definitions.length
+    if (progress > 0) roundedPanel(ctx, 740, 600, Math.max(22, 420 * progress), 22, 11, 'rgba(255,177,116,.9)')
+    ctx.font = '800 18px Pretendard, sans-serif'
+    ctx.fillStyle = '#fff4e2'
+    ctx.fillText(`트로피 ${earnedCount} / ${definitions.length} 달성`, 742, 662, 420)
+
+    roundedPanel(ctx, 720, 870, 465, 1100, 28, 'rgba(35,34,32,.18)', 'rgba(255,255,255,.58)')
+    ctx.font = '800 14px Pretendard, sans-serif'
+    ctx.fillStyle = '#e3a36c'
+    ctx.fillText('CHAMI RESEARCH COLLECTION', 745, 923, 415)
+    ctx.font = '900 34px Pretendard, sans-serif'
+    ctx.fillStyle = '#fff5e3'
+    ctx.fillText('연구 트로피 보관함', 745, 970, 415)
+    ctx.font = '500 16px Pretendard, sans-serif'
+    ctx.fillStyle = '#c5bdad'
+    ctx.fillText('달성 기록과 다음 연구 목표', 745, 1001, 415)
+
+    const columns = 1
+    const gap = 6
+    const cardWidth = 415
+    const cardHeight = 59
+    const startX = 745
+    const startY = 1020
+    definitions.forEach((trophy, index) => {
+      const column = index % columns
+      const row = Math.floor(index / columns)
+      const x = startX + column * (cardWidth + gap)
+      const y = startY + row * (cardHeight + gap)
+      const unlocked = serverEarned.has(trophy.id)
+      roundedPanel(ctx, x, y, cardWidth, cardHeight, 18, unlocked ? 'rgba(255,240,213,.24)' : 'rgba(32,34,33,.18)', unlocked ? 'rgba(255,224,174,.78)' : 'rgba(255,255,255,.32)')
+      ctx.font = '28px "Apple Color Emoji", "Segoe UI Emoji", sans-serif'
+      ctx.fillStyle = unlocked ? '#4b3c2c' : '#777a73'
+      ctx.fillText(unlocked ? trophy.icon : '🔒', x + 12, y + 40)
+      fitCanvasText(ctx, `${String(index + 1).padStart(2, '0')} · ${trophy.title}`, x + 50, y + 25, cardWidth - 145, 16, unlocked ? '#fff5e3' : '#e0e1dc', 800)
+      ctx.font = '500 12px Pretendard, sans-serif'
+      ctx.fillStyle = unlocked ? '#fff1dc' : '#e0e1dc'
+      ctx.fillText(trophy.detail, x + 50, y + 45, cardWidth - 64)
+      ctx.font = '800 10px Pretendard, sans-serif'
+      ctx.fillStyle = unlocked ? '#ffc083' : '#d0d2cc'
+      ctx.textAlign = 'right'
+      ctx.fillText(unlocked ? 'ACHIEVED' : 'LOCKED', x + cardWidth - 12, y + 25, 78)
+      ctx.textAlign = 'left'
+    })
+
+    ctx.font = '700 16px Pretendard, sans-serif'
+    ctx.fillStyle = '#675f52'
+    ctx.fillText('FAN GAME · MADE FOR CHAMI', 98, 2040)
+    ctx.textAlign = 'right'
+    ctx.fillText(new Date().toLocaleDateString('ko-KR'), canvas.width - 98, 2040)
+    ctx.textAlign = 'left'
+
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
+    if (!blob) throw new Error('PNG export failed.')
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(blob)
+    link.download = `chami-sugar-lab-trophies-${new Date().toISOString().slice(0, 10)}.png`
+    link.click()
+    window.setTimeout(() => URL.revokeObjectURL(link.href), 1000)
+    status.textContent = '업적 카드 PNG를 저장했어요!'
+  } catch {
+    status.textContent = '이미지 생성에 실패했어요. 다시 눌러 주세요.'
+  } finally {
+    button.disabled = false
+  }
 }
 
 async function syncServerProfile() {
@@ -613,7 +819,7 @@ document.body.insertAdjacentHTML('beforeend', `
 
 document.querySelector('.collection-section')?.insertAdjacentHTML('beforeend', `
   <div class="trophy-shelf" id="trophy-shelf">
-    <div class="trophy-heading"><div><p class="kicker"><span></span> VISITOR ACHIEVEMENTS</p><h3>연구 트로피</h3><p>이 브라우저에 저장된 연구 기록과 달성 과제를 모아요.</p></div><strong><b id="trophy-count">0</b> / 14</strong></div>
+    <div class="trophy-heading"><div><p class="kicker"><span></span> VISITOR ACHIEVEMENTS</p><h3>연구 트로피</h3><p>이 브라우저에 저장된 연구 기록과 달성 과제를 모아요.</p></div><div class="trophy-heading-actions"><strong><b id="trophy-count">0</b> / 14</strong><button class="download-trophy-button" id="download-trophy-card" type="button"><span aria-hidden="true">⬇</span> 업적 카드 PNG 저장</button><span class="trophy-download-status" id="trophy-download-status" role="status" aria-live="polite"></span></div></div>
     <div class="trophy-grid" id="trophy-grid" aria-live="polite"></div>
     <p class="visitor-note">로그인 없이 익명 방문 키로 저장합니다. 쿠키를 지우면 새 방문자로 시작합니다.</p>
   </div>
@@ -629,5 +835,6 @@ document.querySelector('#fizz-button').addEventListener('click', tapFizzButton)
 document.querySelector('#catch-start-button').addEventListener('click', startCatchRound)
 document.querySelector('#catch-target').addEventListener('click', catchChami)
 document.querySelector('#quick-pop').addEventListener('click', quickPop)
+document.querySelector('#download-trophy-card').addEventListener('click', downloadTrophyCard)
 renderCollection()
 profileSyncPromise = syncServerProfile()
