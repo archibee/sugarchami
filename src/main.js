@@ -14,6 +14,17 @@ const sitriDialogues = [
   '연구 결과는… 일단 귀여우면 합격!',
   '차미야, 오늘도 팡팡 협조 부탁해!',
 ]
+const sitriGameLines = {
+  pop: ['차미 팡! 당도 측정 들어갑니다!', '이번엔 누가 당도왕일까요? 하나씩 열어봐요!', '팡! 연구 결과를 기다리는 중이에요.'],
+  gauge: ['초록 구간에 멈추면 정확도 보너스예요!', '바늘을 잘 보고 타이밍을 맞춰봐요!', '천천히… 지금이다!'],
+  fizz: ['7초 동안 기포를 빠르게 눌러요!', '기포가 도망가기 전에 팡팡!', '연속 탭! 연구원 손놀림을 보여줘요!'],
+  catch: ['도망치는 차미를 눌러서 잡아요!', '차미가 방향을 바꾸기 전에 잡아봐요!', '손가락 준비! 지금 차미가 보여요!'],
+  collection: ['모은 트로피가 늘고 있어요. 뿌듯하네요!', '새 배지를 모으려면 미니게임도 해봐요!', '연구 기록을 차곡차곡 모아봐요!'],
+  miniGames: ['어떤 미니게임부터 해볼까요?', '게임마다 연구 보상이 달라요!', '마음에 드는 연구를 골라 도전해봐요!'],
+  lab: ['차미 당도 측정 중이에요!', '다섯 번 팡! 해서 당도왕을 찾아봐요.', '이번 연구 결과가 궁금하네요!'],
+  hero: ['앗, 저를 눌러주셨네요!', '저 여기 있어요! 다시 한번 눌러봐도 좋아요.', '반가워요! 오늘도 차미 연구 시작할까요?'],
+  default: ['어, 부르셨어요?', '클릭한 곳까지 후다닥!', '여기저기 구경 중이에요.'],
+}
 
 function shuffle(items) {
   const shuffled = [...items]
@@ -725,7 +736,7 @@ app.innerHTML = `
         <span class="orbit orbit-two" aria-hidden="true"></span>
         <span class="hero-spark spark-one" aria-hidden="true">✳</span>
         <span class="hero-spark spark-two" aria-hidden="true">✦</span>
-        <img class="sitri" src="/images/sitri-hero-expanded.png" alt="머리 장식부터 허벅지까지 온전히 보이는 시트리 일러스트" />
+        <img class="sitri" src="/images/sitri-hero-expanded.png" alt="머리 장식부터 허벅지까지 온전히 보이는 시트리 일러스트" role="button" tabindex="0" aria-label="시트리 클릭하기" />
         <div class="speech-card"><span class="speech-dot"></span><span class="speech-line">${sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]}</span></div>
         <span class="art-caption">SITRI · SUGAR RESEARCHER</span>
       </div>
@@ -752,7 +763,6 @@ app.innerHTML = `
       </div>
       <div class="sample-board" id="sample-board"></div>
       <div class="winner-panel" id="winner-panel" hidden aria-live="polite">
-        <img class="winner-sitri" src="/images/variants/sitri/sitri-trophy-mascot.png" alt="" />
         <span class="winner-crown" aria-hidden="true">♛</span>
         <span><b id="winner-title">오늘의 당도왕!</b><small id="winner-copy"></small></span>
         <span class="winner-confetti" aria-hidden="true">✦ ✳ ✦</span>
@@ -777,7 +787,6 @@ app.innerHTML = `
           <div class="mini-game-topline"><span>02 · 정밀 측정실</span><span class="mini-game-icon" aria-hidden="true">⌁</span></div>
           <h3>당도계 눈금 맞추기</h3>
           <p class="mini-game-copy">목표 구간을 지나가는 바늘을 팡! 멈춰요. 손 떨림은 연구의 일부입니다.</p>
-          <div class="mini-game-guide"><img src="/images/variants/sitri/sitri-pointing-mascot.png" alt="" loading="lazy" decoding="async" /><p><b>시트리의 한마디</b><span>초록 구간에 멈추면 연구원 배지에 가까워져요!</span></p></div>
           <div class="gauge-readout"><span>현재 측정값</span><b id="gauge-readout">—<small>°S</small></b></div>
           <div class="gauge-track" aria-label="당도계 바늘 눈금">
             <span class="gauge-target" id="gauge-target" style="left:50%"><i>목표</i></span>
@@ -792,7 +801,6 @@ app.innerHTML = `
           <div class="mini-game-topline"><span>03 · 기포 제거반</span><span class="mini-game-icon" aria-hidden="true">✳</span></div>
           <h3>차미 기포 빼기</h3>
           <p class="mini-game-copy">차미 안에 기포가 들어갔대요. 7초 동안 팡팡 눌러서 빼주세요!</p>
-          <div class="mini-game-guide"><img src="/images/variants/sitri/sitri-sugar-meter-mascot.png" alt="" loading="lazy" decoding="async" /><p><b>시트리의 한마디</b><span>기포가 설탕으로 도망가기 전에 팡팡!</span></p></div>
           <div class="fizz-stage">
             <div class="fizz-chami"><img id="fizz-chami-image" src="${randomChamiSprite()}" alt="" /><span class="fizz-bubble bubble-one"></span><span class="fizz-bubble bubble-two"></span><span class="fizz-bubble bubble-three"></span></div>
             <div class="fizz-score"><b id="fizz-count">0</b><span>회 팡!</span><small><b id="fizz-clock">7.0</b>초</small></div>
@@ -811,7 +819,7 @@ app.innerHTML = `
           <h2 id="collection-title">연구원 수집첩</h2>
           <p>실험하고, 기록하고, 괜히 뿌듯해하세요.</p>
         </div>
-        <div class="collection-count"><img class="collection-mascot" src="/images/variants/sitri/sitri-trophy-mascot.png" alt="" /><b id="badge-count">0</b><span> / 06 배지</span></div>
+        <div class="collection-count"><b id="badge-count">0</b><span> / 06 배지</span></div>
       </div>
       <div class="research-stats">
         <div><span>완료한 연구</span><b id="round-record">0</b><small>ROUND</small></div>
@@ -831,7 +839,6 @@ document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
     <div class="mini-game-topline"><span>04 · 도망 차미 포착</span><span class="mini-game-icon" aria-hidden="true">🐇</span></div>
     <h3>차미 잡아라!</h3>
     <p class="mini-game-copy">10초 동안 도망치는 차미를 눌러 포착하세요. 연속으로 잡으면 기록을 남겨요!</p>
-    <div class="mini-game-guide"><img src="/images/variants/sitri/sitri-wave-mascot.png" alt="" loading="lazy" decoding="async" /><p><b>시트리의 한마디</b><span>차미가 도망간다! 손가락 준비됐죠?</span></p></div>
     <div class="catch-score"><b id="catch-count">0</b><span>마리 포착</span><small><b id="catch-clock">10.0</b>초 남음</small></div>
     <div class="catch-arena" id="catch-arena" aria-label="움직이는 차미 포착 구역">
       <button class="catch-target" id="catch-target" type="button" aria-label="도망치는 차미 잡기" disabled><img src="${randomChamiSprite()}" alt="차미" /></button>
@@ -857,7 +864,122 @@ document.querySelector('.collection-section')?.insertAdjacentHTML('beforeend', `
     <p class="visitor-note">로그인 없이 익명 방문 키로 저장합니다. 쿠키를 지우면 새 방문자로 시작합니다.</p>
   </div>
 `)
-renderTrophies(trophyCatalog, [])
+document.body.insertAdjacentHTML('beforeend', `
+  <aside class="floating-sitri" id="floating-sitri" aria-label="시트리의 한마디">
+    <div class="floating-sitri-bubble"><span class="speech-dot" aria-hidden="true"></span><span id="floating-sitri-line"></span></div>
+    <img id="floating-sitri-image" src="/images/variants/sitri/sitri-wave-mascot.png" alt="SD 시트리" />
+  </aside>
+`)
+
+const floatingSitri = document.querySelector('#floating-sitri')
+const floatingSitriImage = document.querySelector('#floating-sitri-image')
+const floatingSitriLine = document.querySelector('#floating-sitri-line')
+const sitriPoses = ['sitri-wave-mascot', 'sitri-pointing-mascot', 'sitri-trophy-mascot', 'sitri-sugar-meter-mascot']
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+const initialMarginX = Math.min(112, window.innerWidth * 0.28)
+const initialMarginY = Math.min(142, window.innerHeight * 0.3)
+let floaterX = initialMarginX + Math.random() * Math.max(1, window.innerWidth - initialMarginX * 2)
+let floaterY = initialMarginY + Math.random() * Math.max(1, window.innerHeight - initialMarginY * 2)
+let targetX = floaterX
+let targetY = floaterY
+let reactionTimer
+let clickChaseUntil = 0
+let lastFloaterFrame = 0
+let floaterFrame = null
+
+function setFloaterTarget(x, y) {
+  const marginX = Math.min(112, window.innerWidth * 0.28)
+  const marginY = Math.min(142, window.innerHeight * 0.3)
+  targetX = Math.max(marginX, Math.min(window.innerWidth - marginX, x))
+  targetY = Math.max(marginY, Math.min(window.innerHeight - marginY, y))
+  clickChaseUntil = performance.now() + 950
+  if (reducedMotion) {
+    floaterX = targetX
+    floaterY = targetY
+    floatingSitri.style.left = `${floaterX}px`
+    floatingSitri.style.top = `${floaterY}px`
+    return
+  }
+  if (floaterFrame === null) {
+    lastFloaterFrame = 0
+    floaterFrame = requestAnimationFrame(moveFloaterFrame)
+  }
+}
+
+function moveFloaterFrame(now = performance.now()) {
+  const delta = lastFloaterFrame ? Math.min((now - lastFloaterFrame) / 1000, 0.05) : 0.016
+  lastFloaterFrame = now
+  const response = reducedMotion ? 100 : now < clickChaseUntil ? 4.2 : 0.62
+  const easing = 1 - Math.exp(-response * delta)
+  if (reducedMotion) {
+    floaterX = targetX
+    floaterY = targetY
+  } else {
+    floaterX += (targetX - floaterX) * easing
+    floaterY += (targetY - floaterY) * easing
+  }
+  floatingSitri.style.left = `${floaterX}px`
+  floatingSitri.style.top = `${floaterY}px`
+  if (Math.hypot(targetX - floaterX, targetY - floaterY) < 0.8) {
+    floaterX = targetX
+    floaterY = targetY
+    floatingSitri.style.left = `${floaterX}px`
+    floatingSitri.style.top = `${floaterY}px`
+    floaterFrame = null
+    return
+  }
+  floaterFrame = requestAnimationFrame(moveFloaterFrame)
+}
+
+function sayAsSitri(lines, pose = null) {
+  floatingSitriLine.textContent = lines[Math.floor(Math.random() * lines.length)]
+  floatingSitriImage.src = `/images/variants/sitri/${pose || sitriPoses[Math.floor(Math.random() * sitriPoses.length)]}.png`
+  floatingSitri.classList.remove('is-excited')
+  void floatingSitri.offsetWidth
+  floatingSitri.classList.add('is-excited')
+  window.clearTimeout(reactionTimer)
+  reactionTimer = window.setTimeout(() => floatingSitri.classList.remove('is-excited'), 650)
+}
+
+function respondToClick(event) {
+  const target = event.target instanceof Element ? event.target : null
+  const heroSitri = target?.closest('.hero-art .sitri')
+  const inContext = (selector) => Boolean(target?.closest(selector))
+
+  if (heroSitri) sayAsSitri(sitriGameLines.hero, 'sitri-wave-mascot')
+  else if (inContext('#pop-button, #quick-pop, .sample')) sayAsSitri(sitriGameLines.pop, 'sitri-sugar-meter-mascot')
+  else if (inContext('#gauge-button, #gauge-game')) sayAsSitri(sitriGameLines.gauge, 'sitri-pointing-mascot')
+  else if (inContext('#fizz-button, #fizz-game')) sayAsSitri(sitriGameLines.fizz, 'sitri-sugar-meter-mascot')
+  else if (inContext('#catch-start-button, #catch-target, #catch-game')) sayAsSitri(sitriGameLines.catch, 'sitri-wave-mascot')
+  else if (inContext('#collection, #trophy-shelf')) sayAsSitri(sitriGameLines.collection, 'sitri-trophy-mascot')
+  else if (inContext('#mini-games')) sayAsSitri(sitriGameLines.miniGames, 'sitri-pointing-mascot')
+  else if (inContext('#lab')) sayAsSitri(sitriGameLines.lab, 'sitri-sugar-meter-mascot')
+  else sayAsSitri(sitriGameLines.default)
+
+  let pointX = event.clientX
+  let pointY = event.clientY
+  if (event.detail === 0 && target) {
+    const bounds = target.getBoundingClientRect()
+    pointX = bounds.left + bounds.width / 2
+    pointY = bounds.top + bounds.height / 2
+  }
+  setFloaterTarget(pointX + (pointX < window.innerWidth / 2 ? 92 : -92), pointY - 76)
+}
+
+floatingSitriImage.src = `/images/variants/sitri/${sitriPoses[Math.floor(Math.random() * sitriPoses.length)]}.png`
+floatingSitriLine.textContent = sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]
+floatingSitri.style.left = `${floaterX}px`
+floatingSitri.style.top = `${floaterY}px`
+document.addEventListener('click', respondToClick)
+document.addEventListener('keydown', (event) => {
+  if ((event.key === 'Enter' || event.key === ' ') && event.target instanceof Element && event.target.matches('.hero-art .sitri')) {
+    event.preventDefault()
+    sayAsSitri(sitriGameLines.hero, 'sitri-wave-mascot')
+    const bounds = event.target.getBoundingClientRect()
+    setFloaterTarget(bounds.left + bounds.width * 0.55, bounds.top + bounds.height * 0.55)
+  }
+})
+window.addEventListener('resize', () => setFloaterTarget(targetX, targetY))
 
 samples = makeSamples()
 renderSamples()
