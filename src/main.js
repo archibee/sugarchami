@@ -1,7 +1,7 @@
 import './style.css'
 
 const app = document.querySelector('#app')
-const sampleCount = 5
+const sampleCount = 6
 const saveKey = 'chami-sugar-lab-research-v1'
 const chamiSprites = [
   'chami-cheerful', 'chami-sleepy', 'chami-determined', 'chami-surprised', 'chami-dozy', 'chami-sparkle',
@@ -22,8 +22,8 @@ const sitriGameLines = {
   collection: ['트로피가 하나씩 늘고 있네요. 뿌듯해요!', '새 트로피를 모으려면 미니게임도 해봐요!', '연구 기록을 차곡차곡 모아봐요!'],
   guideline: ['이 작품은 팬게임이에요. 이용 안내도 확인해 주세요!', '공개 전에 배포 조건을 확인하는 것, 잊지 마세요!'],
   miniGames: ['어떤 미니게임부터 해볼까요?', '게임마다 연구 보상이 달라요!', '마음에 드는 연구를 골라 도전해봐요!'],
-  memory: ['표본 위치를 기억해 짝을 찾아봐요!', '황금 트로피는 8수 안에 완주하면 얻을 수 있어요!', '같은 차미도 표정이 다르네요. 차근차근 찾아봐요!'],
-  lab: ['차미 당도를 측정하고 있어요!', '다섯 번 팡! 해서 당도왕을 찾아봐요.', '이번 연구 결과가 궁금하네요!'],
+  memory: ['표본 위치를 기억해 짝을 찾아봐요!', '8장 중 짝은 네 쌍이에요. 황금 트로피는 6수·30초 안에 도전해봐요!', '같은 차미도 표정이 다르네요. 차근차근 찾아봐요!'],
+  lab: ['차미 당도를 측정하고 있어요!', '여섯 번 팡! 해서 당도왕을 찾아봐요.', '이번 연구 결과가 궁금하네요!'],
   hero: ['앗, 저를 눌러주셨네요!', '여기 있어요! 한 번 더 눌러봐도 좋아요.', '반가워요! 오늘도 차미 연구를 시작해볼까요?'],
   default: ['어, 저를 부르셨나요?', '클릭한 곳까지 후다닥 갈게요!', '여기저기 구경하고 있었어요!'],
 }
@@ -57,8 +57,8 @@ const trophyCatalog = [
   { id: 'chami-catcher', icon: '🐇', title: '재빠른 앞발', detail: '도망 차미 5마리 잡기' },
   { id: 'chami-catcher-15', icon: '🧤', title: '수집왕 차미', detail: '도망 차미 15마리 잡기' },
   { id: 'memory-first', icon: '🧩', title: '표본 정리', detail: '차미 표본 짝맞추기 완주' },
-  { id: 'memory-analyst', icon: '🔬', title: '눈썰미 연구원', detail: '짝맞추기를 12수 이내로 완주' },
-  { id: 'memory-gold', icon: '🌟', title: '황금 기억력', detail: '8수 이하·45초 안에 완주' },
+  { id: 'memory-analyst', icon: '🔬', title: '눈썰미 연구원', detail: '짝맞추기를 8수 이내로 완주' },
+  { id: 'memory-gold', icon: '🌟', title: '황금 기억력', detail: '6수 이하·30초 안에 완주' },
   { id: 'memory-master', icon: '💎', title: '표본 기억의 달인', detail: '황금 기억력 연구 5회 달성' },
   { id: 'lab-legend', icon: '🏆', title: '연구소의 전설', detail: '당도 연구 50회 완료' },
 ]
@@ -72,15 +72,15 @@ const measurementNotes = [
   '기계가 방금 작은 박수를 친 것 같습니다.',
 ]
 const badgeDefinitions = [
-  { id: 'first-round', icon: '🧪', title: '첫 실험', detail: '차미 5개 당도 측정 완료' },
+  { id: 'first-round', icon: '🧪', title: '첫 실험', detail: '차미 6개 당도 측정 완료' },
   { id: 'sugar-overload', icon: '🍯', title: '당도 초과', detail: '95°S 이상 차미 발견' },
   { id: 'all-sweet', icon: '✦', title: '끈적한 연구실', detail: '한 판에서 전원 80°S 이상' },
   { id: 'steady-hand', icon: '🎯', title: '정밀 연구원', detail: '눈금 맞추기 오차 2°S 이하' },
   { id: 'rapid-paws', icon: '💨', title: '팡팡 장인', detail: '7초 안에 18번 팡!' },
   { id: 'veteran', icon: '📔', title: '연구소 단골', detail: '당도 연구 5회 완료' },
   { id: 'memory-first', icon: '🧩', title: '표본 정리', detail: '차미 표본 짝맞추기 완주' },
-  { id: 'memory-analyst', icon: '🔬', title: '눈썰미 연구원', detail: '짝맞추기를 12수 이내로 완주' },
-  { id: 'memory-gold', icon: '🌟', title: '황금 기억력', detail: '8수 이하·45초 안에 완주' },
+  { id: 'memory-analyst', icon: '🔬', title: '눈썰미 연구원', detail: '짝맞추기를 8수 이내로 완주' },
+  { id: 'memory-gold', icon: '🌟', title: '황금 기억력', detail: '6수 이하·30초 안에 완주' },
   { id: 'memory-master', icon: '💎', title: '표본 기억의 달인', detail: '황금 기억력 연구 5회 달성' },
   { id: 'lab-legend', icon: '🏆', title: '연구소의 전설', detail: '당도 연구 50회 완료' },
 ]
@@ -374,7 +374,7 @@ function measureRandomSample() {
       document.querySelector('#lab-status').textContent = `최고 당도 ${highest}°S! ${winnerIds}가 오늘의 당도왕이에요.`
       popButton.disabled = false
       popButton.querySelector('.pop-title').textContent = '다시 연구하기'
-      popButton.querySelector('.pop-subtitle').textContent = '새 표본 5개'
+      popButton.querySelector('.pop-subtitle').textContent = '새 표본 6개'
     }, 720)
   }
 }
@@ -576,7 +576,7 @@ function renderMemoryBoard() {
     : null
   board.innerHTML = memoryState.deck.map((card, index) => {
     const isFaceUp = memoryState.open.includes(index) || memoryState.matched.has(card.pair)
-    return `<button class="memory-card ${isFaceUp ? 'is-face-up' : ''} ${memoryState.matched.has(card.pair) ? 'is-matched' : ''}" type="button" data-card-index="${index}" aria-label="${isFaceUp ? '차미 표본 공개' : `표본 카드 ${index + 1} 뒤집기`}" aria-pressed="${isFaceUp}">
+    return `<button class="memory-card ${isFaceUp ? 'is-face-up' : ''} ${memoryState.matched.has(card.pair) ? 'is-matched' : ''}" type="button" data-card-index="${index}" aria-label="${isFaceUp ? '차미 표본 공개' : `표본 카드 ${index + 1} 뒤집기`}" aria-pressed="${isFaceUp}" ${memoryState.active ? '' : 'disabled'}>
       <span class="memory-card-inner"><span class="memory-card-back" aria-hidden="true">✳</span><span class="memory-card-front"><img src="${card.sprite}" alt="" /></span></span>
     </button>`
   }).join('')
@@ -585,14 +585,18 @@ function renderMemoryBoard() {
   }
 }
 
+function makeMemoryDeck() {
+  const pairSprites = shuffle([...new Set(chamiSprites)]).slice(0, 4)
+  return shuffle(pairSprites.flatMap((sprite, pair) => [{ sprite, pair }, { sprite, pair }]))
+}
+
 function startMemoryGame() {
   window.clearTimeout(memoryState.mismatchTimer)
   window.clearTimeout(memoryState.clockTimer)
-  const pairSprites = shuffle([...new Set(chamiSprites)]).slice(0, 6)
   memoryState = {
     active: true,
     locked: false,
-    deck: shuffle(pairSprites.flatMap((sprite, pair) => [{ sprite, pair }, { sprite, pair }])),
+    deck: makeMemoryDeck(),
     open: [],
     matched: new Set(),
     moves: 0,
@@ -612,13 +616,13 @@ function finishMemoryGame() {
   memoryState.active = false
   window.clearTimeout(memoryState.clockTimer)
   const seconds = Math.max(1, Math.round((Date.now() - memoryState.startedAt) / 1000))
-  const isGold = memoryState.moves <= 8 && seconds <= 45
+  const isGold = memoryState.moves <= 6 && seconds <= 30
   research.memoryPlays += 1
   research.bestMemoryMoves = research.bestMemoryMoves ? Math.min(research.bestMemoryMoves, memoryState.moves) : memoryState.moves
   if (isGold) research.memoryGolds += 1
   saveResearch()
   unlockBadge('memory-first')
-  if (memoryState.moves <= 12) unlockBadge('memory-analyst')
+  if (memoryState.moves <= 8) unlockBadge('memory-analyst')
   if (isGold) unlockBadge('memory-gold')
   if (research.memoryGolds >= 5) unlockBadge('memory-master')
   checkLocalMilestones()
@@ -627,7 +631,7 @@ function finishMemoryGame() {
   document.querySelector('#memory-start-button').textContent = '한 판 더 연구하기'
   document.querySelector('#memory-status').textContent = isGold
     ? `${memoryState.moves}수 · ${seconds}초! 황금 기억력 트로피 획득이에요!`
-    : memoryState.moves <= 12
+    : memoryState.moves <= 8
       ? `${memoryState.moves}수 · ${seconds}초! 눈썰미 연구원 트로피 획득이에요.`
       : `${memoryState.moves}수 · ${seconds}초 만에 완주했어요! 다음엔 더 적은 수에 도전해봐요.`
 }
@@ -652,8 +656,8 @@ function selectMemoryCard(event) {
     memoryState.matched.add(first.pair)
     memoryState.open = []
     renderMemoryBoard()
-    document.querySelector('#memory-status').textContent = `짝을 찾았어요! ${memoryState.matched.size} / 6쌍 발견`
-    if (memoryState.matched.size === 6) finishMemoryGame()
+    document.querySelector('#memory-status').textContent = `짝을 찾았어요! ${memoryState.matched.size} / 4쌍 발견`
+    if (memoryState.matched.size === 4) finishMemoryGame()
     return
   }
 
@@ -719,7 +723,7 @@ app.innerHTML = `
         </div>
       </div>
       <div class="pop-action">
-        <div class="pop-explainer"><span class="pop-star" aria-hidden="true">✳</span><span><b>누가 나올지는 시트리도 몰라요.</b><small>다섯 번 팡! 해서 당도왕을 찾아보세요.</small></span></div>
+        <div class="pop-explainer"><span class="pop-star" aria-hidden="true">✳</span><span><b>누가 나올지는 시트리도 몰라요.</b><small>여섯 번 팡! 해서 당도왕을 찾아보세요.</small></span></div>
         <button class="pop-button" id="pop-button" type="button">
           <span class="pop-title">차미 팡!</span><span class="pop-subtitle">랜덤 측정 <i aria-hidden="true">↗</i></span>
         </button>
@@ -732,7 +736,7 @@ app.innerHTML = `
       </div>
       <div class="lab-footer">
         <p id="lab-status" role="status" aria-live="polite">버튼을 누르면 차미 한 명이 무작위로 팡! 측정돼요.</p>
-        <span class="progress-label"><b id="progress-count">0</b> / 05 CHECKED</span>
+        <span class="progress-label"><b id="progress-count">0</b> / 06 CHECKED</span>
       </div>
     </section>
 
@@ -814,11 +818,11 @@ document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
   <article class="mini-game-card memory-game" id="memory-game">
     <div class="mini-game-topline"><span>05 · 차미 표본 정리</span><span class="mini-game-icon" aria-hidden="true">🧩</span></div>
     <h3>같은 차미를 찾아라!</h3>
-    <p class="mini-game-copy">뒤집은 표본의 모습을 기억해 짝을 맞춰요. 적은 횟수와 빠른 시간으로 황금 트로피에 도전하세요.</p>
+    <p class="mini-game-copy">8장의 표본에서 네 쌍을 찾아요. 8수 이내면 눈썰미 연구원, 6수·30초 이내면 황금 트로피에 도전할 수 있어요.</p>
     <div class="memory-score"><b id="memory-moves">0</b><span>뒤집은 횟수</span><small><b id="memory-clock">0</b>초</small></div>
     <div class="memory-board" id="memory-board" aria-label="차미 표본 짝맞추기 카드"></div>
     <button class="mini-game-button" id="memory-start-button" type="button">표본 연구 시작</button>
-    <p class="mini-game-status" id="memory-status" role="status" aria-live="polite">6쌍의 표본을 찾아보세요. 완주하면 트로피를 받아요!</p>
+    <p class="mini-game-status" id="memory-status" role="status" aria-live="polite">4쌍의 표본을 찾아보세요. 완주하면 트로피를 받아요!</p>
   </article>
 `)
 document.body.insertAdjacentHTML('beforeend', `
@@ -1025,6 +1029,8 @@ window.addEventListener('resize', () => setFloaterTarget(targetX, targetY))
 
 samples = makeSamples()
 renderSamples()
+memoryState.deck = makeMemoryDeck()
+renderMemoryBoard()
 const heroSpeechLine = document.querySelector('.speech-line')
 const heroSpeechTimer = document.querySelector('.speech-timer-fill')
 heroSpeechTimer.addEventListener('animationiteration', () => {

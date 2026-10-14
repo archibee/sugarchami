@@ -93,7 +93,7 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .pop-title { font-size: 14px; font-weight: 800; }
 .pop-subtitle { color: rgba(255, 250, 243, .8); font-size: 9px; white-space: nowrap; }
 .pop-subtitle i { padding-left: 3px; font-style: normal; }
-.sample-board { position: relative; display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin-top: 35px; }
+.sample-board { position: relative; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin-top: 35px; }
 .sample-board.is-popping { animation: board-shake .54s cubic-bezier(.36,.07,.19,.97); }
 @keyframes board-shake { 10%, 90% { transform: translateX(-3px) rotate(-.3deg); } 20%, 80% { transform: translateX(7px) rotate(.45deg); } 30%, 50%, 70% { transform: translateX(-10px) rotate(-.55deg); } 40%, 60% { transform: translateX(10px) rotate(.55deg); } 100% { transform: translateX(0) rotate(0); } }
 .sample { position: relative; min-width: 0; min-height: 220px; padding: 14px 12px 17px; display: flex; flex-direction: column; align-items: center; justify-content: space-between; overflow: hidden; border: 1px solid #e5e0d5; border-radius: 4px; background: #fbf9f4; color: var(--ink); transition: border-color .2s, background .2s, transform .2s; }
@@ -212,7 +212,7 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .memory-score > b { color: var(--orange); font-size: 33px; line-height: 1; }
 .memory-score > small { margin-left: auto; color: #817a6b; font-size: 10px; }
 .memory-score > small b { color: #575448; font-size: 13px; }
-.memory-board { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 12px 0; perspective: 850px; }
+.memory-board { width: min(100%, 440px); margin: 12px auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; perspective: 850px; }
 .memory-card { min-width: 0; padding: 0; border: 0; border-radius: 9px; aspect-ratio: 1; background: transparent; cursor: pointer; perspective: 700px; touch-action: manipulation; }
 .memory-card-inner { position: relative; display: block; width: 100%; height: 100%; border-radius: inherit; transform-style: preserve-3d; transition: transform .42s cubic-bezier(.2, .72, .25, 1); }
 .memory-card-back, .memory-card-front { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; border: 1px solid #e0c9a8; border-radius: inherit; backface-visibility: hidden; box-shadow: 0 4px 9px rgba(69, 52, 33, .12); }
@@ -297,7 +297,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
   .hero-art { inset: 0; }
   .sitri { right: -4%; }
   .lab-section, .mini-games-section, .collection-section { padding-right: 5%; padding-left: 5%; }
-  .sample-board { gap: 8px; }
+  .sample-board { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
   .sample { padding-right: 8px; padding-left: 8px; }
   .sample-figure { width: min(100%, 122px); }
   .collection-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -327,10 +327,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
   .pop-button { width: 100%; justify-content: center; }
   .pop-subtitle { display: none; }
   .sample-board { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; margin-top: 25px; }
-  .sample:last-child { grid-column: 1 / -1; min-height: 190px; }
   .sample { min-height: 195px; }
   .sample-figure { height: 112px; }
-  .sample:last-child .sample-figure { height: 112px; }
   .mini-games-section, .collection-section { padding: 58px 6% 52px; }
   .mini-game-grid { grid-template-columns: 1fr; gap: 12px; }
   .mini-game-card { padding: 20px; }

@@ -28,8 +28,8 @@ const trophyDefinitions = [
   { id: 'chami-catcher', icon: '🐇', title: '재빠른 앞발', detail: '도망 차미 5마리 잡기' },
   { id: 'chami-catcher-15', icon: '🧤', title: '수집왕 차미', detail: '도망 차미 15마리 잡기' },
   { id: 'memory-first', icon: '🧩', title: '표본 정리', detail: '차미 표본 짝맞추기 완주' },
-  { id: 'memory-analyst', icon: '🔬', title: '눈썰미 연구원', detail: '짝맞추기를 12수 이내로 완주' },
-  { id: 'memory-gold', icon: '🌟', title: '황금 기억력', detail: '8수 이하·45초 안에 완주' },
+  { id: 'memory-analyst', icon: '🔬', title: '눈썰미 연구원', detail: '짝맞추기를 8수 이내로 완주' },
+  { id: 'memory-gold', icon: '🌟', title: '황금 기억력', detail: '6수 이하·30초 안에 완주' },
   { id: 'memory-master', icon: '💎', title: '표본 기억의 달인', detail: '황금 기억력 연구 5회 달성' },
   { id: 'lab-legend', icon: '🏆', title: '연구소의 전설', detail: '당도 연구 50회 완료' },
 ]
@@ -105,8 +105,8 @@ async function recordGameEvent(visitorId, event) {
     const current = await client.query('SELECT * FROM visitor_stats WHERE visitor_id = $1 FOR UPDATE', [visitorId])
     const stats = current.rows[0]
     if (event.type === 'round_complete') {
-      if (!Array.isArray(event.sugars) || event.sugars.length !== 5 || event.sugars.some((value) => !Number.isInteger(value) || value < 54 || value > 99)) {
-        throw Object.assign(new Error('A round must contain five valid sugar readings.'), { status: 400 })
+      if (!Array.isArray(event.sugars) || event.sugars.length !== 6 || event.sugars.some((value) => !Number.isInteger(value) || value < 54 || value > 99)) {
+        throw Object.assign(new Error('A round must contain six valid sugar readings.'), { status: 400 })
       }
       const best = Math.max(...event.sugars)
       await client.query('UPDATE visitor_stats SET completed_rounds = completed_rounds + 1, best_sugar = GREATEST(best_sugar, $2), updated_at = now() WHERE visitor_id = $1', [visitorId, best])
@@ -120,8 +120,8 @@ async function recordGameEvent(visitorId, event) {
       if (!Number.isInteger(event.count) || event.count < 0 || event.count > 1000) throw Object.assign(new Error('Invalid catch result.'), { status: 400 })
       await client.query('UPDATE visitor_stats SET catch_plays = catch_plays + 1, best_catches = GREATEST(best_catches, $2), updated_at = now() WHERE visitor_id = $1', [visitorId, event.count])
     } else if (event.type === 'memory_result') {
-      if (!Number.isInteger(event.moves) || event.moves < 6 || event.moves > 100 || !Number.isInteger(event.seconds) || event.seconds < 1 || event.seconds > 3600) throw Object.assign(new Error('Invalid memory result.'), { status: 400 })
-      const isGold = event.moves <= 8 && event.seconds <= 45
+      if (!Number.isInteger(event.moves) || event.moves < 4 || event.moves > 100 || !Number.isInteger(event.seconds) || event.seconds < 1 || event.seconds > 3600) throw Object.assign(new Error('Invalid memory result.'), { status: 400 })
+      const isGold = event.moves <= 6 && event.seconds <= 30
       await client.query('UPDATE visitor_stats SET memory_plays = memory_plays + 1, best_memory_moves = CASE WHEN best_memory_moves = 0 THEN $2 ELSE LEAST(best_memory_moves, $2) END, memory_golds = memory_golds + $3, updated_at = now() WHERE visitor_id = $1', [visitorId, event.moves, isGold ? 1 : 0])
     } else {
       throw Object.assign(new Error('Unknown game event.'), { status: 400 })
@@ -142,7 +142,7 @@ async function recordGameEvent(visitorId, event) {
     unlock(earned, updated.best_catches >= 5, 'chami-catcher')
     unlock(earned, updated.best_catches >= 15, 'chami-catcher-15')
     unlock(earned, updated.memory_plays >= 1, 'memory-first')
-    unlock(earned, updated.best_memory_moves > 0 && updated.best_memory_moves <= 12, 'memory-analyst')
+    unlock(earned, updated.best_memory_moves > 0 && updated.best_memory_moves <= 8, 'memory-analyst')
     unlock(earned, updated.memory_golds >= 1, 'memory-gold')
     unlock(earned, updated.memory_golds >= 5, 'memory-master')
     if (event.type === 'round_complete' && event.sugars.every((value) => value >= 80)) earned.add('all-sweet')
