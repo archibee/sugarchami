@@ -834,9 +834,10 @@ document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
 `)
 document.body.insertAdjacentHTML('beforeend', `
   <nav class="quick-dock" aria-label="빠른 게임 메뉴">
-    <button id="quick-pop" type="button"><span aria-hidden="true">💥</span> 차미 팡!</button>
-    <a href="#mini-games"><span aria-hidden="true">🎮</span> 미니게임</a>
-    <a href="#trophy-shelf"><span aria-hidden="true">🏆</span> 트로피</a>
+    <button id="quick-pop" type="button" aria-label="차미 팡! 측정"><span aria-hidden="true">💥</span><span class="dock-label-wide">차미 팡!</span><span class="dock-label-short">팡!</span></button>
+    <a href="#lab" aria-label="당도 연구실"><span aria-hidden="true">🧪</span><span class="dock-label-wide">당도 연구</span><span class="dock-label-short">연구</span></a>
+    <a href="#mini-games" aria-label="미니게임"><span aria-hidden="true">🎮</span><span class="dock-label-wide">미니게임</span><span class="dock-label-short">미니</span></a>
+    <a href="#trophy-shelf" aria-label="트로피"><span aria-hidden="true">🏆</span><span class="dock-label-wide">트로피</span><span class="dock-label-short">트로피</span></a>
     <button class="guideline-open-button" id="guidelines-open" type="button" aria-haspopup="dialog"><span aria-hidden="true">ⓘ</span><span class="guideline-button-wide">이용 가이드</span><span class="guideline-button-short">안내</span></button>
   </nav>
 `)
@@ -863,7 +864,7 @@ document.body.insertAdjacentHTML('beforeend', `
         <p class="ai-disclosure-intro">O는 실제 사용, X는 사용하지 않음을 뜻합니다. 공식 캐릭터를 참고해 새로 생성한 팬 이미지이며, 공식 원화 파일을 그대로 사이트 에셋으로 쓰지 않습니다.</p>
         <div class="ai-disclosure-list">
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>SITRY 이미지 생성</b><p>메인 SITRY 팬 일러스트와 SD 포즈 이미지를 AI 이미지 생성으로 제작했습니다. 메인 의상은 <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">참고 VOD</a>의 시트리 의상을 참고했습니다. 원본 방송 캡처를 복사한 이미지는 사용하지 않습니다.</p></div></article>
-          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>차미 이미지 생성</b><p>공식 캐릭터의 둥근 몸, 잎 장식 등 특징을 참고해 표정·잎 형태 변형 이미지를 새로 생성했습니다. 원작 일러스트의 작가 그림체를 복제하지 않고 별도의 그림체로 표현했습니다.</p></div></article>
+          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>차미 이미지 생성</b><p>공식 캐릭터의 둥근 몸, 잎 장식 등 특징을 참고해 표정·잎 형태 변형 이미지를 새로 생성했습니다. AI가 스스로 해석한 별도의 그림체로 표현했습니다.</p></div></article>
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 문구와 대사, 기획·프런트엔드 코드 작성에 AI를 보조 도구로 사용했습니다. 실제 게임 동작과 팡 이펙트는 JavaScript와 CSS로 실행하며, 무작위 선택은 코드의 난수 기능을 사용합니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>음성·음악·효과음 생성</b><p>음성 합성, 캐릭터 음성 변환, AI 음악·BGM 및 AI 효과음 생성은 사용하지 않았습니다. 현재 사이트에는 음성·음악 재생 기능이 없습니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>영상 생성·모델 학습</b><p>AI 영상 생성은 사용하지 않았습니다. 이 프로젝트에서 공식 자료를 이용한 자체 모델 학습이나 파인튜닝도 하지 않았습니다. 이미지 생성 시 캐릭터와 의상 특징을 참고 입력으로 사용한 것과 모델 학습은 구분됩니다.</p></div></article>
@@ -1058,6 +1059,39 @@ document.querySelector('#catch-target').addEventListener('click', catchChami)
 document.querySelector('#memory-start-button').addEventListener('click', () => { startMemoryGame(); tickMemoryClock() })
 document.querySelector('#memory-board').addEventListener('click', selectMemoryCard)
 document.querySelector('#quick-pop').addEventListener('click', quickPop)
+const dockSectionLinks = [...document.querySelectorAll('.quick-dock a[href^="#"]')]
+const dockSections = dockSectionLinks
+  .map((link) => ({ link, section: document.querySelector(link.getAttribute('href')) }))
+  .filter(({ section }) => section)
+let dockUpdateQueued = false
+function updateDockSection() {
+  dockUpdateQueued = false
+  const activationLine = window.innerHeight * 0.38
+  let activeLink = null
+
+  for (const { link, section } of dockSections) {
+    if (section.getBoundingClientRect().top <= activationLine) activeLink = link
+  }
+
+  if (window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4) {
+    activeLink = dockSections[dockSections.length - 1]?.link || activeLink
+  }
+
+  for (const { link } of dockSections) {
+    const isActive = link === activeLink
+    link.classList.toggle('is-active', isActive)
+    if (isActive) link.setAttribute('aria-current', 'location')
+    else link.removeAttribute('aria-current')
+  }
+}
+function scheduleDockSectionUpdate() {
+  if (dockUpdateQueued) return
+  dockUpdateQueued = true
+  window.requestAnimationFrame(updateDockSection)
+}
+window.addEventListener('scroll', scheduleDockSectionUpdate, { passive: true })
+window.addEventListener('resize', scheduleDockSectionUpdate)
+updateDockSection()
 const trophyCardDialog = document.querySelector('#trophy-card-dialog')
 const trophyShowcase = document.querySelector('#trophy-showcase')
 document.querySelector('#view-trophy-card').addEventListener('click', () => {
