@@ -13,6 +13,10 @@
 }
 
 * { box-sizing: border-box; }
+@media (pointer: coarse) {
+  html, body { touch-action: pan-x pan-y; }
+  button, a { touch-action: manipulation; }
+}
 .asterisk-shape { display: block; width: 1em; height: 1em; flex: 0 0 auto; overflow: visible; }
 html { min-width: 320px; scroll-behavior: smooth; }
 body { min-width: 320px; margin: 0; }
@@ -287,8 +291,11 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .quick-dock a:hover, .quick-dock button:hover:not(:disabled) { background: rgba(255,255,255,.13); transform: translateY(-2px); }
 .quick-dock a.is-active { background: #df6840; box-shadow: inset 0 -3px 0 rgba(100,39,22,.28), 0 4px 14px rgba(223,104,64,.3); }
 .quick-dock button:disabled { opacity: .65; cursor: wait; }
+.quick-dock #floating-sitri-toggle[aria-pressed="true"] { color: #f0b47a; }
+.quick-dock #floating-sitri-toggle[aria-pressed="false"] { color: rgba(255,250,242,.62); }
 .quick-dock > a > span[aria-hidden="true"], .quick-dock > button > span[aria-hidden="true"] { flex: 0 0 auto; font-size: 16px; line-height: 1; }
 .dock-label-short { display: none; }
+.sitri-toggle-short { display: none; }
 
 button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offset: 3px; }
 
@@ -365,6 +372,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
 }
 
 .floating-sitri { position: fixed; z-index: 40; top: 50%; left: 50%; width: 169px; min-height: 185px; display: grid; justify-items: center; pointer-events: none; opacity: 0; transform: translate(-50%, -50%); animation: sitri-floater-enter .7s .25s ease-out forwards; }
+.floating-sitri.is-disabled { display: none; }
 .floating-sitri-bubble { position: relative; z-index: 1; width: max-content; max-width: min(169px, 55vw); padding: 8px 10px; border: 1px solid rgba(82,68,49,.12); border-radius: 13px; background: rgba(255,253,247,.76); box-shadow: 0 6px 16px rgba(48,39,27,.1); color: #494438; font-size: 10px; font-weight: 650; line-height: 1.45; animation: float-card 3.6s ease-in-out infinite; }
 .floating-sitri-bubble::after { position: absolute; bottom: -6px; left: 25px; width: 9px; height: 9px; border-right: 1px solid rgba(82,68,49,.12); border-bottom: 1px solid rgba(82,68,49,.12); background: rgba(255,253,247,.76); content: ''; transform: rotate(45deg); }
 .floating-sitri[data-side="right"] .floating-sitri-bubble::after { right: 28px; left: auto; }
@@ -431,6 +439,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
   .quick-dock > a > span[aria-hidden="true"], .quick-dock > button > span[aria-hidden="true"] { font-size: 14px; }
   .dock-label-wide { display: none; }
   .dock-label-short { display: inline; }
+  .sitri-toggle-wide { display: none; }
+  .sitri-toggle-short { display: inline; }
   .guideline-button-wide, .guideline-button-short { font-size: inherit; line-height: inherit; }
   .guideline-button-wide { display: none; }
   .guideline-button-short { display: inline; }

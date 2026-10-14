@@ -1,5 +1,12 @@
 import './style.css'
 
+if (window.matchMedia('(pointer: coarse)').matches) {
+  document.addEventListener('dblclick', (event) => event.preventDefault(), { passive: false })
+  for (const eventName of ['gesturestart', 'gesturechange', 'gestureend']) {
+    document.addEventListener(eventName, (event) => event.preventDefault(), { passive: false })
+  }
+}
+
 const app = document.querySelector('#app')
 const sampleCount = 6
 const saveKey = 'chami-sugar-lab-research-v1'
@@ -830,6 +837,7 @@ document.body.insertAdjacentHTML('beforeend', `
     <a href="#lab" aria-label="당도 연구실"><span aria-hidden="true">🧪</span><span class="dock-label-wide">당도 연구</span><span class="dock-label-short">연구</span></a>
     <a href="#mini-games" aria-label="미니게임"><span aria-hidden="true">🎮</span><span class="dock-label-wide">미니게임</span><span class="dock-label-short">미니</span></a>
     <a href="#trophy-shelf" aria-label="트로피"><span aria-hidden="true">🏆</span><span class="dock-label-wide">트로피</span><span class="dock-label-short">트로피</span></a>
+    <button id="floating-sitri-toggle" type="button" aria-pressed="true" aria-label="시트리 요정 끄기"><span aria-hidden="true">🧚</span><span class="sitri-toggle-wide">시트리 요정 켜짐</span><span class="sitri-toggle-short">요정 켜짐</span></button>
     <button class="guideline-open-button" id="guidelines-open" type="button" aria-haspopup="dialog"><span aria-hidden="true">ⓘ</span><span class="guideline-button-wide">이용 가이드</span><span class="guideline-button-short">안내</span></button>
   </nav>
 `)
@@ -918,8 +926,13 @@ document.body.insertAdjacentHTML('beforeend', `
 const floatingSitri = document.querySelector('#floating-sitri')
 const floatingSitriImage = document.querySelector('#floating-sitri-image')
 const floatingSitriLine = document.querySelector('#floating-sitri-line')
+const floatingSitriToggle = document.querySelector('#floating-sitri-toggle')
 const sitriPoses = ['sitri-wave-mascot', 'sitri-pointing-mascot', 'sitri-trophy-mascot', 'sitri-sugar-meter-mascot']
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
+let floatingSitriEnabled = true
+try {
+  floatingSitriEnabled = localStorage.getItem('chami-floating-sitri') !== 'off'
+} catch {}
 const initialMarginX = Math.min(112, window.innerWidth * 0.28)
 const initialMarginY = Math.min(142, window.innerHeight * 0.3)
 let floaterX = initialMarginX + Math.random() * Math.max(1, window.innerWidth - initialMarginX * 2)
@@ -931,7 +944,28 @@ let clickChaseUntil = 0
 let lastFloaterFrame = 0
 let floaterFrame = null
 
+function setFloatingSitriEnabled(enabled) {
+  floatingSitriEnabled = enabled
+  floatingSitri.classList.toggle('is-disabled', !enabled)
+  floatingSitri.setAttribute('aria-hidden', String(!enabled))
+  floatingSitriToggle.setAttribute('aria-pressed', String(enabled))
+  floatingSitriToggle.setAttribute('aria-label', `시트리 요정 ${enabled ? '끄기' : '켜기'}`)
+  floatingSitriToggle.querySelector('.sitri-toggle-wide').textContent = `시트리 요정 ${enabled ? '켜짐' : '꺼짐'}`
+  floatingSitriToggle.querySelector('.sitri-toggle-short').textContent = `요정 ${enabled ? '켜짐' : '꺼짐'}`
+  if (!enabled && floaterFrame !== null) {
+    cancelAnimationFrame(floaterFrame)
+    floaterFrame = null
+  }
+  try {
+    localStorage.setItem('chami-floating-sitri', enabled ? 'on' : 'off')
+  } catch {}
+}
+
+setFloatingSitriEnabled(floatingSitriEnabled)
+floatingSitriToggle.addEventListener('click', () => setFloatingSitriEnabled(!floatingSitriEnabled))
+
 function setFloaterTarget(x, y) {
+  if (!floatingSitriEnabled) return
   const marginX = Math.min(112, window.innerWidth * 0.28)
   const marginY = Math.min(142, window.innerHeight * 0.3)
   targetX = Math.max(marginX, Math.min(window.innerWidth - marginX, x))
@@ -987,6 +1021,7 @@ function sayAsSitri(lines, pose = null) {
 
 function respondToClick(event) {
   const target = event.target instanceof Element ? event.target : null
+  if (!floatingSitriEnabled || target?.closest('#floating-sitri-toggle')) return
   const heroSitri = target?.closest('.hero-art .sitri')
   const inContext = (selector) => Boolean(target?.closest(selector))
 
@@ -1018,7 +1053,7 @@ floatingSitri.style.left = `${floaterX}px`
 floatingSitri.style.top = `${floaterY}px`
 document.addEventListener('click', respondToClick)
 document.addEventListener('keydown', (event) => {
-  if ((event.key === 'Enter' || event.key === ' ') && event.target instanceof Element && event.target.matches('.hero-art .sitri')) {
+  if (floatingSitriEnabled && (event.key === 'Enter' || event.key === ' ') && event.target instanceof Element && event.target.matches('.hero-art .sitri')) {
     event.preventDefault()
     sayAsSitri(sitriGameLines.hero, 'sitri-wave-mascot')
     const bounds = event.target.getBoundingClientRect()
