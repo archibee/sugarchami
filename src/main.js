@@ -3,6 +3,31 @@ import './style.css'
 const app = document.querySelector('#app')
 const sampleCount = 5
 const saveKey = 'chami-sugar-lab-research-v1'
+const chamiSprites = [
+  'chami-cheerful', 'chami-sleepy', 'chami-determined', 'chami-surprised', 'chami-dozy', 'chami-sparkle',
+  'chami-cheering', 'chami-yawning', 'chami-curious', 'chami-bashful', 'chami-grumpy', 'chami-dizzy',
+  'chami-triple-leaf', 'chami-curled-leaf', 'chami-double-sprout', 'chami-mint-leaf', 'chami-dew-leaf', 'chami-pear-shape',
+].map((name) => `/images/variants/chami/${name}.png`)
+const sitriDialogues = [
+  '자, 누가 제일 달콤할까?',
+  '차미의 당도는 제가 직접 확인할게요.',
+  '연구 결과는… 일단 귀여우면 합격!',
+  '차미야, 오늘도 팡팡 협조 부탁해!',
+]
+
+function shuffle(items) {
+  const shuffled = [...items]
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const target = Math.floor(Math.random() * (index + 1))
+    ;[shuffled[index], shuffled[target]] = [shuffled[target], shuffled[index]]
+  }
+  return shuffled
+}
+
+function randomChamiSprite() {
+  return chamiSprites[Math.floor(Math.random() * chamiSprites.length)]
+}
+
 const trophyCatalog = [
   { id: 'first-round', icon: '🧪', title: '첫 연구', detail: '첫 당도 연구를 마쳤다' },
   { id: 'sweet-95', icon: '🍯', title: '고당도 경보', detail: '95째S 이상 차미를 발견했다' },
@@ -388,9 +413,11 @@ function renderCollection() {
 }
 
 function makeSamples() {
+  const spriteOrder = shuffle(chamiSprites)
   return Array.from({ length: sampleCount }, (_, index) => ({
     id: index + 1,
     sugar: Math.floor(Math.random() * 46) + 54,
+    sprite: spriteOrder[index],
     revealed: false,
   }))
 }
@@ -401,7 +428,7 @@ function renderSamples(animateId = null) {
     <article class="sample ${sample.revealed ? 'is-revealed' : ''} ${sample.winner ? 'is-sweetest' : ''} ${sample.id === animateId ? 'just-measured' : ''}" data-id="${sample.id}">
       <span class="sample-number">SAMPLE 0${sample.id}</span>
       <span class="sample-figure" style="--hit-tilt:${Math.round(Math.random() * 44 - 22)}deg; --hit-shift:${Math.round(Math.random() * 28 - 14)}px">
-        <img src="/images/chami.png" alt="" />
+        <img src="${sample.sprite}" alt="" />
         <span class="impact" aria-hidden="true">팡!${sample.revealed ? `<small>${sample.sugar}°S</small>` : ''}</span>
       </span>
       <span class="sugar-result">${sample.revealed ? `${sample.sugar}<small>°S</small>` : '<small>측정 대기 중</small>'}</span>
@@ -567,6 +594,7 @@ function finishFizzRound() {
 function startFizzRound() {
   fizzState.running = true
   fizzState.count = 0
+  document.querySelector('#fizz-chami-image').src = randomChamiSprite()
   fizzState.endsAt = Date.now() + 7000
   document.querySelector('#fizz-count').textContent = '0'
   document.querySelector('#fizz-clock').textContent = '7.0'
@@ -620,6 +648,7 @@ function startCatchRound() {
   if (catchState.running) return
   catchState.running = true
   catchState.count = 0
+  document.querySelector('#catch-target img').src = randomChamiSprite()
   catchState.endsAt = Date.now() + 10000
   document.querySelector('#catch-count').textContent = '0'
   document.querySelector('#catch-clock').textContent = '10.0'
@@ -697,7 +726,7 @@ app.innerHTML = `
         <span class="hero-spark spark-one" aria-hidden="true">✳</span>
         <span class="hero-spark spark-two" aria-hidden="true">✦</span>
         <img class="sitri" src="/images/sitri-hero-expanded.png" alt="머리 장식부터 허벅지까지 온전히 보이는 시트리 일러스트" />
-        <div class="speech-card"><span class="speech-dot"></span> 자, 누가 제일 달콤할까?</div>
+        <div class="speech-card"><span class="speech-dot"></span><span class="speech-line">${sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]}</span></div>
         <span class="art-caption">SITRI · SUGAR RESEARCHER</span>
       </div>
       <span class="hero-index" aria-hidden="true">01 <i>—</i> 02</span>
@@ -723,6 +752,7 @@ app.innerHTML = `
       </div>
       <div class="sample-board" id="sample-board"></div>
       <div class="winner-panel" id="winner-panel" hidden aria-live="polite">
+        <img class="winner-sitri" src="/images/variants/sitri/sitri-trophy-mascot.png" alt="" />
         <span class="winner-crown" aria-hidden="true">♛</span>
         <span><b id="winner-title">오늘의 당도왕!</b><small id="winner-copy"></small></span>
         <span class="winner-confetti" aria-hidden="true">✦ ✳ ✦</span>
@@ -747,6 +777,7 @@ app.innerHTML = `
           <div class="mini-game-topline"><span>02 · 정밀 측정실</span><span class="mini-game-icon" aria-hidden="true">⌁</span></div>
           <h3>당도계 눈금 맞추기</h3>
           <p class="mini-game-copy">목표 구간을 지나가는 바늘을 팡! 멈춰요. 손 떨림은 연구의 일부입니다.</p>
+          <div class="mini-game-guide"><img src="/images/variants/sitri/sitri-pointing-mascot.png" alt="" loading="lazy" decoding="async" /><p><b>시트리의 한마디</b><span>초록 구간에 멈추면 연구원 배지에 가까워져요!</span></p></div>
           <div class="gauge-readout"><span>현재 측정값</span><b id="gauge-readout">—<small>°S</small></b></div>
           <div class="gauge-track" aria-label="당도계 바늘 눈금">
             <span class="gauge-target" id="gauge-target" style="left:50%"><i>목표</i></span>
@@ -761,8 +792,9 @@ app.innerHTML = `
           <div class="mini-game-topline"><span>03 · 기포 제거반</span><span class="mini-game-icon" aria-hidden="true">✳</span></div>
           <h3>차미 기포 빼기</h3>
           <p class="mini-game-copy">차미 안에 기포가 들어갔대요. 7초 동안 팡팡 눌러서 빼주세요!</p>
+          <div class="mini-game-guide"><img src="/images/variants/sitri/sitri-sugar-meter-mascot.png" alt="" loading="lazy" decoding="async" /><p><b>시트리의 한마디</b><span>기포가 설탕으로 도망가기 전에 팡팡!</span></p></div>
           <div class="fizz-stage">
-            <div class="fizz-chami"><img src="/images/chami.png" alt="" /><span class="fizz-bubble bubble-one"></span><span class="fizz-bubble bubble-two"></span><span class="fizz-bubble bubble-three"></span></div>
+            <div class="fizz-chami"><img id="fizz-chami-image" src="${randomChamiSprite()}" alt="" /><span class="fizz-bubble bubble-one"></span><span class="fizz-bubble bubble-two"></span><span class="fizz-bubble bubble-three"></span></div>
             <div class="fizz-score"><b id="fizz-count">0</b><span>회 팡!</span><small><b id="fizz-clock">7.0</b>초</small></div>
           </div>
           <div class="fizz-timer"><span id="fizz-timer-fill"></span></div>
@@ -779,7 +811,7 @@ app.innerHTML = `
           <h2 id="collection-title">연구원 수집첩</h2>
           <p>실험하고, 기록하고, 괜히 뿌듯해하세요.</p>
         </div>
-        <div class="collection-count"><b id="badge-count">0</b><span> / 06 배지</span></div>
+        <div class="collection-count"><img class="collection-mascot" src="/images/variants/sitri/sitri-trophy-mascot.png" alt="" /><b id="badge-count">0</b><span> / 06 배지</span></div>
       </div>
       <div class="research-stats">
         <div><span>완료한 연구</span><b id="round-record">0</b><small>ROUND</small></div>
@@ -799,9 +831,10 @@ document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
     <div class="mini-game-topline"><span>04 · 도망 차미 포착</span><span class="mini-game-icon" aria-hidden="true">🐇</span></div>
     <h3>차미 잡아라!</h3>
     <p class="mini-game-copy">10초 동안 도망치는 차미를 눌러 포착하세요. 연속으로 잡으면 기록을 남겨요!</p>
+    <div class="mini-game-guide"><img src="/images/variants/sitri/sitri-wave-mascot.png" alt="" loading="lazy" decoding="async" /><p><b>시트리의 한마디</b><span>차미가 도망간다! 손가락 준비됐죠?</span></p></div>
     <div class="catch-score"><b id="catch-count">0</b><span>마리 포착</span><small><b id="catch-clock">10.0</b>초 남음</small></div>
     <div class="catch-arena" id="catch-arena" aria-label="움직이는 차미 포착 구역">
-      <button class="catch-target" id="catch-target" type="button" aria-label="도망치는 차미 잡기" disabled><img src="/images/chami.png" alt="차미" /></button>
+      <button class="catch-target" id="catch-target" type="button" aria-label="도망치는 차미 잡기" disabled><img src="${randomChamiSprite()}" alt="차미" /></button>
       <span class="catch-combo" id="catch-combo" aria-hidden="true">잡았다!</span>
     </div>
     <div class="fizz-timer catch-timer"><span id="catch-timer-fill"></span></div>
