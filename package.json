@@ -4,11 +4,15 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "node --env-file-if-exists=.env.local dev.js",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "node --env-file-if-exists=.env.local server.js"
   },
   "devDependencies": {
     "vite": "*"
+  },
+  "dependencies": {
+    "pg": "^8.23.1"
   }
 }

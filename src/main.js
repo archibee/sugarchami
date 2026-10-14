@@ -3,6 +3,20 @@ import './style.css'
 const app = document.querySelector('#app')
 const sampleCount = 5
 const saveKey = 'chami-sugar-lab-research-v1'
+const trophyCatalog = [
+  { id: 'first-round', icon: '🧪', title: '첫 연구', detail: '첫 당도 연구를 마쳤다' },
+  { id: 'sweet-95', icon: '🍯', title: '고당도 경보', detail: '95째S 이상 차미를 발견했다' },
+  { id: 'sweet-99', icon: '👑', title: '당도 대폭발', detail: '최고 당도 99째S를 기록했다' },
+  { id: 'all-sweet', icon: '🍬', title: '전원 달콤', detail: '한 판에서 모두 80째S 이상' },
+  { id: 'rounds-5', icon: '📒', title: '성실 연구원', detail: '당도 연구 5회 완료' },
+  { id: 'rounds-20', icon: '🏅', title: '차미 박사', detail: '당도 연구 20회 완료' },
+  { id: 'precision', icon: '🎯', title: '정밀 측정', detail: '차이 2째S 이내로 측정' },
+  { id: 'precision-10', icon: '🧭', title: '영점의 달인', detail: '정밀 측정 10회 성공' },
+  { id: 'rapid-paws', icon: '🐾', title: '바쁜 앞발', detail: '거품 게임에서 18회 연타' },
+  { id: 'fizz-master', icon: '🫧', title: '거품 과학자', detail: '거품 게임에서 30회 연타' },
+  { id: 'mini-game-fan', icon: '🎮', title: '연구소 순회', detail: '세 가지 게임을 모두 플레이' },
+  { id: 'collection-6', icon: '✨', title: '트로피 수집가', detail: '트로피 6개 수집' },
+]
 const measurementNotes = [
   '당도계가 잠깐 행복해졌습니다.',
   '시트리가 고개를 끄덕였습니다. 근거는 없습니다.',
@@ -40,6 +54,66 @@ function saveResearch() {
     localStorage.setItem(saveKey, JSON.stringify(research))
   } catch {
     // Keep the current session playable when storage is unavailable.
+  }
+}
+
+function renderTrophies(definitions = [], earnedTrophies = []) {
+  const grid = document.querySelector('#trophy-grid')
+  if (!grid) return
+  const earned = new Map(earnedTrophies.map((item) => [item.id, item.earnedAt]))
+  grid.innerHTML = definitions.map((trophy) => {
+    const date = earned.get(trophy.id)
+    return `<article class="trophy-card ${date ? 'is-earned' : 'is-locked'}">
+      <span class="trophy-icon" aria-hidden="true">${date ? trophy.icon : '🔒'}</span>
+      <b>${trophy.title}</b><small>${trophy.detail}</small>
+      <span class="trophy-state">${date ? '달성 완료' : '미달성'}</span>
+    </article>`
+  }).join('')
+  const count = document.querySelector('#trophy-count')
+  if (count) count.textContent = String(earned.size)
+}
+
+function applyServerProfile(profile) {
+  const stats = profile.stats || {}
+  const earned = new Set((profile.trophies || []).map((trophy) => trophy.id))
+  research = {
+    completedRounds: Number(stats.completed_rounds) || 0,
+    bestSugar: Number(stats.best_sugar) || 0,
+    bestMashes: Number(stats.best_mashes) || 0,
+    badges: [
+      earned.has('first-round') && 'first-round',
+      earned.has('sweet-95') && 'sugar-overload',
+      earned.has('all-sweet') && 'all-sweet',
+      earned.has('precision') && 'steady-hand',
+      earned.has('rapid-paws') && 'rapid-paws',
+      earned.has('rounds-5') && 'veteran',
+    ].filter(Boolean),
+  }
+  saveResearch()
+  renderCollection()
+  renderTrophies(profile.trophyDefinitions, profile.trophies)
+}
+
+async function syncServerProfile() {
+  try {
+    const response = await fetch('/api/profile', { credentials: 'same-origin' })
+    if (response.ok) applyServerProfile(await response.json())
+  } catch {
+    // The local research record remains available if the database is offline.
+  }
+}
+
+async function submitGameEvent(event) {
+  try {
+    const response = await fetch('/api/events', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(event),
+    })
+    if (response.ok) applyServerProfile(await response.json())
+  } catch {
+    // Do not interrupt a game round when persistent storage is unavailable.
   }
 }
 
@@ -129,6 +203,7 @@ function measureRandomSample() {
 
       const highest = Math.max(...samples.map((item) => item.sugar))
       const winners = samples.filter((item) => item.sugar === highest)
+      submitGameEvent({ type: 'round_complete', sugars: samples.map((item) => item.sugar) })
       winners.forEach((winner) => { winner.winner = true })
       research.completedRounds += 1
       research.bestSugar = Math.max(research.bestSugar, highest)
@@ -194,6 +269,7 @@ function useGauge() {
   const actual = Math.round(54 + (gaugeState.position / 100) * 45)
   const expected = Math.round(54 + (gaugeState.target / 100) * 45)
   const difference = Math.abs(actual - expected)
+  submitGameEvent({ type: 'gauge_result', difference })
   const readout = document.querySelector('#gauge-readout')
   readout.textContent = `${actual}°S`
   document.querySelector('#gauge-needle').style.left = `${gaugeState.position}%`
@@ -210,6 +286,7 @@ function useGauge() {
 function finishFizzRound() {
   clearInterval(fizzState.timer)
   fizzState.running = false
+  submitGameEvent({ type: 'mash_result', count: fizzState.count })
   research.bestMashes = Math.max(research.bestMashes, fizzState.count)
   saveResearch()
   renderCollection()
@@ -378,6 +455,15 @@ app.innerHTML = `
   <footer class="site-footer"><span>CHAMI SUGAR LAB</span><span>작은 차미들의 당도를 연구하는 곳</span><span>FAN GAME · MADE WITH ♥</span></footer>
 `
 
+document.querySelector('.collection-section')?.insertAdjacentHTML('beforeend', `
+  <div class="trophy-shelf">
+    <div class="trophy-heading"><div><p class="kicker"><span></span> VISITOR ACHIEVEMENTS</p><h3>연구 트로피</h3><p>이 브라우저에 저장된 연구 기록과 달성 과제를 모아요.</p></div><strong><b id="trophy-count">0</b> / 12</strong></div>
+    <div class="trophy-grid" id="trophy-grid" aria-live="polite"></div>
+    <p class="visitor-note">로그인 없이 익명 방문 키로 저장합니다. 쿠키를 지우면 새 방문자로 시작합니다.</p>
+  </div>
+`)
+renderTrophies(trophyCatalog, [])
+
 samples = makeSamples()
 renderSamples()
 document.querySelector('#reset-button').addEventListener('click', resetLab)
@@ -385,3 +471,4 @@ document.querySelector('#pop-button').addEventListener('click', measureRandomSam
 document.querySelector('#gauge-button').addEventListener('click', useGauge)
 document.querySelector('#fizz-button').addEventListener('click', tapFizzButton)
 renderCollection()
+syncServerProfile()
