@@ -1,8 +1,8 @@
-﻿# Character image variants
+# Character image variants
 
-Generated PNG character assets for mini-games, dialogue, collections, and rewards. The source art is retained here; Vite serves the smaller display copies from `public/images/variants/`.
+Generated PNG character assets for 시트리 and 차미 for mini-games, dialogue, collections, and rewards. The source art is retained here; Vite serves the smaller display copies from `public/images/variants/`.
 
-## CHAMI
+## 차미
 
 The master sprites are 512 × 512, grouped into three six-character sheets:
 
@@ -12,7 +12,7 @@ The master sprites are 512 × 512, grouped into three six-character sheets:
 
 Runtime copies in `public/images/variants/chami/` are resized to 384 × 384 for lighter page loads. The original 3 × 2 sheets are kept in `chami/` as `chami-expressions-atlas-a.png`, `chami-expressions-atlas-b.png`, and `chami-leaf-variants-atlas.png`.
 
-## SITRY SD
+## 시트리 SD
 
 - `sitri-wave-mascot.png`: welcoming wave
 - `sitri-pointing-mascot.png`: points toward a game or panel

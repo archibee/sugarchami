@@ -509,7 +509,7 @@ app.innerHTML = `
   <header class="site-header">
     <a class="brand" href="#top" aria-label="차미 당도 연구소 홈">
       <span class="brand-mark" aria-hidden="true">✳</span>
-      <span>차미 당도 연구소<small>CHAMI SUGAR LAB</small></span>
+      <span>차미 당도 연구소<small>SUGAR LAB</small></span>
     </a>
     <nav class="header-nav" aria-label="페이지 메뉴">
       <a href="#lab">당도 연구</a>
@@ -533,7 +533,7 @@ app.innerHTML = `
         <span class="orbit orbit-two" aria-hidden="true"></span>
         <span class="hero-spark spark-one" aria-hidden="true">✳</span>
         <span class="hero-spark spark-two" aria-hidden="true">✦</span>
-        <img class="sitri" src="/images/sitri-hero-expanded.png" alt="머리 장식부터 허벅지까지 온전히 보이는 SITRY(시트리) 팬 일러스트" role="button" tabindex="0" aria-label="SITRY 시트리 클릭하기" />
+        <img class="sitri" src="/images/sitri-hero-expanded.png" alt="머리 장식부터 허벅지까지 온전히 보이는 시트리 팬 일러스트" role="button" tabindex="0" aria-label="시트리 클릭하기" />
         <div class="speech-card"><span class="speech-dot"></span><span class="speech-line">${sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]}</span></div>
         <span class="art-caption">SITRY · SUGAR RESEARCHER</span>
       </div>
@@ -612,7 +612,7 @@ app.innerHTML = `
     <section class="collection-section" id="collection" aria-labelledby="collection-title">
       <div class="section-heading collection-heading">
         <div>
-          <p class="kicker"><span></span> CHAMI RESEARCH ARCHIVE</p>
+          <p class="kicker"><span></span> 차미 연구 기록</p>
           <h2 id="collection-title">연구원 수집첩</h2>
           <p>실험하고, 기록하고, 괜히 뿌듯해하세요.</p>
         </div>
@@ -628,7 +628,7 @@ app.innerHTML = `
     </section>
   </main>
 
-  <footer class="site-footer"><span>CHAMI SUGAR LAB</span><span>작은 차미들의 당도를 연구하는 곳</span><span>Original By Creatorbus Inc.</span><span class="site-credit"><a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">의상 참고 VOD</a> · <a href="https://www.sooplive.com/station/vlupsitry" target="_blank" rel="noopener noreferrer">시트리의 숲 방송국</a> · AI 생성 이미지 포함 · 비영리 팬게임</span></footer>
+  <footer class="site-footer"><span>차미 당도 연구소</span><span>작은 차미들의 당도를 연구하는 곳</span><span>Original By Creatorbus Inc.</span><span class="site-credit"><a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">의상 참고 VOD</a> · <a href="https://www.sooplive.com/station/vlupsitry" target="_blank" rel="noopener noreferrer">시트리의 숲 방송국</a> · AI 생성 이미지 포함 · 비영리 팬게임</span></footer>
 `
 
 document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
@@ -671,19 +671,19 @@ document.body.insertAdjacentHTML('beforeend', `
 시트리의 숲 방송국: https://www.sooplive.com/station/vlupsitry
 원곡·원본 콘텐츠의 공식 링크: 배포 시 실제 사용한 공식 콘텐츠 URL 추가 기재</pre><p>시트리 일러스트는 AI 생성 팬 일러스트이며, 의상 참고 출처로 위 방송 VOD를 표기합니다. 고해상도 원화·포토카드 원본·음원 원본 파일을 추출하거나 별도 배포할 수 없습니다. 원저작물을 사실상 그대로 복제해 제공하는 형태도 금지됩니다.</p></section>
       <section class="guideline-section"><h3>콘텐츠 제한</h3><p>타인 비방, 선정성, 정치·종교·사상 풍자, 반사회적 표현, 스트리머 사생활 침해·추적·사칭 등 당사 규정을 위반하는 내용은 사용할 수 없습니다.</p></section>
-      <section class="guideline-section"><h3>AI 생성물과 음성 합성</h3><p>AI 생성물은 AI 생성물임을 표시해야 하며, 당사 저작물을 학습 데이터로 사용해서는 안 됩니다. 아래 O/X 표에 이 사이트에서 실제 사용한 AI 기능을 표시했습니다. SITRY·CHAMI 캐릭터와 공식 IP의 권리는 각 권리자에게 있으며 이 팬게임이 권리를 주장하지 않습니다.</p><p>음성 합성은 이주인, 시트리, 노이, 리미, 라즈에 한해 비영리 목적으로 허용됩니다. 벨디르 미스틸테인, 이아나 이그노시스, 베루의 음성 합성은 허용되지 않습니다. 허용 범위의 음성 합성도 당사 요청 시 즉시 중단해야 합니다.</p></section>
+      <section class="guideline-section"><h3>AI 생성물과 음성 합성</h3><p>AI 생성물은 AI 생성물임을 표시해야 하며, 당사 저작물을 학습 데이터로 사용해서는 안 됩니다. 아래 O/X 표에 이 사이트에서 실제 사용한 AI 기능을 표시했습니다. 시트리와 차미 캐릭터 및 공식 IP의 권리는 각 권리자에게 있으며 이 팬게임이 권리를 주장하지 않습니다.</p><p>음성 합성은 이주인, 시트리, 노이, 리미, 라즈에 한해 비영리 목적으로 허용됩니다. 벨디르 미스틸테인, 이아나 이그노시스, 베루의 음성 합성은 허용되지 않습니다. 허용 범위의 음성 합성도 당사 요청 시 즉시 중단해야 합니다.</p></section>
       <section class="guideline-section ai-disclosure" aria-labelledby="ai-disclosure-title">
         <h3 id="ai-disclosure-title">이 사이트의 AI 사용 내역 O/X</h3>
         <p class="ai-disclosure-intro">O는 실제 사용, X는 사용하지 않음을 뜻합니다. 공식 캐릭터를 참고해 새로 생성한 팬 이미지이며, 공식 원화 파일을 그대로 사이트 에셋으로 쓰지 않습니다.</p>
         <div class="ai-disclosure-list">
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>SITRY 이미지 생성</b><p>메인 SITRY 팬 일러스트와 SD 포즈 이미지를 AI 이미지 생성으로 제작했습니다. 메인 의상은 <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">참고 VOD</a>의 시트리 의상을 참고했습니다. 원본 방송 캡처를 복사한 이미지는 사용하지 않습니다.</p></div></article>
-          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>CHAMI 이미지 생성</b><p>공식 CHAMI의 둥근 몸, 잎 장식 등 캐릭터 특징을 참고해 표정·잎 형태 변형 이미지를 새로 생성했습니다. 원작 일러스트의 작가 그림체를 복제하지 않고 별도의 그림체로 표현했습니다.</p></div></article>
+          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>차미 이미지 생성</b><p>공식 캐릭터의 둥근 몸, 잎 장식 등 특징을 참고해 표정·잎 형태 변형 이미지를 새로 생성했습니다. 원작 일러스트의 작가 그림체를 복제하지 않고 별도의 그림체로 표현했습니다.</p></div></article>
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 문구와 대사, 기획·프런트엔드 코드 작성에 AI를 보조 도구로 사용했습니다. 실제 게임 동작과 팡 이펙트는 JavaScript와 CSS로 실행하며, 무작위 선택은 코드의 난수 기능을 사용합니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>음성·음악·효과음 생성</b><p>음성 합성, 캐릭터 음성 변환, AI 음악·BGM 및 AI 효과음 생성은 사용하지 않았습니다. 현재 사이트에는 음성·음악 재생 기능이 없습니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>영상 생성·모델 학습</b><p>AI 영상 생성은 사용하지 않았습니다. 이 프로젝트에서 공식 자료를 이용한 자체 모델 학습이나 파인튜닝도 하지 않았습니다. 이미지 생성 시 캐릭터와 의상 특징을 참고 입력으로 사용한 것과 모델 학습은 구분됩니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>이미지 가공·웹 효과의 생성형 AI 사용</b><p>생성된 이미지를 웹용 크기로 줄이고, 파비콘을 만드는 작업은 코드로 처리했습니다. 업적과 트로피는 페이지에서 보기 기능만 제공합니다. CSS 흔들림, 파티클, 게임 이펙트는 코드로 만든 시각 효과이며 생성형 AI로 만든 영상·애니메이션이 아닙니다.</p></div></article>
         </div>
-        <p class="ai-name-note">영문 캐릭터 표기는 SITRY / CHAMI를 사용합니다. CHAMI는 프로젝트에서 쓰는 표기이며, 공식 영문 키워드라고 주장하지 않습니다.</p>
+        <p class="ai-name-note">사이트에서는 캐릭터 이름을 시트리와 차미로 표기합니다. 디자인 장식에는 SITRY를 사용할 수 있으며, 차미에는 별도의 공식 영문 키워드가 없어 영문 이름 표기를 사용하지 않습니다.</p>
         <p class="ai-source-links"><b>이미지 참고 출처:</b> <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">SITRY 의상 참고 VOD ↗</a> · <a href="https://www.sooplive.com/station/vlupsitry" target="_blank" rel="noopener noreferrer">시트리의 숲 공식 방송국 ↗</a></p>
       </section>
       <section class="guideline-section"><h3>배포 채널과 공개 전 사전 통보</h3><p>무료 배포는 브이럽 공식 카페에서만 가능합니다. 스팀, 앱스토어·구글 플레이, 광고·후원 기능이 기본 제공되는 플랫폼에는 업로드할 수 없습니다. 베타를 포함해 공개하기 전에 배포 링크와 간단한 설명을 당사에 통보해야 합니다. 필요하면 수정 요청 또는 배포 보류 안내가 있을 수 있습니다.</p></section>
@@ -711,11 +711,11 @@ document.body.insertAdjacentHTML('beforeend', `
     <article class="trophy-showcase" id="trophy-showcase">
       <button class="trophy-showcase-close" id="trophy-showcase-close" type="button" aria-label="업적 카드 닫기">✕</button>
       <section class="trophy-showcase-art" aria-label="SITRY 팬 일러스트">
-        <img src="/images/sitri-hero-expanded.png" alt="SITRY 팬 일러스트" />
+        <img src="/images/sitri-hero-expanded.png" alt="시트리 팬 일러스트" />
         <span class="trophy-art-label">SITRY · SUGAR RESEARCHER</span>
       </section>
       <section class="trophy-showcase-info">
-        <p class="kicker"><span></span> CHAMI SUGAR LAB · RESEARCH FILE</p>
+        <p class="kicker"><span></span> SUGAR LAB · RESEARCH FILE</p>
         <h2 id="trophy-card-title">차미 당도 연구 카드</h2>
         <p class="trophy-showcase-subtitle">오늘의 연구 기록과 트로피</p>
         <div class="trophy-showcase-stats" id="trophy-showcase-stats"></div>
@@ -730,7 +730,7 @@ document.body.insertAdjacentHTML('beforeend', `
 document.body.insertAdjacentHTML('beforeend', `
   <aside class="floating-sitri" id="floating-sitri" aria-label="시트리의 한마디">
     <div class="floating-sitri-bubble"><span class="speech-dot" aria-hidden="true"></span><span id="floating-sitri-line"></span></div>
-    <img id="floating-sitri-image" src="/images/variants/sitri/sitri-wave-mascot.png" alt="SITRY SD 캐릭터" />
+    <img id="floating-sitri-image" src="/images/variants/sitri/sitri-wave-mascot.png" alt="시트리 SD 캐릭터" />
   </aside>
 `)
 
