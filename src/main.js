@@ -849,7 +849,7 @@ document.body.insertAdjacentHTML('beforeend', `
       <button class="guidelines-close" id="guidelines-close" type="button" aria-label="이용 가이드 닫기">✕</button>
     </header>
     <div class="guidelines-content">
-      <aside class="guideline-alert"><b>먼저 확인해주세요</b><p>이 작품은 비영리 팬게임을 지향합니다. 공개 전 사전 통보가 필요하며, 무료 배포 채널은 브이럽 공식 카페로 한정됩니다. 이 안내를 표시하는 것만으로 허가·승인 또는 지침 준수가 확정되는 것은 아닙니다. 현재 공개 방식이 지침에 맞는지 제작자가 원문과 함께 확인해야 합니다.</p></aside>
+      <aside class="guideline-alert"><b>먼저 확인해주세요</b><p>이 작품은 비영리 팬게임을 목표로 제작되었습니다. 공개 전 사전 통보가 필요하며, 배포 채널은 브이럽 공식 카페로 한정됩니다. 이 안내를 표시하는 것만으로 허가·승인 또는 지침 준수가 확정되는 것은 아닙니다. 현재 공개 방식이 지침에 맞는지 제작자가 원문과 함께 확인해야 합니다.</p></aside>
       <section class="guideline-section"><h3>목적과 적용 범위</h3><p>이 지침은 ㈜크리에이터버스 IP를 활용한 비영리 팬게임의 제작·배포에 적용됩니다. 브이럽 2차 창작 가이드라인과 커뮤니티 규정도 함께 준수해야 합니다. 제작·배포 과정에서 발생하는 기술 문제, 버그, 저작권 분쟁, 이용자 피해 등은 제작자 책임이며 ㈜크리에이터버스는 법적·금전적 책임을 지지 않습니다.</p></section>
       <section class="guideline-section"><h3>비영리 원칙과 금지 항목</h3><p>팬게임은 원칙적으로 비영리로만 제작·배포할 수 있습니다. 판매, 유료 다운로드, 인앱 결제·DLC, 유료 베타, 후원·구독 리워드, 스폰서 표기, 제휴 배너, 링크 단축 광고, 광고 수익이 발생하는 호스팅·배포 페이지 이용은 금지됩니다.</p><p>영리 이용은 사전에 ㈜크리에이터버스의 서면 허가를 받아야 하며 IP 사용료가 부과될 수 있습니다. 허가 없는 영리 이용은 불가합니다.</p></section>
       <section class="guideline-section"><h3>저작권 표기와 원저작물 재배포 금지</h3><p>게임 내 크레딧과 배포 페이지 설명란에 아래 표기 및 실제 사용한 원곡·원본 콘텐츠의 공식 링크를 기재해야 합니다.</p><pre class="guideline-credit">Original By Creatorbus Inc.
@@ -863,17 +863,17 @@ document.body.insertAdjacentHTML('beforeend', `
         <h3 id="ai-disclosure-title">이 사이트의 AI 사용 내역 O/X</h3>
         <p class="ai-disclosure-intro">O는 실제 사용, X는 사용하지 않음을 뜻합니다. 공식 캐릭터를 참고해 새로 생성한 팬 이미지이며, 공식 원화 파일을 그대로 사이트 에셋으로 쓰지 않습니다.</p>
         <div class="ai-disclosure-list">
-          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>SITRY 이미지 생성</b><p>메인 SITRY 팬 일러스트와 SD 포즈 이미지를 AI 이미지 생성으로 제작했습니다. 메인 의상은 <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">참고 VOD</a>의 시트리 의상을 참고했습니다. 원본 방송 캡처를 복사한 이미지는 사용하지 않습니다.</p></div></article>
+          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>시트리 이미지 생성</b><p>메인 시트리 일러스트와 SD 포즈 이미지를 AI 이미지 생성으로 제작했습니다. 메인 의상은 <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">참고 VOD</a>의 시트리 의상을 참고했습니다. 원본 방송 캡처를 복사한 이미지는 사용하지 않습니다.</p></div></article>
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>차미 이미지 생성</b><p>공식 캐릭터의 둥근 몸, 잎 장식 등 특징을 참고해 표정·잎 형태 변형 이미지를 새로 생성했습니다. AI가 스스로 해석한 별도의 그림체로 표현했습니다.</p></div></article>
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 문구와 대사, 기획·프런트엔드 코드 작성에 AI를 보조 도구로 사용했습니다. 실제 게임 동작과 팡 이펙트는 JavaScript와 CSS로 실행하며, 무작위 선택은 코드의 난수 기능을 사용합니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>음성·음악·효과음 생성</b><p>음성 합성, 캐릭터 음성 변환, AI 음악·BGM 및 AI 효과음 생성은 사용하지 않았습니다. 현재 사이트에는 음성·음악 재생 기능이 없습니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>영상 생성·모델 학습</b><p>AI 영상 생성은 사용하지 않았습니다. 이 프로젝트에서 공식 자료를 이용한 자체 모델 학습이나 파인튜닝도 하지 않았습니다. 이미지 생성 시 캐릭터와 의상 특징을 참고 입력으로 사용한 것과 모델 학습은 구분됩니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>이미지 가공·웹 효과의 생성형 AI 사용</b><p>생성된 이미지를 웹용 크기로 줄이고, 파비콘을 만드는 작업은 코드로 처리했습니다. 업적과 트로피는 페이지에서 보기 기능만 제공합니다. CSS 흔들림, 파티클, 게임 이펙트는 코드로 만든 시각 효과이며 생성형 AI로 만든 영상·애니메이션이 아닙니다.</p></div></article>
         </div>
-        <p class="ai-name-note">사이트에서는 캐릭터 이름을 시트리와 차미로 표기합니다. 디자인 장식에는 SITRY를 사용할 수 있으며, 차미에는 별도의 공식 영문 키워드가 없어 영문 이름 표기를 사용하지 않습니다.</p>
+        <p class="ai-name-note">사이트에서는 캐릭터 이름을 시트리와 차미로 표기합니다. 차미에는 별도의 공식 영문 키워드가 없어 영문 이름 표기를 사용하지 않습니다.</p>
         <p class="ai-source-links"><b>이미지 참고 출처:</b> <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">SITRY 의상 참고 VOD ↗</a> · <a href="https://www.sooplive.com/station/vlupsitry" target="_blank" rel="noopener noreferrer">시트리의 숲 공식 방송국 ↗</a></p>
       </section>
-      <section class="guideline-section"><h3>배포 채널과 공개 전 사전 통보</h3><p>무료 배포는 브이럽 공식 카페에서만 가능합니다. 스팀, 앱스토어·구글 플레이, 광고·후원 기능이 기본 제공되는 플랫폼에는 업로드할 수 없습니다. 베타를 포함해 공개하기 전에 배포 링크와 간단한 설명을 당사에 통보해야 합니다. 필요하면 수정 요청 또는 배포 보류 안내가 있을 수 있습니다.</p></section>
+      <section class="guideline-section"><h3>배포 채널과 공개 전 사전 통보</h3><p>배포는 브이럽 공식 카페에서만 가능합니다. 스팀, 앱스토어·구글 플레이, 광고·후원 기능이 기본 제공되는 플랫폼에는 업로드할 수 없습니다. 베타를 포함해 공개하기 전에 배포 링크와 간단한 설명을 당사에 통보해야 합니다. 필요하면 수정 요청 또는 배포 보류 안내가 있을 수 있습니다.</p></section>
       <section class="guideline-section"><h3>위반 시 조치와 문의</h3><p>지침 위반이 확인되면 배포 중단·삭제를 요구할 수 있으며, 필요하면 법적 조치를 진행할 수 있습니다.</p><p>문의: <a href="mailto:v_lup@creatorbus.net">v_lup@creatorbus.net</a> 또는 브이럽 공식 문의 채널</p></section>
       <footer class="guidelines-source"><span>원문 확인</span><a href="https://cafe.naver.com/vlup/36148" target="_blank" rel="noopener noreferrer">팬게임 가이드라인 (PLAY the V-LUP) ↗</a><a href="https://v-lup.com/" target="_blank" rel="noopener noreferrer">V-LUP 공식 사이트 ↗</a></footer>
     </div>
