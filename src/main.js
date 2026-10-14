@@ -90,7 +90,6 @@ let gaugeState = { running: false, target: 50, position: 50, startedAt: 0, frame
 let fizzState = { running: false, count: 0, endsAt: 0, timer: null }
 let catchState = { running: false, count: 0, endsAt: 0, timer: null, mover: null }
 let memoryState = { active: false, locked: false, deck: [], open: [], matched: new Set(), moves: 0, startedAt: 0, mismatchTimer: null, clockTimer: null }
-let quickPopTimer = null
 let knownTrophies = null
 let trophyToastTimer = null
 let profileSyncPromise = null
@@ -345,7 +344,7 @@ function measureRandomSample() {
 
   if (remaining === 0) {
     popButton.disabled = true
-    popButton.querySelector('.pop-title').textContent = '측정 완료!'
+    popButton.querySelector('.pop-title').textContent = '당도왕 발표 중…'
     const currentRound = roundSerial
     window.setTimeout(() => {
       if (currentRound !== roundSerial) return
@@ -373,6 +372,9 @@ function measureRandomSample() {
       document.querySelector('#winner-panel').hidden = false
       document.querySelector('#winner-panel').classList.add('is-visible')
       document.querySelector('#lab-status').textContent = `최고 당도 ${highest}°S! ${winnerIds}가 오늘의 당도왕이에요.`
+      popButton.disabled = false
+      popButton.querySelector('.pop-title').textContent = '다시 연구하기'
+      popButton.querySelector('.pop-subtitle').textContent = '새 표본 5개'
     }, 720)
   }
 }
@@ -388,6 +390,7 @@ function resetLab() {
   const popButton = document.querySelector('#pop-button')
   popButton.disabled = false
   popButton.querySelector('.pop-title').textContent = '차미 팡!'
+  popButton.querySelector('.pop-subtitle').innerHTML = '랜덤 측정 <i aria-hidden="true">↗</i>'
 }
 
 function animateGauge(timestamp) {
@@ -669,19 +672,6 @@ function tickMemoryClock() {
   memoryState.clockTimer = window.setTimeout(tickMemoryClock, 250)
 }
 
-function quickPop() {
-  if (quickPopTimer) return
-  if (samples.every((sample) => sample.revealed)) resetLab()
-  document.querySelector('#lab').scrollIntoView({ behavior: 'smooth', block: 'center' })
-  const button = document.querySelector('#quick-pop')
-  button.disabled = true
-  quickPopTimer = window.setTimeout(() => {
-    measureRandomSample()
-    button.disabled = false
-    quickPopTimer = null
-  }, 260)
-}
-
 app.innerHTML = `
   <header class="site-header">
     <a class="brand" href="#top" aria-label="차미 당도 연구소 홈">
@@ -726,7 +716,6 @@ app.innerHTML = `
         </div>
         <div class="lab-controls">
           <span class="unit-label">SUGAR UNIT <b>°S</b></span>
-          <button class="reset-button" id="reset-button" type="button">새 연구 <span aria-hidden="true">↻</span></button>
         </div>
       </div>
       <div class="pop-action">
@@ -834,7 +823,6 @@ document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
 `)
 document.body.insertAdjacentHTML('beforeend', `
   <nav class="quick-dock" aria-label="빠른 게임 메뉴">
-    <button id="quick-pop" type="button" aria-label="차미 팡! 측정"><span aria-hidden="true">💥</span><span class="dock-label-wide">차미 팡!</span><span class="dock-label-short">팡!</span></button>
     <a href="#lab" aria-label="당도 연구실"><span aria-hidden="true">🧪</span><span class="dock-label-wide">당도 연구</span><span class="dock-label-short">연구</span></a>
     <a href="#mini-games" aria-label="미니게임"><span aria-hidden="true">🎮</span><span class="dock-label-wide">미니게임</span><span class="dock-label-short">미니</span></a>
     <a href="#trophy-shelf" aria-label="트로피"><span aria-hidden="true">🏆</span><span class="dock-label-wide">트로피</span><span class="dock-label-short">트로피</span></a>
@@ -996,7 +984,7 @@ function respondToClick(event) {
   const inContext = (selector) => Boolean(target?.closest(selector))
 
   if (heroSitri) sayAsSitri(sitriGameLines.hero, 'sitri-wave-mascot')
-  else if (inContext('#pop-button, #quick-pop, .sample')) sayAsSitri(sitriGameLines.pop, 'sitri-sugar-meter-mascot')
+  else if (inContext('#pop-button, .sample')) sayAsSitri(sitriGameLines.pop, 'sitri-sugar-meter-mascot')
   else if (inContext('#gauge-button, #gauge-game')) sayAsSitri(sitriGameLines.gauge, 'sitri-pointing-mascot')
   else if (inContext('#fizz-button, #fizz-game')) sayAsSitri(sitriGameLines.fizz, 'sitri-sugar-meter-mascot')
   else if (inContext('#catch-start-button, #catch-target, #catch-game')) sayAsSitri(sitriGameLines.catch, 'sitri-wave-mascot')
@@ -1050,15 +1038,16 @@ renderTrophies(trophyCatalog, [
   ...research.trophies.map((id) => ({ id, earnedAt: true })),
   ...research.badges.map((badge) => localBadgeTrophyMap[badge]).filter(Boolean).map((id) => ({ id, earnedAt: true })),
 ])
-document.querySelector('#reset-button').addEventListener('click', resetLab)
-document.querySelector('#pop-button').addEventListener('click', measureRandomSample)
+document.querySelector('#pop-button').addEventListener('click', () => {
+  if (samples.every((sample) => sample.revealed)) resetLab()
+  else measureRandomSample()
+})
 document.querySelector('#gauge-button').addEventListener('click', useGauge)
 document.querySelector('#fizz-button').addEventListener('click', tapFizzButton)
 document.querySelector('#catch-start-button').addEventListener('click', startCatchRound)
 document.querySelector('#catch-target').addEventListener('click', catchChami)
 document.querySelector('#memory-start-button').addEventListener('click', () => { startMemoryGame(); tickMemoryClock() })
 document.querySelector('#memory-board').addEventListener('click', selectMemoryCard)
-document.querySelector('#quick-pop').addEventListener('click', quickPop)
 const dockSectionLinks = [...document.querySelectorAll('.quick-dock a[href^="#"]')]
 const dockSections = dockSectionLinks
   .map((link) => ({ link, section: document.querySelector(link.getAttribute('href')) }))
