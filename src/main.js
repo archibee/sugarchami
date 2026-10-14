@@ -889,7 +889,7 @@ guidelinesDialog.addEventListener('click', (event) => {
 document.querySelector('main')?.insertAdjacentHTML('beforeend', `
   <section class="collection-section trophy-section" id="trophy-shelf" aria-labelledby="trophy-title">
     <div class="section-heading collection-heading trophy-heading">
-      <div><p class="kicker"><span></span> VISITOR ACHIEVEMENTS</p><h2 id="trophy-title">연구 트로피</h2><p>이 브라우저에 저장된 연구 기록과 달성 과제를 모아요.</p><p class="trophy-view-note">카드는 사이트 안에서 확인할 수 있어요. 저장이나 공유는 화면 캡처 등 이용자가 직접 선택해 주세요.</p></div>
+      <div><p class="kicker"><span></span> VISITOR ACHIEVEMENTS</p><h2 id="trophy-title">연구 트로피</h2><p>이 브라우저에 저장된 연구 기록과 달성 과제를 모아요.</p></div>
       <div class="trophy-heading-actions"><div class="collection-count"><b id="trophy-count">0</b><span> / ${trophyCatalog.length} 트로피</span></div><button class="view-trophy-button" id="view-trophy-card" type="button"><span aria-hidden="true">✦</span> 업적 카드 보기</button></div>
     </div>
     <div class="collection-grid trophy-grid" id="trophy-grid" aria-live="polite"></div>
@@ -932,7 +932,7 @@ const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matc
 let floatingSitriEnabled = true
 try {
   floatingSitriEnabled = localStorage.getItem('chami-floating-sitri') !== 'off'
-} catch {}
+} catch { }
 const initialMarginX = Math.min(112, window.innerWidth * 0.28)
 const initialMarginY = Math.min(142, window.innerHeight * 0.3)
 let floaterX = initialMarginX + Math.random() * Math.max(1, window.innerWidth - initialMarginX * 2)
@@ -958,7 +958,7 @@ function setFloatingSitriEnabled(enabled) {
   }
   try {
     localStorage.setItem('chami-floating-sitri', enabled ? 'on' : 'off')
-  } catch {}
+  } catch { }
 }
 
 setFloatingSitriEnabled(floatingSitriEnabled)
