@@ -211,6 +211,23 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .catch-combo { position: absolute; z-index: 4; top: 50%; left: 50%; color: #e65332; font-size: 20px; font-weight: 1000; opacity: 0; pointer-events: none; text-shadow: 2px 2px 0 #fff; transform: translate(-50%,-50%); }
 .catch-combo.is-visible { animation: catch-combo .5s cubic-bezier(.2,1.6,.4,1) both; }
 .catch-timer { margin-top: 10px; }
+.memory-score { margin: 8px 0 10px; display: flex; align-items: baseline; gap: 8px; color: #827b6d; font-size: 10px; }
+.memory-score > b { color: var(--orange); font-size: 33px; line-height: 1; }
+.memory-score > small { margin-left: auto; color: #817a6b; font-size: 10px; }
+.memory-score > small b { color: #575448; font-size: 13px; }
+.memory-board { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 12px 0; perspective: 850px; }
+.memory-card { min-width: 0; padding: 0; border: 0; border-radius: 9px; aspect-ratio: 1; background: transparent; cursor: pointer; perspective: 700px; touch-action: manipulation; }
+.memory-card-inner { position: relative; display: block; width: 100%; height: 100%; border-radius: inherit; transform-style: preserve-3d; transition: transform .42s cubic-bezier(.2, .72, .25, 1); }
+.memory-card-back, .memory-card-front { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; border: 1px solid #e0c9a8; border-radius: inherit; backface-visibility: hidden; box-shadow: 0 4px 9px rgba(69, 52, 33, .12); }
+.memory-card-back { background: radial-gradient(circle at 50% 45%, #fff3d8, transparent 42%), linear-gradient(145deg, #e9bb84, #d98a5d); color: rgba(255, 252, 237, .94); font-size: clamp(19px, 3vw, 29px); text-shadow: 0 2px 8px rgba(121, 64, 41, .25); }
+.memory-card-front { background: rgba(255, 252, 245, .94); transform: rotateY(180deg); }
+.memory-card-front img { width: 92%; height: 92%; object-fit: contain; filter: drop-shadow(0 4px 4px rgba(57, 47, 34, .12)); }
+.memory-card.is-face-up .memory-card-inner { transform: rotateY(180deg); }
+.memory-card:hover:not(.is-face-up) .memory-card-inner { transform: translateY(-3px) rotateX(5deg); }
+.memory-card.is-matched .memory-card-front { border-color: #d3aa71; background: linear-gradient(145deg, #fff5df, #f5dfb5); box-shadow: 0 0 0 2px rgba(220, 169, 102, .18), 0 0 18px rgba(214, 169, 102, .32); }
+.memory-card.is-matched .memory-card-front img { animation: memory-match-pop .42s cubic-bezier(.2, 1.7, .4, 1); }
+.memory-game.is-memory-complete { border-color: #d6b06f; background: linear-gradient(145deg, #fff8e9, #f7ebd4); box-shadow: 0 0 0 3px rgba(222, 175, 102, .14), 0 12px 30px rgba(155, 117, 62, .15); }
+@keyframes memory-match-pop { 45% { transform: scale(1.2) rotate(-7deg); } 100% { transform: scale(1) rotate(0); } }
 @keyframes catch-squish { 18% { transform: scale(1.35,.72) rotate(-12deg); } 45% { transform: scale(.82,1.25) rotate(12deg); } 72% { transform: scale(1.12,.9) rotate(-5deg); } 100% { transform: scale(1) rotate(0); } }
 @keyframes catch-arena-hit { 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-2px); } 100% { transform: translateX(0); } }
 @keyframes catch-combo { 0% { opacity: 0; transform: translate(-50%,-50%) scale(.2) rotate(-14deg); } 30% { opacity: 1; transform: translate(-50%,-80%) scale(1.35) rotate(8deg); } 100% { opacity: 0; transform: translate(-50%,-130%) scale(.85) rotate(0); } }
@@ -255,6 +272,11 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .trophy-card > small { min-height: 28px; margin-top: 4px; color: #898273; font-size: 9px; line-height: 1.45; }
 .trophy-state { margin-top: auto; padding-top: 7px; color: #aaa294; font-size: 8px; }
 .is-earned .trophy-state { color: #b96c3f; font-weight: 700; }
+.trophy-card.is-gold { position: relative; overflow: hidden; }
+.trophy-card.is-silver { position: relative; overflow: hidden; }
+.trophy-card.is-gold::before { position: absolute; top: 7px; right: 7px; padding: 3px 5px; border: 1px solid rgba(193, 143, 63, .38); border-radius: 99px; background: rgba(246, 225, 179, .82); color: #98702f; content: '황금'; font-size: 7px; font-weight: 900; }
+.trophy-card.is-gold.is-earned { border-color: #d7ae63; background: linear-gradient(145deg, #fff9e8, #f2dfb4); box-shadow: 0 5px 20px rgba(186, 142, 63, .2), inset 0 1px rgba(255,255,255,.9); }
+.trophy-card.is-silver::before { position: absolute; top: 7px; right: 7px; padding: 3px 5px; border-radius: 99px; background: rgba(227, 225, 215, .9); color: #777366; content: '정밀'; font-size: 7px; font-weight: 900; }
 .trophy-card.is-earned { position: relative; overflow: hidden; transition: transform .2s, box-shadow .2s; }
 .trophy-card.is-earned:hover { transform: translateY(-5px) rotate(-1deg); box-shadow: 0 12px 24px rgba(147,105,63,.2); }
 .trophy-card.is-earned .trophy-icon { box-shadow: 0 0 0 3px rgba(222,166,101,.15), 0 0 20px rgba(222,166,101,.3); }
@@ -472,6 +494,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
 .trophy-showcase-grid .trophy-card { min-height: 104px; padding: 10px; border-color: rgba(255, 255, 255, .18); border-radius: 10px; background: rgba(255, 255, 255, .08); color: rgba(255, 248, 236, .62); backdrop-filter: blur(8px); }
 .trophy-showcase-grid .trophy-card.is-locked { filter: none; opacity: .58; }
 .trophy-showcase-grid .trophy-card.is-earned { border-color: rgba(247, 195, 130, .62); background: rgba(255, 222, 177, .16); color: #fff5e4; box-shadow: inset 0 1px rgba(255, 255, 255, .16), 0 5px 18px rgba(18, 14, 13, .12); }
+.trophy-showcase-grid .trophy-card.is-gold::before { border-color: rgba(255, 220, 153, .34); background: rgba(211, 163, 83, .25); color: #ffe0a4; }
 .trophy-showcase-grid .trophy-icon { width: 28px; height: 28px; margin-bottom: 6px; font-size: 15px; }
 .trophy-showcase-grid .trophy-card > b { font-size: 10px; }
 .trophy-showcase-grid .trophy-card > small { min-height: 0; color: rgba(255, 246, 231, .62); font-size: 8px; }
@@ -496,4 +519,5 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
 @media (prefers-reduced-motion: reduce) {
   .trophy-showcase { transition: none; transform: none; }
   .trophy-card-dialog[open], .trophy-card-dialog::backdrop { animation: none; }
+  .memory-card-inner, .memory-card-front img { transition: none; animation: none; }
 }

@@ -22,6 +22,7 @@ const sitriGameLines = {
   collection: ['트로피가 하나씩 늘고 있네요. 뿌듯해요!', '새 트로피를 모으려면 미니게임도 해봐요!', '연구 기록을 차곡차곡 모아봐요!'],
   guideline: ['이 작품은 팬게임이에요. 이용 안내도 확인해 주세요!', '공개 전에 배포 조건을 확인하는 것, 잊지 마세요!'],
   miniGames: ['어떤 미니게임부터 해볼까요?', '게임마다 연구 보상이 달라요!', '마음에 드는 연구를 골라 도전해봐요!'],
+  memory: ['표본 위치를 기억해 짝을 찾아봐요!', '황금 트로피는 8수 안에 완주하면 얻을 수 있어요!', '같은 차미도 표정이 다르네요. 차근차근 찾아봐요!'],
   lab: ['차미 당도를 측정하고 있어요!', '다섯 번 팡! 해서 당도왕을 찾아봐요.', '이번 연구 결과가 궁금하네요!'],
   hero: ['앗, 저를 눌러주셨네요!', '여기 있어요! 한 번 더 눌러봐도 좋아요.', '반가워요! 오늘도 차미 연구를 시작해볼까요?'],
   default: ['어, 저를 부르셨나요?', '클릭한 곳까지 후다닥 갈게요!', '여기저기 구경하고 있었어요!'],
@@ -31,7 +32,7 @@ function shuffle(items) {
   const shuffled = [...items]
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
     const target = Math.floor(Math.random() * (index + 1))
-    ;[shuffled[index], shuffled[target]] = [shuffled[target], shuffled[index]]
+      ;[shuffled[index], shuffled[target]] = [shuffled[target], shuffled[index]]
   }
   return shuffled
 }
@@ -51,11 +52,18 @@ const trophyCatalog = [
   { id: 'precision-10', icon: '🧭', title: '영점의 달인', detail: '정밀 측정 10회 성공' },
   { id: 'rapid-paws', icon: '🐾', title: '바쁜 앞발', detail: '거품 게임에서 18회 연타' },
   { id: 'fizz-master', icon: '🫧', title: '거품 과학자', detail: '거품 게임에서 30회 연타' },
-  { id: 'mini-game-fan', icon: '🎮', title: '연구소 순회', detail: '네 가지 게임을 모두 플레이' },
+  { id: 'mini-game-fan', icon: '🎮', title: '연구소 순회', detail: '다섯 가지 게임을 모두 플레이' },
   { id: 'collection-6', icon: '✨', title: '트로피 수집가', detail: '트로피 6개 수집' },
   { id: 'chami-catcher', icon: '🐇', title: '재빠른 앞발', detail: '도망 차미 5마리 잡기' },
   { id: 'chami-catcher-15', icon: '🧤', title: '수집왕 차미', detail: '도망 차미 15마리 잡기' },
+  { id: 'memory-first', icon: '🧩', title: '표본 정리', detail: '차미 표본 짝맞추기 완주' },
+  { id: 'memory-analyst', icon: '🔬', title: '눈썰미 연구원', detail: '짝맞추기를 12수 이내로 완주' },
+  { id: 'memory-gold', icon: '🌟', title: '황금 기억력', detail: '8수 이하·45초 안에 완주' },
+  { id: 'memory-master', icon: '💎', title: '표본 기억의 달인', detail: '황금 기억력 연구 5회 달성' },
+  { id: 'lab-legend', icon: '🏆', title: '연구소의 전설', detail: '당도 연구 50회 완료' },
 ]
+const goldTrophyIds = new Set(['sweet-99', 'precision-10', 'chami-catcher-15', 'memory-gold', 'memory-master', 'lab-legend'])
+const localBadgeTrophyMap = { 'first-round': 'first-round', 'sugar-overload': 'sweet-95', 'all-sweet': 'all-sweet', 'steady-hand': 'precision', 'rapid-paws': 'rapid-paws', veteran: 'rounds-5', 'memory-first': 'memory-first', 'memory-analyst': 'memory-analyst', 'memory-gold': 'memory-gold', 'memory-master': 'memory-master', 'lab-legend': 'lab-legend' }
 const measurementNotes = [
   '당도계가 잠깐 행복해졌습니다.',
   '시트리가 고개를 끄덕였습니다. 근거는 없습니다.',
@@ -70,12 +78,18 @@ const badgeDefinitions = [
   { id: 'steady-hand', icon: '🎯', title: '정밀 연구원', detail: '눈금 맞추기 오차 2°S 이하' },
   { id: 'rapid-paws', icon: '💨', title: '팡팡 장인', detail: '7초 안에 18번 팡!' },
   { id: 'veteran', icon: '📔', title: '연구소 단골', detail: '당도 연구 5회 완료' },
+  { id: 'memory-first', icon: '🧩', title: '표본 정리', detail: '차미 표본 짝맞추기 완주' },
+  { id: 'memory-analyst', icon: '🔬', title: '눈썰미 연구원', detail: '짝맞추기를 12수 이내로 완주' },
+  { id: 'memory-gold', icon: '🌟', title: '황금 기억력', detail: '8수 이하·45초 안에 완주' },
+  { id: 'memory-master', icon: '💎', title: '표본 기억의 달인', detail: '황금 기억력 연구 5회 달성' },
+  { id: 'lab-legend', icon: '🏆', title: '연구소의 전설', detail: '당도 연구 50회 완료' },
 ]
 let samples = []
 let roundSerial = 0
 let gaugeState = { running: false, target: 50, position: 50, startedAt: 0, frame: null }
 let fizzState = { running: false, count: 0, endsAt: 0, timer: null }
 let catchState = { running: false, count: 0, endsAt: 0, timer: null, mover: null }
+let memoryState = { active: false, locked: false, deck: [], open: [], matched: new Set(), moves: 0, startedAt: 0, mismatchTimer: null, clockTimer: null }
 let quickPopTimer = null
 let knownTrophies = null
 let trophyToastTimer = null
@@ -83,10 +97,10 @@ let profileSyncPromise = null
 let lastServerProfile = null
 
 function loadResearch() {
-  const fresh = { completedRounds: 0, bestSugar: 0, bestMashes: 0, badges: [] }
+  const fresh = { completedRounds: 0, bestSugar: 0, bestMashes: 0, bestCatches: 0, catchPlays: 0, gaugePlays: 0, precisionHits: 0, mashPlays: 0, bestMemoryMoves: 0, memoryPlays: 0, memoryGolds: 0, trophies: [], badges: [] }
   try {
     const saved = JSON.parse(localStorage.getItem(saveKey))
-    return { ...fresh, ...saved, badges: Array.isArray(saved?.badges) ? saved.badges : [] }
+    return { ...fresh, ...saved, badges: Array.isArray(saved?.badges) ? saved.badges : [], trophies: Array.isArray(saved?.trophies) ? saved.trophies : [] }
   } catch {
     return fresh
   }
@@ -108,7 +122,8 @@ function renderTrophies(definitions = [], earnedTrophies = []) {
   const earned = new Map(earnedTrophies.map((item) => [item.id, item.earnedAt]))
   grid.innerHTML = definitions.map((trophy) => {
     const date = earned.get(trophy.id)
-    return `<article class="trophy-card ${date ? 'is-earned' : 'is-locked'}">
+    const rarity = goldTrophyIds.has(trophy.id) ? 'is-gold' : ['sweet-95', 'rounds-20', 'fizz-master', 'mini-game-fan', 'chami-catcher'].includes(trophy.id) ? 'is-silver' : ''
+    return `<article class="trophy-card ${date ? 'is-earned' : 'is-locked'} ${rarity}">
       <span class="trophy-icon" aria-hidden="true">${date ? trophy.icon : '🔒'}</span>
       <b>${trophy.title}</b><small>${trophy.detail}</small>
       <span class="trophy-state">${date ? '달성 완료' : '미달성'}</span>
@@ -132,6 +147,15 @@ function applyServerProfile(profile) {
     completedRounds: Number(stats.completed_rounds) || 0,
     bestSugar: Number(stats.best_sugar) || 0,
     bestMashes: Number(stats.best_mashes) || 0,
+    bestCatches: Number(stats.best_catches) || 0,
+    catchPlays: Number(stats.catch_plays) || 0,
+    gaugePlays: Number(stats.gauge_plays) || 0,
+    precisionHits: Number(stats.precision_hits) || 0,
+    mashPlays: Number(stats.mash_plays) || 0,
+    bestMemoryMoves: Number(stats.best_memory_moves) || 0,
+    memoryPlays: Number(stats.memory_plays) || 0,
+    memoryGolds: Number(stats.memory_golds) || 0,
+    trophies: earnedTrophies.map((trophy) => trophy.id),
     badges: [
       earned.has('first-round') && 'first-round',
       earned.has('sweet-95') && 'sugar-overload',
@@ -139,6 +163,11 @@ function applyServerProfile(profile) {
       earned.has('precision') && 'steady-hand',
       earned.has('rapid-paws') && 'rapid-paws',
       earned.has('rounds-5') && 'veteran',
+      earned.has('memory-first') && 'memory-first',
+      earned.has('memory-analyst') && 'memory-analyst',
+      earned.has('memory-gold') && 'memory-gold',
+      earned.has('memory-master') && 'memory-master',
+      earned.has('lab-legend') && 'lab-legend',
     ].filter(Boolean),
   }
   saveResearch()
@@ -196,7 +225,25 @@ function unlockBadge(id) {
     research.badges.push(id)
     saveResearch()
     renderCollection()
+    if (localBadgeTrophyMap[id]) unlockTrophy(localBadgeTrophyMap[id])
   }
+}
+
+function unlockTrophy(id) {
+  if (research.trophies.includes(id)) return
+  research.trophies.push(id)
+  saveResearch()
+  renderTrophies(trophyCatalog, [
+    ...research.trophies.map((trophyId) => ({ id: trophyId, earnedAt: true })),
+    ...research.badges.map((badge) => localBadgeTrophyMap[badge]).filter(Boolean).map((trophyId) => ({ id: trophyId, earnedAt: true })),
+  ])
+}
+
+function checkLocalMilestones() {
+  const playedEveryGame = research.completedRounds > 0 && research.gaugePlays > 0 && research.mashPlays > 0 && research.catchPlays > 0 && research.memoryPlays > 0
+  if (playedEveryGame) unlockTrophy('mini-game-fan')
+  const localTrophies = new Set([...research.trophies, ...research.badges.map((badge) => localBadgeTrophyMap[badge]).filter(Boolean)])
+  if (localTrophies.size >= 6) unlockTrophy('collection-6')
 }
 
 function renderCollection() {
@@ -310,10 +357,14 @@ function measureRandomSample() {
       research.completedRounds += 1
       research.bestSugar = Math.max(research.bestSugar, highest)
       saveResearch()
-      if (research.completedRounds === 1) unlockBadge('first-round')
-      if (samples.some((item) => item.sugar >= 95)) unlockBadge('sugar-overload')
-      if (samples.every((item) => item.sugar >= 80)) unlockBadge('all-sweet')
+      unlockTrophy('first-round')
+      if (research.bestSugar >= 95) { unlockBadge('sugar-overload'); unlockTrophy('sweet-95') }
+      if (research.bestSugar >= 99) unlockTrophy('sweet-99')
+      if (samples.every((item) => item.sugar >= 80)) { unlockBadge('all-sweet'); unlockTrophy('all-sweet') }
       if (research.completedRounds >= 5) unlockBadge('veteran')
+      if (research.completedRounds >= 20) unlockTrophy('rounds-20')
+      if (research.completedRounds >= 50) unlockBadge('lab-legend')
+      checkLocalMilestones()
       renderCollection()
       renderSamples()
       const winnerIds = winners.map((winner) => `차미 ${String(winner.id).padStart(2, '0')}`).join(' · ')
@@ -371,6 +422,9 @@ function useGauge() {
   const actual = Math.round(54 + (gaugeState.position / 100) * 45)
   const expected = Math.round(54 + (gaugeState.target / 100) * 45)
   const difference = Math.abs(actual - expected)
+  research.gaugePlays += 1
+  if (difference <= 2) research.precisionHits += 1
+  saveResearch()
   submitGameEvent({ type: 'gauge_result', difference })
   const readout = document.querySelector('#gauge-readout')
   readout.textContent = `${actual}°S`
@@ -383,16 +437,22 @@ function useGauge() {
       : `오차 ${difference}°S. 차미가 살짝 움직였다고 기록합니다.`
   button.textContent = '한 번 더 측정'
   if (difference <= 2) unlockBadge('steady-hand')
+  if (research.precisionHits >= 10) unlockTrophy('precision-10')
+  checkLocalMilestones()
 }
 
 function finishFizzRound() {
   clearInterval(fizzState.timer)
   fizzState.running = false
   submitGameEvent({ type: 'mash_result', count: fizzState.count })
+  research.mashPlays += 1
   research.bestMashes = Math.max(research.bestMashes, fizzState.count)
   saveResearch()
   renderCollection()
   if (fizzState.count >= 18) unlockBadge('rapid-paws')
+  if (fizzState.count >= 18) unlockTrophy('rapid-paws')
+  if (research.bestMashes >= 30) unlockTrophy('fizz-master')
+  checkLocalMilestones()
   document.querySelector('#fizz-button').textContent = '한 판 더 팡팡!'
   document.querySelector('#fizz-status').textContent = fizzState.count >= 18
     ? `${fizzState.count}회! 차미가 팝콘인 줄 알고 줄을 섰어요. 팡팡 장인 배지 획득!`
@@ -422,6 +482,10 @@ function tapFizzButton() {
     startFizzRound()
     return
   }
+  if (Date.now() >= fizzState.endsAt) {
+    finishFizzRound()
+    return
+  }
 
   fizzState.count += 1
   document.querySelector('#fizz-count').textContent = fizzState.count
@@ -447,6 +511,12 @@ function finishCatchRound() {
   clearInterval(catchState.mover)
   catchState.running = false
   submitGameEvent({ type: 'catch_result', count: catchState.count })
+  research.catchPlays += 1
+  research.bestCatches = Math.max(research.bestCatches, catchState.count)
+  saveResearch()
+  if (research.bestCatches >= 5) unlockTrophy('chami-catcher')
+  if (research.bestCatches >= 15) unlockTrophy('chami-catcher-15')
+  checkLocalMilestones()
   document.querySelector('#catch-target').disabled = true
   document.querySelector('#catch-start-button').textContent = '한 판 더!'
   document.querySelector('#catch-status').textContent = `${catchState.count}마리 포착! 차미가 연구소 CCTV 사각지대로 도망갔어요.`
@@ -476,6 +546,10 @@ function startCatchRound() {
 
 function catchChami() {
   if (!catchState.running) return
+  if (Date.now() >= catchState.endsAt) {
+    finishCatchRound()
+    return
+  }
   catchState.count += 1
   document.querySelector('#catch-count').textContent = catchState.count
   const target = document.querySelector('#catch-target')
@@ -490,6 +564,109 @@ function catchChami() {
   requestAnimationFrame(() => combo.classList.add('is-visible'))
   moveCatchTarget()
   if ('vibrate' in navigator) navigator.vibrate(18)
+}
+
+function renderMemoryBoard() {
+  const board = document.querySelector('#memory-board')
+  const focusedIndex = document.activeElement instanceof Element
+    ? document.activeElement.closest('.memory-card')?.dataset.cardIndex
+    : null
+  board.innerHTML = memoryState.deck.map((card, index) => {
+    const isFaceUp = memoryState.open.includes(index) || memoryState.matched.has(card.pair)
+    return `<button class="memory-card ${isFaceUp ? 'is-face-up' : ''} ${memoryState.matched.has(card.pair) ? 'is-matched' : ''}" type="button" data-card-index="${index}" aria-label="${isFaceUp ? '차미 표본 공개' : `표본 카드 ${index + 1} 뒤집기`}" aria-pressed="${isFaceUp}">
+      <span class="memory-card-inner"><span class="memory-card-back" aria-hidden="true">✳</span><span class="memory-card-front"><img src="${card.sprite}" alt="" /></span></span>
+    </button>`
+  }).join('')
+  if (focusedIndex !== null && focusedIndex !== undefined) {
+    board.querySelector(`[data-card-index="${focusedIndex}"]`)?.focus({ preventScroll: true })
+  }
+}
+
+function startMemoryGame() {
+  window.clearTimeout(memoryState.mismatchTimer)
+  window.clearTimeout(memoryState.clockTimer)
+  const pairSprites = shuffle([...new Set(chamiSprites)]).slice(0, 6)
+  memoryState = {
+    active: true,
+    locked: false,
+    deck: shuffle(pairSprites.flatMap((sprite, pair) => [{ sprite, pair }, { sprite, pair }])),
+    open: [],
+    matched: new Set(),
+    moves: 0,
+    startedAt: Date.now(),
+    mismatchTimer: null,
+    clockTimer: null,
+  }
+  document.querySelector('#memory-moves').textContent = '0'
+  document.querySelector('#memory-clock').textContent = '0'
+  document.querySelector('#memory-start-button').textContent = '다시 섞기'
+  document.querySelector('#memory-status').textContent = '표본을 뒤집어 같은 차미끼리 짝을 맞춰봐요!'
+  document.querySelector('#memory-game').classList.remove('is-memory-complete')
+  renderMemoryBoard()
+}
+
+function finishMemoryGame() {
+  memoryState.active = false
+  window.clearTimeout(memoryState.clockTimer)
+  const seconds = Math.max(1, Math.round((Date.now() - memoryState.startedAt) / 1000))
+  const isGold = memoryState.moves <= 8 && seconds <= 45
+  research.memoryPlays += 1
+  research.bestMemoryMoves = research.bestMemoryMoves ? Math.min(research.bestMemoryMoves, memoryState.moves) : memoryState.moves
+  if (isGold) research.memoryGolds += 1
+  saveResearch()
+  unlockBadge('memory-first')
+  if (memoryState.moves <= 12) unlockBadge('memory-analyst')
+  if (isGold) unlockBadge('memory-gold')
+  if (research.memoryGolds >= 5) unlockBadge('memory-master')
+  checkLocalMilestones()
+  submitGameEvent({ type: 'memory_result', moves: memoryState.moves, seconds })
+  document.querySelector('#memory-game').classList.add('is-memory-complete')
+  document.querySelector('#memory-start-button').textContent = '한 판 더 연구하기'
+  document.querySelector('#memory-status').textContent = isGold
+    ? `${memoryState.moves}수 · ${seconds}초! 황금 기억력 트로피 획득이에요!`
+    : memoryState.moves <= 12
+      ? `${memoryState.moves}수 · ${seconds}초! 눈썰미 연구원 트로피 획득이에요.`
+      : `${memoryState.moves}수 · ${seconds}초 만에 완주했어요! 다음엔 더 적은 수에 도전해봐요.`
+}
+
+function selectMemoryCard(event) {
+  if (!(event.target instanceof Element)) return
+  const card = event.target.closest('.memory-card')
+  if (!card || !memoryState.active || memoryState.locked) return
+  const index = Number(card.dataset.cardIndex)
+  const item = memoryState.deck[index]
+  if (!item || memoryState.open.includes(index) || memoryState.matched.has(item.pair)) return
+  memoryState.open.push(index)
+  renderMemoryBoard()
+  if (memoryState.open.length < 2) return
+
+  memoryState.moves += 1
+  document.querySelector('#memory-moves').textContent = memoryState.moves
+  const [firstIndex, secondIndex] = memoryState.open
+  const first = memoryState.deck[firstIndex]
+  const second = memoryState.deck[secondIndex]
+  if (first.pair === second.pair) {
+    memoryState.matched.add(first.pair)
+    memoryState.open = []
+    renderMemoryBoard()
+    document.querySelector('#memory-status').textContent = `짝을 찾았어요! ${memoryState.matched.size} / 6쌍 발견`
+    if (memoryState.matched.size === 6) finishMemoryGame()
+    return
+  }
+
+  memoryState.locked = true
+  document.querySelector('#memory-status').textContent = '다른 표본이에요. 위치를 기억해두세요!'
+  memoryState.mismatchTimer = window.setTimeout(() => {
+    memoryState.open = []
+    memoryState.locked = false
+    renderMemoryBoard()
+  }, 720)
+}
+
+function tickMemoryClock() {
+  if (!memoryState.active) return
+  document.querySelector('#memory-clock').textContent = Math.floor((Date.now() - memoryState.startedAt) / 1000)
+  memoryState.clockTimer = window.setTimeout(tickMemoryClock, 250)
 }
 
 function quickPop() {
@@ -616,7 +793,7 @@ app.innerHTML = `
           <h2 id="collection-title">연구원 수집첩</h2>
           <p>실험하고, 기록하고, 괜히 뿌듯해하세요.</p>
         </div>
-        <div class="collection-count"><b id="badge-count">0</b><span> / 06 배지</span></div>
+        <div class="collection-count"><b id="badge-count">0</b><span> / ${String(badgeDefinitions.length).padStart(2, '0')} 배지</span></div>
       </div>
       <div class="research-stats">
         <div><span>완료한 연구</span><b id="round-record">0</b><small>ROUND</small></div>
@@ -644,6 +821,15 @@ document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
     <div class="fizz-timer catch-timer"><span id="catch-timer-fill"></span></div>
     <button class="mini-game-button" id="catch-start-button" type="button">10초 포착 실험 시작</button>
     <p class="mini-game-status" id="catch-status" role="status" aria-live="polite">5마리 잡으면 재빠른 앞발 트로피!</p>
+  </article>
+  <article class="mini-game-card memory-game" id="memory-game">
+    <div class="mini-game-topline"><span>05 · 차미 표본 정리</span><span class="mini-game-icon" aria-hidden="true">🧩</span></div>
+    <h3>같은 차미를 찾아라!</h3>
+    <p class="mini-game-copy">뒤집은 표본의 모습을 기억해 짝을 맞춰요. 적은 횟수와 빠른 시간으로 황금 트로피에 도전하세요.</p>
+    <div class="memory-score"><b id="memory-moves">0</b><span>뒤집은 횟수</span><small><b id="memory-clock">0</b>초</small></div>
+    <div class="memory-board" id="memory-board" aria-label="차미 표본 짝맞추기 카드"></div>
+    <button class="mini-game-button" id="memory-start-button" type="button">표본 연구 시작</button>
+    <p class="mini-game-status" id="memory-status" role="status" aria-live="polite">6쌍의 표본을 찾아보세요. 완주하면 트로피를 받아요!</p>
   </article>
 `)
 document.body.insertAdjacentHTML('beforeend', `
@@ -701,7 +887,7 @@ guidelinesDialog.addEventListener('click', (event) => {
 })
 document.querySelector('.collection-section')?.insertAdjacentHTML('beforeend', `
   <div class="trophy-shelf" id="trophy-shelf">
-    <div class="trophy-heading"><div><p class="kicker"><span></span> VISITOR ACHIEVEMENTS</p><h3>연구 트로피</h3><p>이 브라우저에 저장된 연구 기록과 달성 과제를 모아요.</p><p class="trophy-view-note">카드는 사이트 안에서 확인할 수 있어요. 저장이나 공유는 화면 캡처 등 이용자가 직접 선택해 주세요.</p></div><div class="trophy-heading-actions"><strong><b id="trophy-count">0</b> / 14</strong><button class="view-trophy-button" id="view-trophy-card" type="button"><span aria-hidden="true">✦</span> 업적 카드 보기</button></div></div>
+    <div class="trophy-heading"><div><p class="kicker"><span></span> VISITOR ACHIEVEMENTS</p><h3>연구 트로피</h3><p>이 브라우저에 저장된 연구 기록과 달성 과제를 모아요.</p><p class="trophy-view-note">카드는 사이트 안에서 확인할 수 있어요. 저장이나 공유는 화면 캡처 등 이용자가 직접 선택해 주세요.</p></div><div class="trophy-heading-actions"><strong><b id="trophy-count">0</b> / ${trophyCatalog.length}</strong><button class="view-trophy-button" id="view-trophy-card" type="button"><span aria-hidden="true">✦</span> 업적 카드 보기</button></div></div>
     <div class="trophy-grid" id="trophy-grid" aria-live="polite"></div>
     <p class="visitor-note">로그인 없이 익명 방문 키로 저장합니다. 쿠키를 지우면 새 방문자로 시작합니다.</p>
   </div>
@@ -716,13 +902,12 @@ document.body.insertAdjacentHTML('beforeend', `
       </section>
       <section class="trophy-showcase-info">
         <p class="kicker"><span></span> SUGAR LAB · RESEARCH FILE</p>
-        <h2 id="trophy-card-title">차미 당도 연구 카드</h2>
+      <h2 id="trophy-card-title">차미 당도 연구 카드</h2>
         <p class="trophy-showcase-subtitle">오늘의 연구 기록과 트로피</p>
         <div class="trophy-showcase-stats" id="trophy-showcase-stats"></div>
         <div class="trophy-showcase-progress"><span id="trophy-showcase-progress-fill"></span></div>
         <p class="trophy-showcase-count" id="trophy-showcase-count"></p>
         <div class="trophy-showcase-grid" id="trophy-showcase-grid"></div>
-        <p class="trophy-showcase-footnote">카드 저장과 공유는 브라우저의 화면 캡처 등 이용자 선택으로 진행해 주세요.</p>
       </section>
     </article>
   </dialog>
@@ -814,6 +999,7 @@ function respondToClick(event) {
   else if (inContext('#gauge-button, #gauge-game')) sayAsSitri(sitriGameLines.gauge, 'sitri-pointing-mascot')
   else if (inContext('#fizz-button, #fizz-game')) sayAsSitri(sitriGameLines.fizz, 'sitri-sugar-meter-mascot')
   else if (inContext('#catch-start-button, #catch-target, #catch-game')) sayAsSitri(sitriGameLines.catch, 'sitri-wave-mascot')
+  else if (inContext('#memory-start-button, #memory-board, #memory-game')) sayAsSitri(sitriGameLines.memory, 'sitri-pointing-mascot')
   else if (inContext('#guidelines-open')) sayAsSitri(sitriGameLines.guideline, 'sitri-pointing-mascot')
   else if (inContext('#collection, #trophy-shelf')) sayAsSitri(sitriGameLines.collection, 'sitri-trophy-mascot')
   else if (inContext('#mini-games')) sayAsSitri(sitriGameLines.miniGames, 'sitri-pointing-mascot')
@@ -859,21 +1045,18 @@ heroSpeechTimer.addEventListener('animationiteration', () => {
     heroSpeechLine.classList.remove('is-changing')
   }, 180)
 })
-const localTrophyIds = {
-  'first-round': 'first-round',
-  'sugar-overload': 'sweet-95',
-  'all-sweet': 'all-sweet',
-  'steady-hand': 'precision',
-  'rapid-paws': 'rapid-paws',
-  veteran: 'rounds-5',
-}
-renderTrophies(trophyCatalog, research.badges.map((badge) => ({ id: localTrophyIds[badge], earnedAt: true })).filter((trophy) => trophy.id))
+renderTrophies(trophyCatalog, [
+  ...research.trophies.map((id) => ({ id, earnedAt: true })),
+  ...research.badges.map((badge) => localBadgeTrophyMap[badge]).filter(Boolean).map((id) => ({ id, earnedAt: true })),
+])
 document.querySelector('#reset-button').addEventListener('click', resetLab)
 document.querySelector('#pop-button').addEventListener('click', measureRandomSample)
 document.querySelector('#gauge-button').addEventListener('click', useGauge)
 document.querySelector('#fizz-button').addEventListener('click', tapFizzButton)
 document.querySelector('#catch-start-button').addEventListener('click', startCatchRound)
 document.querySelector('#catch-target').addEventListener('click', catchChami)
+document.querySelector('#memory-start-button').addEventListener('click', () => { startMemoryGame(); tickMemoryClock() })
+document.querySelector('#memory-board').addEventListener('click', selectMemoryCard)
 document.querySelector('#quick-pop').addEventListener('click', quickPop)
 const trophyCardDialog = document.querySelector('#trophy-card-dialog')
 const trophyShowcase = document.querySelector('#trophy-showcase')

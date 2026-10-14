@@ -23,10 +23,15 @@ const trophyDefinitions = [
   { id: 'precision-10', icon: '🧭', title: '영점의 달인', detail: '정밀 측정 10회 성공' },
   { id: 'rapid-paws', icon: '🐾', title: '바쁜 앞발', detail: '거품 게임에서 18회 연타' },
   { id: 'fizz-master', icon: '🫧', title: '거품 과학자', detail: '거품 게임에서 30회 연타' },
-  { id: 'mini-game-fan', icon: '🎮', title: '연구소 순회', detail: '네 가지 게임을 모두 플레이' },
+  { id: 'mini-game-fan', icon: '🎮', title: '연구소 순회', detail: '다섯 가지 게임을 모두 플레이' },
   { id: 'collection-6', icon: '✨', title: '트로피 수집가', detail: '트로피 6개 수집' },
   { id: 'chami-catcher', icon: '🐇', title: '재빠른 앞발', detail: '도망 차미 5마리 잡기' },
   { id: 'chami-catcher-15', icon: '🧤', title: '수집왕 차미', detail: '도망 차미 15마리 잡기' },
+  { id: 'memory-first', icon: '🧩', title: '표본 정리', detail: '차미 표본 짝맞추기 완주' },
+  { id: 'memory-analyst', icon: '🔬', title: '눈썰미 연구원', detail: '짝맞추기를 12수 이내로 완주' },
+  { id: 'memory-gold', icon: '🌟', title: '황금 기억력', detail: '8수 이하·45초 안에 완주' },
+  { id: 'memory-master', icon: '💎', title: '표본 기억의 달인', detail: '황금 기억력 연구 5회 달성' },
+  { id: 'lab-legend', icon: '🏆', title: '연구소의 전설', detail: '당도 연구 50회 완료' },
 ]
 
 function loadLocalEnv() {
@@ -80,11 +85,11 @@ async function getVisitor(request, response) {
 
 async function readProfile(visitorId) {
   const [stats, trophies] = await Promise.all([
-    pool.query('SELECT completed_rounds, best_sugar, best_mashes, best_catches, catch_plays, gauge_plays, precision_hits, mash_plays FROM visitor_stats WHERE visitor_id = $1', [visitorId]),
+    pool.query('SELECT completed_rounds, best_sugar, best_mashes, best_catches, catch_plays, gauge_plays, precision_hits, mash_plays, memory_plays, best_memory_moves, memory_golds FROM visitor_stats WHERE visitor_id = $1', [visitorId]),
     pool.query('SELECT trophy_id, earned_at FROM visitor_trophies WHERE visitor_id = $1 ORDER BY earned_at', [visitorId]),
   ])
   return {
-    stats: stats.rows[0] || { completed_rounds: 0, best_sugar: 0, best_mashes: 0, best_catches: 0, catch_plays: 0, gauge_plays: 0, precision_hits: 0, mash_plays: 0 },
+    stats: stats.rows[0] || { completed_rounds: 0, best_sugar: 0, best_mashes: 0, best_catches: 0, catch_plays: 0, gauge_plays: 0, precision_hits: 0, mash_plays: 0, memory_plays: 0, best_memory_moves: 0, memory_golds: 0 },
     trophies: trophies.rows.map((row) => ({ id: row.trophy_id, earnedAt: row.earned_at })),
   }
 }
@@ -114,6 +119,10 @@ async function recordGameEvent(visitorId, event) {
     } else if (event.type === 'catch_result') {
       if (!Number.isInteger(event.count) || event.count < 0 || event.count > 1000) throw Object.assign(new Error('Invalid catch result.'), { status: 400 })
       await client.query('UPDATE visitor_stats SET catch_plays = catch_plays + 1, best_catches = GREATEST(best_catches, $2), updated_at = now() WHERE visitor_id = $1', [visitorId, event.count])
+    } else if (event.type === 'memory_result') {
+      if (!Number.isInteger(event.moves) || event.moves < 6 || event.moves > 100 || !Number.isInteger(event.seconds) || event.seconds < 1 || event.seconds > 3600) throw Object.assign(new Error('Invalid memory result.'), { status: 400 })
+      const isGold = event.moves <= 8 && event.seconds <= 45
+      await client.query('UPDATE visitor_stats SET memory_plays = memory_plays + 1, best_memory_moves = CASE WHEN best_memory_moves = 0 THEN $2 ELSE LEAST(best_memory_moves, $2) END, memory_golds = memory_golds + $3, updated_at = now() WHERE visitor_id = $1', [visitorId, event.moves, isGold ? 1 : 0])
     } else {
       throw Object.assign(new Error('Unknown game event.'), { status: 400 })
     }
@@ -125,14 +134,19 @@ async function recordGameEvent(visitorId, event) {
     unlock(earned, updated.best_sugar >= 99, 'sweet-99')
     unlock(earned, updated.completed_rounds >= 5, 'rounds-5')
     unlock(earned, updated.completed_rounds >= 20, 'rounds-20')
+    unlock(earned, updated.completed_rounds >= 50, 'lab-legend')
     unlock(earned, updated.precision_hits >= 1, 'precision')
     unlock(earned, updated.precision_hits >= 10, 'precision-10')
     unlock(earned, updated.best_mashes >= 18, 'rapid-paws')
     unlock(earned, updated.best_mashes >= 30, 'fizz-master')
     unlock(earned, updated.best_catches >= 5, 'chami-catcher')
     unlock(earned, updated.best_catches >= 15, 'chami-catcher-15')
+    unlock(earned, updated.memory_plays >= 1, 'memory-first')
+    unlock(earned, updated.best_memory_moves > 0 && updated.best_memory_moves <= 12, 'memory-analyst')
+    unlock(earned, updated.memory_golds >= 1, 'memory-gold')
+    unlock(earned, updated.memory_golds >= 5, 'memory-master')
     if (event.type === 'round_complete' && event.sugars.every((value) => value >= 80)) earned.add('all-sweet')
-    unlock(earned, updated.completed_rounds > 0 && updated.gauge_plays > 0 && updated.mash_plays > 0 && updated.catch_plays > 0, 'mini-game-fan')
+    unlock(earned, updated.completed_rounds > 0 && updated.gauge_plays > 0 && updated.mash_plays > 0 && updated.catch_plays > 0 && updated.memory_plays > 0, 'mini-game-fan')
     await client.query(`INSERT INTO visitor_trophies (visitor_id, trophy_id)
       SELECT $1, unnest($2::text[]) ON CONFLICT DO NOTHING`, [visitorId, [...earned]])
     const trophyCount = Number((await client.query('SELECT count(*) FROM visitor_trophies WHERE visitor_id = $1', [visitorId])).rows[0].count)

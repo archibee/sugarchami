@@ -16,11 +16,17 @@ CREATE TABLE IF NOT EXISTS visitor_stats (
   gauge_plays integer NOT NULL DEFAULT 0 CHECK (gauge_plays >= 0),
   precision_hits integer NOT NULL DEFAULT 0 CHECK (precision_hits >= 0),
   mash_plays integer NOT NULL DEFAULT 0 CHECK (mash_plays >= 0),
+  memory_plays integer NOT NULL DEFAULT 0 CHECK (memory_plays >= 0),
+  best_memory_moves integer NOT NULL DEFAULT 0 CHECK (best_memory_moves >= 0),
+  memory_golds integer NOT NULL DEFAULT 0 CHECK (memory_golds >= 0),
   updated_at timestamptz NOT NULL DEFAULT now()
 );
 
 ALTER TABLE visitor_stats ADD COLUMN IF NOT EXISTS best_catches integer NOT NULL DEFAULT 0 CHECK (best_catches >= 0);
 ALTER TABLE visitor_stats ADD COLUMN IF NOT EXISTS catch_plays integer NOT NULL DEFAULT 0 CHECK (catch_plays >= 0);
+ALTER TABLE visitor_stats ADD COLUMN IF NOT EXISTS memory_plays integer NOT NULL DEFAULT 0 CHECK (memory_plays >= 0);
+ALTER TABLE visitor_stats ADD COLUMN IF NOT EXISTS best_memory_moves integer NOT NULL DEFAULT 0 CHECK (best_memory_moves >= 0);
+ALTER TABLE visitor_stats ADD COLUMN IF NOT EXISTS memory_golds integer NOT NULL DEFAULT 0 CHECK (memory_golds >= 0);
 
 CREATE TABLE IF NOT EXISTS visitor_trophies (
   visitor_id uuid NOT NULL REFERENCES visitors(id) ON DELETE CASCADE,
