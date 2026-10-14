@@ -115,6 +115,10 @@ function measureRandomSample() {
   board.classList.remove('is-popping')
   requestAnimationFrame(() => board.classList.add('is-popping'))
   window.setTimeout(() => board.classList.remove('is-popping'), 520)
+  const labSection = document.querySelector('.lab-section')
+  labSection.classList.remove('is-impact')
+  requestAnimationFrame(() => labSection.classList.add('is-impact'))
+  window.setTimeout(() => labSection.classList.remove('is-impact'), 480)
 
   if (remaining === 0) {
     popButton.disabled = true
