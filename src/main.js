@@ -20,6 +20,7 @@ const sitriGameLines = {
   fizz: ['7초 동안 기포를 빠르게 눌러요!', '기포가 도망가기 전에 팡팡!', '연속 탭! 연구원 손놀림을 보여줘요!'],
   catch: ['도망치는 차미를 눌러서 잡아요!', '차미가 방향을 바꾸기 전에 잡아봐요!', '손가락 준비! 지금 차미가 보여요!'],
   collection: ['모은 트로피가 늘고 있어요. 뿌듯하네요!', '새 배지를 모으려면 미니게임도 해봐요!', '연구 기록을 차곡차곡 모아봐요!'],
+  guideline: ['이 작품은 팬게임이에요. 이용 안내도 꼭 확인해주세요!', '공개 전 배포 조건을 확인하는 것 잊지 마세요.'],
   miniGames: ['어떤 미니게임부터 해볼까요?', '게임마다 연구 보상이 달라요!', '마음에 드는 연구를 골라 도전해봐요!'],
   lab: ['차미 당도 측정 중이에요!', '다섯 번 팡! 해서 당도왕을 찾아봐요.', '이번 연구 결과가 궁금하네요!'],
   hero: ['앗, 저를 눌러주셨네요!', '저 여기 있어요! 다시 한번 눌러봐도 좋아요.', '반가워요! 오늘도 차미 연구 시작할까요?'],
@@ -164,210 +165,6 @@ function showTrophyToast(award, definitions = []) {
   document.body.append(toast)
   window.clearTimeout(trophyToastTimer)
   trophyToastTimer = window.setTimeout(() => toast.remove(), 3600)
-}
-
-function roundedPanel(ctx, x, y, width, height, radius, fill, stroke = null) {
-  ctx.beginPath()
-  ctx.roundRect(x, y, width, height, radius)
-  ctx.fillStyle = fill
-  ctx.fill()
-  if (stroke) {
-    ctx.strokeStyle = stroke
-    ctx.lineWidth = 2
-    ctx.stroke()
-  }
-}
-
-function drawContainedImage(ctx, image, x, y, width, height, alpha = 1) {
-  const scale = Math.min(width / image.naturalWidth, height / image.naturalHeight)
-  const drawWidth = image.naturalWidth * scale
-  const drawHeight = image.naturalHeight * scale
-  ctx.save()
-  ctx.globalAlpha = alpha
-  ctx.drawImage(image, x + (width - drawWidth) / 2, y + (height - drawHeight) / 2, drawWidth, drawHeight)
-  ctx.restore()
-}
-
-function fitCanvasText(ctx, text, x, y, maxWidth, fontSize, color, weight = 700) {
-  let size = fontSize
-  ctx.textAlign = 'left'
-  ctx.textBaseline = 'alphabetic'
-  while (size > 12) {
-    ctx.font = `${weight} ${size}px Pretendard, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif`
-    if (ctx.measureText(text).width <= maxWidth) break
-    size -= 2
-  }
-  ctx.fillStyle = color
-  ctx.fillText(text, x, y, maxWidth)
-}
-
-function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, maxLines = 2) {
-  const lines = []
-  let line = ''
-  let overflow = false
-  for (const char of text) {
-    if (line && ctx.measureText(line + char).width > maxWidth) {
-      lines.push(line)
-      line = char
-      if (lines.length === maxLines) { overflow = true; break }
-    } else line += char
-  }
-  if (lines.length < maxLines && line) lines.push(line)
-  if (overflow && lines.length) {
-    let last = lines[lines.length - 1]
-    while (last && ctx.measureText(`${last}…`).width > maxWidth) last = last.slice(0, -1)
-    lines[lines.length - 1] = `${last}…`
-  }
-  lines.slice(0, maxLines).forEach((part, index) => ctx.fillText(part, x, y + index * lineHeight))
-}
-
-async function downloadTrophyCard() {
-  const button = document.querySelector('#download-trophy-card')
-  const status = document.querySelector('#trophy-download-status')
-  button.disabled = true
-  status.textContent = '공유 카드를 그리고 있어요…'
-  try {
-    await document.fonts?.ready
-    const image = new Image()
-    image.src = '/images/sitri-hero-expanded.png'
-    await image.decode()
-
-    const profile = lastServerProfile || {}
-    const stats = profile.stats || {
-      completed_rounds: research.completedRounds,
-      best_sugar: research.bestSugar,
-      best_mashes: research.bestMashes,
-    }
-    const definitions = profile.trophyDefinitions || trophyCatalog
-    const serverEarned = new Set((profile.trophies || []).map((item) => item.id))
-    if (!lastServerProfile) {
-      const badgeMap = { 'first-round': 'first-round', 'sugar-overload': 'sweet-95', 'all-sweet': 'all-sweet', 'steady-hand': 'precision', 'rapid-paws': 'rapid-paws', veteran: 'rounds-5' }
-      research.badges.forEach((id) => { if (badgeMap[id]) serverEarned.add(badgeMap[id]) })
-    }
-
-    const canvas = document.createElement('canvas')
-    canvas.width = 1200
-    canvas.height = 2100
-    const ctx = canvas.getContext('2d')
-    if (!ctx) throw new Error('Canvas is unavailable.')
-
-    const background = ctx.createLinearGradient(0, 0, 1400, 2100)
-    background.addColorStop(0, '#f8f0df')
-    background.addColorStop(.52, '#eee3cc')
-    background.addColorStop(1, '#ddd0b5')
-    ctx.fillStyle = background
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-    const sitriHeight = canvas.height
-    const sitriWidth = image.naturalWidth * (sitriHeight / image.naturalHeight)
-    ctx.drawImage(image, (canvas.width - sitriWidth) / 2, 0, sitriWidth, sitriHeight)
-    const cardShade = ctx.createLinearGradient(0, 0, 0, canvas.height)
-    cardShade.addColorStop(0, 'rgba(24,22,20,.10)')
-    cardShade.addColorStop(.38, 'rgba(24,22,20,0)')
-    cardShade.addColorStop(1, 'rgba(24,22,20,.22)')
-    ctx.fillStyle = cardShade
-    ctx.fillRect(0, 0, canvas.width, canvas.height)
-    ctx.shadowColor = 'rgba(0,0,0,.48)'
-    ctx.shadowBlur = 8
-    ctx.shadowOffsetY = 2
-
-    roundedPanel(ctx, 92, 90, 325, 52, 26, 'rgba(32,30,28,.24)', 'rgba(255,255,255,.48)')
-    ctx.font = '800 15px Pretendard, sans-serif'
-    ctx.fillStyle = '#fff4df'
-    ctx.textBaseline = 'middle'
-    ctx.fillText('CHAMI SUGAR LAB  ·  RESEARCH FILE', 117, 116, 275)
-    ctx.textBaseline = 'alphabetic'
-    ctx.font = '800 24px Pretendard, sans-serif'
-    ctx.fillStyle = '#bd6841'
-    fitCanvasText(ctx, 'SITRI OFFICIAL RESEARCH ARCHIVE', 100, 238, 510, 24, '#fff1d8', 800)
-    fitCanvasText(ctx, '차미 당도 연구 결과', 750, 280, 410, 58, '#fff8ed', 900)
-    ctx.font = '500 23px Pretendard, sans-serif'
-    ctx.fillStyle = 'rgba(255,248,237,.82)'
-    ctx.fillText('시트리의 연구 기록과 트로피', 755, 326, 405)
-
-    roundedPanel(ctx, 720, 380, 465, 340, 24, 'rgba(38,34,30,.16)', 'rgba(255,255,255,.42)')
-    const metrics = [
-      { label: '완료한 연구', value: `${Number(stats.completed_rounds) || 0}`, unit: 'ROUND' },
-      { label: '최고 당도', value: `${Number(stats.best_sugar) || 0}`, unit: '°S' },
-      { label: '최고 팡팡', value: `${Number(stats.best_mashes) || 0}`, unit: '연타' },
-    ]
-    metrics.forEach((metric, index) => {
-      const x = 740 + index * 138
-      ctx.font = '600 19px Pretendard, sans-serif'
-      ctx.fillStyle = 'rgba(255,244,225,.78)'
-      fitCanvasText(ctx, metric.label, x, 438, 128, 19, 'rgba(255,248,237,.94)', 600)
-      ctx.font = '900 54px Pretendard, sans-serif'
-      ctx.fillStyle = index === 1 ? '#ffb174' : '#fff8ed'
-      ctx.fillText(metric.value, x, 512, 125)
-      ctx.font = '700 18px Pretendard, sans-serif'
-      ctx.fillStyle = 'rgba(255,244,225,.68)'
-      ctx.fillText(metric.unit, x, 544)
-    })
-    const earnedCount = serverEarned.size
-    roundedPanel(ctx, 740, 600, 420, 22, 11, 'rgba(255,249,239,.24)')
-    const progress = earnedCount / definitions.length
-    if (progress > 0) roundedPanel(ctx, 740, 600, Math.max(22, 420 * progress), 22, 11, 'rgba(255,177,116,.9)')
-    ctx.font = '800 18px Pretendard, sans-serif'
-    ctx.fillStyle = '#fff4e2'
-    ctx.fillText(`트로피 ${earnedCount} / ${definitions.length} 달성`, 742, 662, 420)
-
-    roundedPanel(ctx, 720, 870, 465, 1100, 28, 'rgba(35,34,32,.18)', 'rgba(255,255,255,.58)')
-    ctx.font = '800 14px Pretendard, sans-serif'
-    ctx.fillStyle = '#e3a36c'
-    ctx.fillText('CHAMI RESEARCH COLLECTION', 745, 923, 415)
-    ctx.font = '900 34px Pretendard, sans-serif'
-    ctx.fillStyle = '#fff5e3'
-    ctx.fillText('연구 트로피 보관함', 745, 970, 415)
-    ctx.font = '500 16px Pretendard, sans-serif'
-    ctx.fillStyle = '#c5bdad'
-    ctx.fillText('달성 기록과 다음 연구 목표', 745, 1001, 415)
-
-    const columns = 1
-    const gap = 6
-    const cardWidth = 415
-    const cardHeight = 59
-    const startX = 745
-    const startY = 1020
-    definitions.forEach((trophy, index) => {
-      const column = index % columns
-      const row = Math.floor(index / columns)
-      const x = startX + column * (cardWidth + gap)
-      const y = startY + row * (cardHeight + gap)
-      const unlocked = serverEarned.has(trophy.id)
-      roundedPanel(ctx, x, y, cardWidth, cardHeight, 18, unlocked ? 'rgba(255,240,213,.24)' : 'rgba(32,34,33,.18)', unlocked ? 'rgba(255,224,174,.78)' : 'rgba(255,255,255,.32)')
-      ctx.font = '28px "Apple Color Emoji", "Segoe UI Emoji", sans-serif'
-      ctx.fillStyle = unlocked ? '#4b3c2c' : '#777a73'
-      ctx.fillText(unlocked ? trophy.icon : '🔒', x + 12, y + 40)
-      fitCanvasText(ctx, `${String(index + 1).padStart(2, '0')} · ${trophy.title}`, x + 50, y + 25, cardWidth - 145, 16, unlocked ? '#fff5e3' : '#e0e1dc', 800)
-      ctx.font = '500 12px Pretendard, sans-serif'
-      ctx.fillStyle = unlocked ? '#fff1dc' : '#e0e1dc'
-      ctx.fillText(trophy.detail, x + 50, y + 45, cardWidth - 64)
-      ctx.font = '800 10px Pretendard, sans-serif'
-      ctx.fillStyle = unlocked ? '#ffc083' : '#d0d2cc'
-      ctx.textAlign = 'right'
-      ctx.fillText(unlocked ? 'ACHIEVED' : 'LOCKED', x + cardWidth - 12, y + 25, 78)
-      ctx.textAlign = 'left'
-    })
-
-    ctx.font = '700 16px Pretendard, sans-serif'
-    ctx.fillStyle = '#675f52'
-    ctx.fillText('FAN GAME · MADE FOR CHAMI', 98, 2040)
-    ctx.textAlign = 'right'
-    ctx.fillText(new Date().toLocaleDateString('ko-KR'), canvas.width - 98, 2040)
-    ctx.textAlign = 'left'
-
-    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
-    if (!blob) throw new Error('PNG export failed.')
-    const link = document.createElement('a')
-    link.href = URL.createObjectURL(blob)
-    link.download = `chami-sugar-lab-trophies-${new Date().toISOString().slice(0, 10)}.png`
-    link.click()
-    window.setTimeout(() => URL.revokeObjectURL(link.href), 1000)
-    status.textContent = '업적 카드 PNG를 저장했어요!'
-  } catch {
-    status.textContent = '이미지 생성에 실패했어요. 다시 눌러 주세요.'
-  } finally {
-    button.disabled = false
-  }
 }
 
 async function syncServerProfile() {
@@ -736,9 +533,9 @@ app.innerHTML = `
         <span class="orbit orbit-two" aria-hidden="true"></span>
         <span class="hero-spark spark-one" aria-hidden="true">✳</span>
         <span class="hero-spark spark-two" aria-hidden="true">✦</span>
-        <img class="sitri" src="/images/sitri-hero-expanded.png" alt="머리 장식부터 허벅지까지 온전히 보이는 시트리 일러스트" role="button" tabindex="0" aria-label="시트리 클릭하기" />
+        <img class="sitri" src="/images/sitri-hero-expanded.png" alt="머리 장식부터 허벅지까지 온전히 보이는 SITRY(시트리) 팬 일러스트" role="button" tabindex="0" aria-label="SITRY 시트리 클릭하기" />
         <div class="speech-card"><span class="speech-dot"></span><span class="speech-line">${sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]}</span></div>
-        <span class="art-caption">SITRI · SUGAR RESEARCHER</span>
+        <span class="art-caption">SITRY · SUGAR RESEARCHER</span>
       </div>
       <span class="hero-index" aria-hidden="true">01 <i>—</i> 02</span>
     </section>
@@ -831,7 +628,7 @@ app.innerHTML = `
     </section>
   </main>
 
-  <footer class="site-footer"><span>CHAMI SUGAR LAB</span><span>작은 차미들의 당도를 연구하는 곳</span><span>FAN GAME · MADE WITH ♥</span></footer>
+  <footer class="site-footer"><span>CHAMI SUGAR LAB</span><span>작은 차미들의 당도를 연구하는 곳</span><span>Original By Creatorbus Inc.</span><span class="site-credit"><a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">의상 참고 VOD</a> · <a href="https://www.sooplive.com/station/vlupsitry" target="_blank" rel="noopener noreferrer">시트리의 숲 방송국</a> · AI 생성 이미지 포함 · 비영리 팬게임</span></footer>
 `
 
 document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
@@ -854,12 +651,57 @@ document.body.insertAdjacentHTML('beforeend', `
     <button id="quick-pop" type="button"><span aria-hidden="true">💥</span> 차미 팡!</button>
     <a href="#mini-games"><span aria-hidden="true">🎮</span> 미니게임</a>
     <a href="#trophy-shelf"><span aria-hidden="true">🏆</span> 트로피</a>
+    <button class="guideline-open-button" id="guidelines-open" type="button" aria-haspopup="dialog"><span aria-hidden="true">ⓘ</span><span class="guideline-button-wide">이용 가이드</span><span class="guideline-button-short">안내</span></button>
   </nav>
 `)
 
+document.body.insertAdjacentHTML('beforeend', `
+  <dialog class="guidelines-dialog" id="guidelines-dialog" aria-labelledby="guidelines-title">
+    <header class="guidelines-header">
+      <div><p class="kicker"><span></span> FAN GAME / USE GUIDE</p><h2 id="guidelines-title">V-LUP 팬게임 이용 가이드</h2><p>제작·공개·배포 전에 원문 지침을 꼭 확인해주세요.</p></div>
+      <button class="guidelines-close" id="guidelines-close" type="button" aria-label="이용 가이드 닫기">✕</button>
+    </header>
+    <div class="guidelines-content">
+      <aside class="guideline-alert"><b>먼저 확인해주세요</b><p>이 작품은 비영리 팬게임을 지향합니다. 공개 전 사전 통보가 필요하며, 무료 배포 채널은 브이럽 공식 카페로 한정됩니다. 이 안내를 표시하는 것만으로 허가·승인 또는 지침 준수가 확정되는 것은 아닙니다. 현재 공개 방식이 지침에 맞는지 제작자가 원문과 함께 확인해야 합니다.</p></aside>
+      <section class="guideline-section"><h3>목적과 적용 범위</h3><p>이 지침은 ㈜크리에이터버스 IP를 활용한 비영리 팬게임의 제작·배포에 적용됩니다. 브이럽 2차 창작 가이드라인과 커뮤니티 규정도 함께 준수해야 합니다. 제작·배포 과정에서 발생하는 기술 문제, 버그, 저작권 분쟁, 이용자 피해 등은 제작자 책임이며 ㈜크리에이터버스는 법적·금전적 책임을 지지 않습니다.</p></section>
+      <section class="guideline-section"><h3>비영리 원칙과 금지 항목</h3><p>팬게임은 원칙적으로 비영리로만 제작·배포할 수 있습니다. 판매, 유료 다운로드, 인앱 결제·DLC, 유료 베타, 후원·구독 리워드, 스폰서 표기, 제휴 배너, 링크 단축 광고, 광고 수익이 발생하는 호스팅·배포 페이지 이용은 금지됩니다.</p><p>영리 이용은 사전에 ㈜크리에이터버스의 서면 허가를 받아야 하며 IP 사용료가 부과될 수 있습니다. 허가 없는 영리 이용은 불가합니다.</p></section>
+      <section class="guideline-section"><h3>저작권 표기와 원저작물 재배포 금지</h3><p>게임 내 크레딧과 배포 페이지 설명란에 아래 표기 및 실제 사용한 원곡·원본 콘텐츠의 공식 링크를 기재해야 합니다.</p><pre class="guideline-credit">Original By Creatorbus Inc.
+
+의상 참고 VOD: https://vod.sooplive.com/player/209820895
+시트리의 숲 방송국: https://www.sooplive.com/station/vlupsitry
+원곡·원본 콘텐츠의 공식 링크: 배포 시 실제 사용한 공식 콘텐츠 URL 추가 기재</pre><p>시트리 일러스트는 AI 생성 팬 일러스트이며, 의상 참고 출처로 위 방송 VOD를 표기합니다. 고해상도 원화·포토카드 원본·음원 원본 파일을 추출하거나 별도 배포할 수 없습니다. 원저작물을 사실상 그대로 복제해 제공하는 형태도 금지됩니다.</p></section>
+      <section class="guideline-section"><h3>콘텐츠 제한</h3><p>타인 비방, 선정성, 정치·종교·사상 풍자, 반사회적 표현, 스트리머 사생활 침해·추적·사칭 등 당사 규정을 위반하는 내용은 사용할 수 없습니다.</p></section>
+      <section class="guideline-section"><h3>AI 생성물과 음성 합성</h3><p>AI 생성물은 AI 생성물임을 표시해야 하며, 당사 저작물을 학습 데이터로 사용해서는 안 됩니다. 아래 O/X 표에 이 사이트에서 실제 사용한 AI 기능을 표시했습니다. SITRY·CHAMI 캐릭터와 공식 IP의 권리는 각 권리자에게 있으며 이 팬게임이 권리를 주장하지 않습니다.</p><p>음성 합성은 이주인, 시트리, 노이, 리미, 라즈에 한해 비영리 목적으로 허용됩니다. 벨디르 미스틸테인, 이아나 이그노시스, 베루의 음성 합성은 허용되지 않습니다. 허용 범위의 음성 합성도 당사 요청 시 즉시 중단해야 합니다.</p></section>
+      <section class="guideline-section ai-disclosure" aria-labelledby="ai-disclosure-title">
+        <h3 id="ai-disclosure-title">이 사이트의 AI 사용 내역 O/X</h3>
+        <p class="ai-disclosure-intro">O는 실제 사용, X는 사용하지 않음을 뜻합니다. 공식 캐릭터를 참고해 새로 생성한 팬 이미지이며, 공식 원화 파일을 그대로 사이트 에셋으로 쓰지 않습니다.</p>
+        <div class="ai-disclosure-list">
+          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>SITRY 이미지 생성</b><p>메인 SITRY 팬 일러스트와 SD 포즈 이미지를 AI 이미지 생성으로 제작했습니다. 메인 의상은 <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">참고 VOD</a>의 시트리 의상을 참고했습니다. 원본 방송 캡처를 복사한 이미지는 사용하지 않습니다.</p></div></article>
+          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>CHAMI 이미지 생성</b><p>공식 CHAMI의 둥근 몸, 잎 장식 등 캐릭터 특징을 참고해 표정·잎 형태 변형 이미지를 새로 생성했습니다. 원작 일러스트의 작가 그림체를 복제하지 않고 별도의 그림체로 표현했습니다.</p></div></article>
+          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 문구와 대사, 기획·프런트엔드 코드 작성에 AI를 보조 도구로 사용했습니다. 실제 게임 동작과 팡 이펙트는 JavaScript와 CSS로 실행하며, 무작위 선택은 코드의 난수 기능을 사용합니다.</p></div></article>
+          <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>음성·음악·효과음 생성</b><p>음성 합성, 캐릭터 음성 변환, AI 음악·BGM 및 AI 효과음 생성은 사용하지 않았습니다. 현재 사이트에는 음성·음악 재생 기능이 없습니다.</p></div></article>
+          <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>영상 생성·모델 학습</b><p>AI 영상 생성은 사용하지 않았습니다. 이 프로젝트에서 공식 자료를 이용한 자체 모델 학습이나 파인튜닝도 하지 않았습니다. 이미지 생성 시 캐릭터와 의상 특징을 참고 입력으로 사용한 것과 모델 학습은 구분됩니다.</p></div></article>
+          <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>이미지 가공·웹 효과의 생성형 AI 사용</b><p>생성된 이미지를 웹용 크기로 줄이고, 파비콘을 만드는 작업은 코드로 처리했습니다. 업적과 트로피는 페이지에서 보기 기능만 제공합니다. CSS 흔들림, 파티클, 게임 이펙트는 코드로 만든 시각 효과이며 생성형 AI로 만든 영상·애니메이션이 아닙니다.</p></div></article>
+        </div>
+        <p class="ai-name-note">영문 캐릭터 표기는 SITRY / CHAMI를 사용합니다. CHAMI는 프로젝트에서 쓰는 표기이며, 공식 영문 키워드라고 주장하지 않습니다.</p>
+        <p class="ai-source-links"><b>이미지 참고 출처:</b> <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">SITRY 의상 참고 VOD ↗</a> · <a href="https://www.sooplive.com/station/vlupsitry" target="_blank" rel="noopener noreferrer">시트리의 숲 공식 방송국 ↗</a></p>
+      </section>
+      <section class="guideline-section"><h3>배포 채널과 공개 전 사전 통보</h3><p>무료 배포는 브이럽 공식 카페에서만 가능합니다. 스팀, 앱스토어·구글 플레이, 광고·후원 기능이 기본 제공되는 플랫폼에는 업로드할 수 없습니다. 베타를 포함해 공개하기 전에 배포 링크와 간단한 설명을 당사에 통보해야 합니다. 필요하면 수정 요청 또는 배포 보류 안내가 있을 수 있습니다.</p></section>
+      <section class="guideline-section"><h3>위반 시 조치와 문의</h3><p>지침 위반이 확인되면 배포 중단·삭제를 요구할 수 있으며, 필요하면 법적 조치를 진행할 수 있습니다.</p><p>문의: <a href="mailto:v_lup@creatorbus.net">v_lup@creatorbus.net</a> 또는 브이럽 공식 문의 채널</p></section>
+      <footer class="guidelines-source"><span>원문 확인</span><a href="https://cafe.naver.com/vlup/36148" target="_blank" rel="noopener noreferrer">팬게임 가이드라인 (PLAY the V-LUP) ↗</a><a href="https://v-lup.com/" target="_blank" rel="noopener noreferrer">V-LUP 공식 사이트 ↗</a></footer>
+    </div>
+  </dialog>
+`)
+
+const guidelinesDialog = document.querySelector('#guidelines-dialog')
+document.querySelector('#guidelines-open').addEventListener('click', () => guidelinesDialog.showModal())
+document.querySelector('#guidelines-close').addEventListener('click', () => guidelinesDialog.close())
+guidelinesDialog.addEventListener('click', (event) => {
+  if (event.target === guidelinesDialog) guidelinesDialog.close()
+})
 document.querySelector('.collection-section')?.insertAdjacentHTML('beforeend', `
   <div class="trophy-shelf" id="trophy-shelf">
-    <div class="trophy-heading"><div><p class="kicker"><span></span> VISITOR ACHIEVEMENTS</p><h3>연구 트로피</h3><p>이 브라우저에 저장된 연구 기록과 달성 과제를 모아요.</p></div><div class="trophy-heading-actions"><strong><b id="trophy-count">0</b> / 14</strong><button class="download-trophy-button" id="download-trophy-card" type="button"><span aria-hidden="true">⬇</span> 업적 카드 PNG 저장</button><span class="trophy-download-status" id="trophy-download-status" role="status" aria-live="polite"></span></div></div>
+    <div class="trophy-heading"><div><p class="kicker"><span></span> VISITOR ACHIEVEMENTS</p><h3>연구 트로피</h3><p>이 브라우저에 저장된 연구 기록과 달성 과제를 모아요.</p><p class="trophy-view-note">카드는 사이트 안에서 확인할 수 있어요. 저장이나 공유는 화면 캡처 등 이용자가 직접 선택해 주세요.</p></div><div class="trophy-heading-actions"><strong><b id="trophy-count">0</b> / 14</strong><button class="view-trophy-button" id="view-trophy-card" type="button"><span aria-hidden="true">✦</span> 업적 카드 보기</button></div></div>
     <div class="trophy-grid" id="trophy-grid" aria-live="polite"></div>
     <p class="visitor-note">로그인 없이 익명 방문 키로 저장합니다. 쿠키를 지우면 새 방문자로 시작합니다.</p>
   </div>
@@ -867,7 +709,7 @@ document.querySelector('.collection-section')?.insertAdjacentHTML('beforeend', `
 document.body.insertAdjacentHTML('beforeend', `
   <aside class="floating-sitri" id="floating-sitri" aria-label="시트리의 한마디">
     <div class="floating-sitri-bubble"><span class="speech-dot" aria-hidden="true"></span><span id="floating-sitri-line"></span></div>
-    <img id="floating-sitri-image" src="/images/variants/sitri/sitri-wave-mascot.png" alt="SD 시트리" />
+    <img id="floating-sitri-image" src="/images/variants/sitri/sitri-wave-mascot.png" alt="SITRY SD 캐릭터" />
   </aside>
 `)
 
@@ -951,6 +793,7 @@ function respondToClick(event) {
   else if (inContext('#gauge-button, #gauge-game')) sayAsSitri(sitriGameLines.gauge, 'sitri-pointing-mascot')
   else if (inContext('#fizz-button, #fizz-game')) sayAsSitri(sitriGameLines.fizz, 'sitri-sugar-meter-mascot')
   else if (inContext('#catch-start-button, #catch-target, #catch-game')) sayAsSitri(sitriGameLines.catch, 'sitri-wave-mascot')
+  else if (inContext('#guidelines-open')) sayAsSitri(sitriGameLines.guideline, 'sitri-pointing-mascot')
   else if (inContext('#collection, #trophy-shelf')) sayAsSitri(sitriGameLines.collection, 'sitri-trophy-mascot')
   else if (inContext('#mini-games')) sayAsSitri(sitriGameLines.miniGames, 'sitri-pointing-mascot')
   else if (inContext('#lab')) sayAsSitri(sitriGameLines.lab, 'sitri-sugar-meter-mascot')
@@ -990,6 +833,12 @@ document.querySelector('#fizz-button').addEventListener('click', tapFizzButton)
 document.querySelector('#catch-start-button').addEventListener('click', startCatchRound)
 document.querySelector('#catch-target').addEventListener('click', catchChami)
 document.querySelector('#quick-pop').addEventListener('click', quickPop)
-document.querySelector('#download-trophy-card').addEventListener('click', downloadTrophyCard)
+document.querySelector('#view-trophy-card').addEventListener('click', () => {
+  const shelf = document.querySelector('#trophy-shelf')
+  shelf?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+  shelf?.classList.remove('is-view-focused')
+  requestAnimationFrame(() => shelf?.classList.add('is-view-focused'))
+  window.setTimeout(() => shelf?.classList.remove('is-view-focused'), 1400)
+})
 renderCollection()
 profileSyncPromise = syncServerProfile()
