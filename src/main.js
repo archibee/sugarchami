@@ -213,7 +213,8 @@ async function syncServerProfile() {
 
 async function submitGameEvent(event) {
   try {
-    if (profileSyncPromise) await profileSyncPromise
+    if (!profileSyncPromise) profileSyncPromise = syncServerProfile()
+    await profileSyncPromise
     const response = await fetch('/api/events', {
       method: 'POST',
       credentials: 'same-origin',
@@ -289,7 +290,7 @@ function renderSamples(animateId = null) {
     <article class="sample ${sample.revealed ? 'is-revealed' : ''} ${sample.winner ? 'is-sweetest' : ''} ${sample.id === animateId ? 'just-measured' : ''}" data-id="${sample.id}">
       <span class="sample-number">SAMPLE 0${sample.id}</span>
       <span class="sample-figure" style="--hit-tilt:${Math.round(Math.random() * 44 - 22)}deg; --hit-shift:${Math.round(Math.random() * 28 - 14)}px">
-        <img src="${sample.sprite}" alt="" />
+        <img src="${sample.sprite}" alt="" loading="lazy" fetchpriority="low" decoding="async" />
         <span class="impact" aria-hidden="true">팡!${sample.revealed ? `<small>${sample.sugar}°S</small>` : ''}</span>
       </span>
       <span class="sugar-result">${sample.revealed ? `${sample.sugar}<small>°S</small>` : '<small>측정 대기 중</small>'}</span>
@@ -584,7 +585,7 @@ function renderMemoryBoard() {
   board.innerHTML = memoryState.deck.map((card, index) => {
     const isFaceUp = memoryState.open.includes(index) || memoryState.matched.has(card.pair)
     return `<button class="memory-card ${isFaceUp ? 'is-face-up' : ''} ${memoryState.matched.has(card.pair) ? 'is-matched' : ''}" type="button" data-card-index="${index}" aria-label="${isFaceUp ? '차미 표본 공개' : `표본 카드 ${index + 1} 뒤집기`}" aria-pressed="${isFaceUp}" ${memoryState.active ? '' : 'disabled'}>
-      <span class="memory-card-inner"><span class="memory-card-back" aria-hidden="true"><svg class="asterisk-shape" viewBox="0 0 100 100"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg></span><span class="memory-card-front"><img src="${card.sprite}" alt="" /></span></span>
+      <span class="memory-card-inner"><span class="memory-card-back" aria-hidden="true"><svg class="asterisk-shape" viewBox="0 0 100 100"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg></span><span class="memory-card-front"><img src="${card.sprite}" alt="" loading="lazy" fetchpriority="low" decoding="async" /></span></span>
     </button>`
   }).join('')
   if (focusedIndex !== null && focusedIndex !== undefined) {
@@ -711,7 +712,7 @@ app.innerHTML = `
         <span class="orbit orbit-two" aria-hidden="true"></span>
         <svg class="hero-spark spark-one asterisk-shape" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg>
         <span class="hero-spark spark-two" aria-hidden="true">✦</span>
-        <img class="sitri" src="/images/sitri-hero-expanded.png" alt="머리 장식부터 허벅지까지 온전히 보이는 시트리 팬 일러스트" role="button" tabindex="0" aria-label="시트리 클릭하기" />
+        <img class="sitri" src="/images/sitri-hero-expanded.png" alt="머리 장식부터 허벅지까지 온전히 보이는 시트리 팬 일러스트" role="button" tabindex="0" aria-label="시트리 클릭하기" loading="eager" fetchpriority="high" decoding="sync" />
         <div class="speech-card" aria-label="시트리의 대사"><span class="speech-dot" aria-hidden="true"></span><span class="speech-line">${sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]}</span><span class="speech-timer" aria-hidden="true"><span class="speech-timer-fill"></span></span></div>
         <span class="art-caption">SITRY · SUGAR RESEARCHER</span>
       </div>
@@ -776,7 +777,7 @@ app.innerHTML = `
           <h3>차미 기포 빼기</h3>
           <p class="mini-game-copy">차미 안에 기포가 들어갔대요. 7초 동안 팡팡 눌러서 빼주세요!</p>
           <div class="fizz-stage">
-            <div class="fizz-chami"><img id="fizz-chami-image" src="${randomChamiSprite()}" alt="" /><span class="fizz-bubble bubble-one"></span><span class="fizz-bubble bubble-two"></span><span class="fizz-bubble bubble-three"></span></div>
+            <div class="fizz-chami"><img id="fizz-chami-image" src="${randomChamiSprite()}" alt="" loading="lazy" fetchpriority="low" decoding="async" /><span class="fizz-bubble bubble-one"></span><span class="fizz-bubble bubble-two"></span><span class="fizz-bubble bubble-three"></span></div>
             <div class="fizz-score"><b id="fizz-count">0</b><span>회 팡!</span><small><b id="fizz-clock">7.0</b>초</small></div>
           </div>
           <div class="fizz-timer"><span id="fizz-timer-fill"></span></div>
@@ -815,7 +816,7 @@ document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
     <p class="mini-game-copy">10초 동안 도망치는 차미를 눌러 포착하세요. 연속으로 잡으면 기록을 남겨요!</p>
     <div class="catch-score"><b id="catch-count">0</b><span>마리 포착</span><small><b id="catch-clock">10.0</b>초 남음</small></div>
     <div class="catch-arena" id="catch-arena" aria-label="움직이는 차미 포착 구역">
-      <button class="catch-target" id="catch-target" type="button" aria-label="도망치는 차미 잡기" disabled><img src="${randomChamiSprite()}" alt="차미" /></button>
+      <button class="catch-target" id="catch-target" type="button" aria-label="도망치는 차미 잡기" disabled><img src="${randomChamiSprite()}" alt="차미" loading="lazy" fetchpriority="low" decoding="async" /></button>
       <span class="catch-combo" id="catch-combo" aria-hidden="true">잡았다!</span>
     </div>
     <div class="fizz-timer catch-timer"><span id="catch-timer-fill"></span></div>
@@ -901,7 +902,7 @@ document.body.insertAdjacentHTML('beforeend', `
     <article class="trophy-showcase" id="trophy-showcase">
       <button class="trophy-showcase-close" id="trophy-showcase-close" type="button" aria-label="업적 카드 닫기">✕</button>
       <section class="trophy-showcase-art" aria-label="SITRY 팬 일러스트">
-        <img src="/images/sitri-hero-expanded.png" alt="시트리 팬 일러스트" />
+        <img src="/images/sitri-hero-expanded.png" alt="시트리 팬 일러스트" loading="lazy" fetchpriority="low" decoding="async" />
         <span class="trophy-art-label">SITRY · SUGAR RESEARCHER</span>
       </section>
       <section class="trophy-showcase-info">
@@ -919,7 +920,7 @@ document.body.insertAdjacentHTML('beforeend', `
 document.body.insertAdjacentHTML('beforeend', `
   <aside class="floating-sitri" id="floating-sitri" aria-label="시트리의 한마디">
     <div class="floating-sitri-bubble"><span class="speech-dot" aria-hidden="true"></span><span id="floating-sitri-line"></span></div>
-    <img id="floating-sitri-image" src="/images/variants/sitri/sitri-wave-mascot.png" alt="시트리 SD 캐릭터" />
+    <img id="floating-sitri-image" src="/images/variants/sitri/sitri-wave-mascot.png" alt="시트리 SD 캐릭터" loading="lazy" fetchpriority="low" decoding="async" />
   </aside>
 `)
 
@@ -1164,4 +1165,8 @@ trophyShowcase.addEventListener('pointerleave', () => {
   trophyShowcase.style.setProperty('--card-tilt-y', '0deg')
 })
 renderCollection()
-profileSyncPromise = syncServerProfile()
+const beginProfileSync = () => {
+  if (!profileSyncPromise) profileSyncPromise = syncServerProfile()
+}
+if ('requestIdleCallback' in window) window.requestIdleCallback(beginProfileSync, { timeout: 2500 })
+else window.setTimeout(beginProfileSync, 800)
