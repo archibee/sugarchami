@@ -707,6 +707,27 @@ document.querySelector('.collection-section')?.insertAdjacentHTML('beforeend', `
   </div>
 `)
 document.body.insertAdjacentHTML('beforeend', `
+  <dialog class="trophy-card-dialog" id="trophy-card-dialog" aria-labelledby="trophy-card-title">
+    <article class="trophy-showcase" id="trophy-showcase">
+      <button class="trophy-showcase-close" id="trophy-showcase-close" type="button" aria-label="업적 카드 닫기">✕</button>
+      <section class="trophy-showcase-art" aria-label="SITRY 팬 일러스트">
+        <img src="/images/sitri-hero-expanded.png" alt="SITRY 팬 일러스트" />
+        <span class="trophy-art-label">SITRY · SUGAR RESEARCHER</span>
+      </section>
+      <section class="trophy-showcase-info">
+        <p class="kicker"><span></span> CHAMI SUGAR LAB · RESEARCH FILE</p>
+        <h2 id="trophy-card-title">차미 당도 연구 카드</h2>
+        <p class="trophy-showcase-subtitle">오늘의 연구 기록과 트로피</p>
+        <div class="trophy-showcase-stats" id="trophy-showcase-stats"></div>
+        <div class="trophy-showcase-progress"><span id="trophy-showcase-progress-fill"></span></div>
+        <p class="trophy-showcase-count" id="trophy-showcase-count"></p>
+        <div class="trophy-showcase-grid" id="trophy-showcase-grid"></div>
+        <p class="trophy-showcase-footnote">카드 저장과 공유는 브라우저의 화면 캡처 등 이용자 선택으로 진행해 주세요.</p>
+      </section>
+    </article>
+  </dialog>
+`)
+document.body.insertAdjacentHTML('beforeend', `
   <aside class="floating-sitri" id="floating-sitri" aria-label="시트리의 한마디">
     <div class="floating-sitri-bubble"><span class="speech-dot" aria-hidden="true"></span><span id="floating-sitri-line"></span></div>
     <img id="floating-sitri-image" src="/images/variants/sitri/sitri-wave-mascot.png" alt="SITRY SD 캐릭터" />
@@ -826,6 +847,15 @@ window.addEventListener('resize', () => setFloaterTarget(targetX, targetY))
 
 samples = makeSamples()
 renderSamples()
+const localTrophyIds = {
+  'first-round': 'first-round',
+  'sugar-overload': 'sweet-95',
+  'all-sweet': 'all-sweet',
+  'steady-hand': 'precision',
+  'rapid-paws': 'rapid-paws',
+  veteran: 'rounds-5',
+}
+renderTrophies(trophyCatalog, research.badges.map((badge) => ({ id: localTrophyIds[badge], earnedAt: true })).filter((trophy) => trophy.id))
 document.querySelector('#reset-button').addEventListener('click', resetLab)
 document.querySelector('#pop-button').addEventListener('click', measureRandomSample)
 document.querySelector('#gauge-button').addEventListener('click', useGauge)
@@ -833,12 +863,43 @@ document.querySelector('#fizz-button').addEventListener('click', tapFizzButton)
 document.querySelector('#catch-start-button').addEventListener('click', startCatchRound)
 document.querySelector('#catch-target').addEventListener('click', catchChami)
 document.querySelector('#quick-pop').addEventListener('click', quickPop)
+const trophyCardDialog = document.querySelector('#trophy-card-dialog')
+const trophyShowcase = document.querySelector('#trophy-showcase')
 document.querySelector('#view-trophy-card').addEventListener('click', () => {
-  const shelf = document.querySelector('#trophy-shelf')
-  shelf?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-  shelf?.classList.remove('is-view-focused')
-  requestAnimationFrame(() => shelf?.classList.add('is-view-focused'))
-  window.setTimeout(() => shelf?.classList.remove('is-view-focused'), 1400)
+  const stats = lastServerProfile?.stats || {
+    completed_rounds: research.completedRounds,
+    best_sugar: research.bestSugar,
+    best_mashes: research.bestMashes,
+  }
+  const visibleTrophies = [...document.querySelectorAll('#trophy-grid .trophy-card')]
+  const earnedCount = visibleTrophies.filter((card) => card.classList.contains('is-earned')).length
+  const trophyTotal = visibleTrophies.length || trophyCatalog.length
+  document.querySelector('#trophy-showcase-stats').innerHTML = [
+    ['완료 연구', Number(stats.completed_rounds) || 0, 'ROUND'],
+    ['최고 당도', Number(stats.best_sugar) || 0, '°S'],
+    ['최고 팡팡', Number(stats.best_mashes) || 0, '회'],
+  ].map(([label, value, unit]) => `<div><small>${label}</small><b>${value}<em>${unit}</em></b></div>`).join('')
+  document.querySelector('#trophy-showcase-count').textContent = `트로피 ${earnedCount} / ${trophyTotal} 달성`
+  document.querySelector('#trophy-showcase-progress-fill').style.width = `${trophyTotal ? earnedCount / trophyTotal * 100 : 0}%`
+  const previewGrid = document.querySelector('#trophy-showcase-grid')
+  previewGrid.replaceChildren(...visibleTrophies.map((card) => card.cloneNode(true)))
+  trophyCardDialog.showModal()
+})
+document.querySelector('#trophy-showcase-close').addEventListener('click', () => trophyCardDialog.close())
+trophyCardDialog.addEventListener('click', (event) => {
+  if (event.target === trophyCardDialog) trophyCardDialog.close()
+})
+trophyShowcase.addEventListener('pointermove', (event) => {
+  if (event.pointerType !== 'mouse' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
+  const bounds = trophyShowcase.getBoundingClientRect()
+  const x = (event.clientX - bounds.left) / bounds.width - 0.5
+  const y = (event.clientY - bounds.top) / bounds.height - 0.5
+  trophyShowcase.style.setProperty('--card-tilt-x', `${x * 5}deg`)
+  trophyShowcase.style.setProperty('--card-tilt-y', `${y * -5}deg`)
+})
+trophyShowcase.addEventListener('pointerleave', () => {
+  trophyShowcase.style.setProperty('--card-tilt-x', '0deg')
+  trophyShowcase.style.setProperty('--card-tilt-y', '0deg')
 })
 renderCollection()
 profileSyncPromise = syncServerProfile()
