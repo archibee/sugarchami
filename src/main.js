@@ -124,7 +124,7 @@ function renderTrophies(definitions = [], earnedTrophies = []) {
     const rarity = goldTrophyIds.has(trophy.id) ? 'is-gold' : ['sweet-95', 'rounds-20', 'fizz-master', 'mini-game-fan', 'chami-catcher'].includes(trophy.id) ? 'is-silver' : ''
     return `<article class="trophy-card ${date ? 'is-earned' : 'is-locked'} ${rarity}">
       <span class="trophy-icon" aria-hidden="true">${date ? trophy.icon : '🔒'}</span>
-      <b>${trophy.title}</b><small>${trophy.detail}</small>
+      <span class="trophy-name">${trophy.title}</span><small>${trophy.detail}</small>
       <span class="trophy-state">${date ? '달성 완료' : '미달성'}</span>
     </article>`
   }).join('')
@@ -874,12 +874,15 @@ document.querySelector('#guidelines-close').addEventListener('click', () => guid
 guidelinesDialog.addEventListener('click', (event) => {
   if (event.target === guidelinesDialog) guidelinesDialog.close()
 })
-document.querySelector('.collection-section')?.insertAdjacentHTML('beforeend', `
-  <div class="trophy-shelf" id="trophy-shelf">
-    <div class="trophy-heading"><div><p class="kicker"><span></span> VISITOR ACHIEVEMENTS</p><h3>연구 트로피</h3><p>이 브라우저에 저장된 연구 기록과 달성 과제를 모아요.</p><p class="trophy-view-note">카드는 사이트 안에서 확인할 수 있어요. 저장이나 공유는 화면 캡처 등 이용자가 직접 선택해 주세요.</p></div><div class="trophy-heading-actions"><strong><b id="trophy-count">0</b> / ${trophyCatalog.length}</strong><button class="view-trophy-button" id="view-trophy-card" type="button"><span aria-hidden="true">✦</span> 업적 카드 보기</button></div></div>
-    <div class="trophy-grid" id="trophy-grid" aria-live="polite"></div>
-    <p class="visitor-note">로그인 없이 익명 방문 키로 저장합니다. 쿠키를 지우면 새 방문자로 시작합니다.</p>
-  </div>
+document.querySelector('main')?.insertAdjacentHTML('beforeend', `
+  <section class="collection-section trophy-section" id="trophy-shelf" aria-labelledby="trophy-title">
+    <div class="section-heading collection-heading trophy-heading">
+      <div><p class="kicker"><span></span> VISITOR ACHIEVEMENTS</p><h2 id="trophy-title">연구 트로피</h2><p>이 브라우저에 저장된 연구 기록과 달성 과제를 모아요.</p><p class="trophy-view-note">카드는 사이트 안에서 확인할 수 있어요. 저장이나 공유는 화면 캡처 등 이용자가 직접 선택해 주세요.</p></div>
+      <div class="trophy-heading-actions"><div class="collection-count"><b id="trophy-count">0</b><span> / ${trophyCatalog.length} 트로피</span></div><button class="view-trophy-button" id="view-trophy-card" type="button"><span aria-hidden="true">✦</span> 업적 카드 보기</button></div>
+    </div>
+    <div class="collection-grid trophy-grid" id="trophy-grid" aria-live="polite"></div>
+    <p class="collection-note visitor-note">로그인 없이 익명 방문 키로 저장합니다. 쿠키를 지우면 새 방문자로 시작합니다.</p>
+  </section>
 `)
 document.body.insertAdjacentHTML('beforeend', `
   <dialog class="trophy-card-dialog" id="trophy-card-dialog" aria-labelledby="trophy-card-title">
