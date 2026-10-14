@@ -364,26 +364,26 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
   html { scroll-behavior: auto !important; }
 }
 
-.floating-sitri { position: fixed; z-index: 40; top: 50%; left: 50%; width: 188px; min-height: 206px; display: grid; justify-items: center; pointer-events: none; opacity: 0; transform: translate(-50%, -50%); animation: sitri-floater-enter .7s .25s ease-out forwards; }
-.floating-sitri-bubble { position: relative; z-index: 1; width: max-content; max-width: min(188px, 55vw); padding: 10px 12px; border: 1px solid rgba(82,68,49,.16); border-radius: 15px; background: rgba(255,253,247,.96); box-shadow: 0 8px 24px rgba(48,39,27,.16); color: #494438; font-size: 11px; font-weight: 650; line-height: 1.5; animation: float-card 3.6s ease-in-out infinite; }
-.floating-sitri-bubble::after { position: absolute; bottom: -6px; left: 28px; width: 10px; height: 10px; border-right: 1px solid rgba(82,68,49,.16); border-bottom: 1px solid rgba(82,68,49,.16); background: #fffdf7; content: ''; transform: rotate(45deg); }
+.floating-sitri { position: fixed; z-index: 40; top: 50%; left: 50%; width: 150px; min-height: 165px; display: grid; justify-items: center; pointer-events: none; opacity: 0; transform: translate(-50%, -50%); animation: sitri-floater-enter .7s .25s ease-out forwards; }
+.floating-sitri-bubble { position: relative; z-index: 1; width: max-content; max-width: min(150px, 55vw); padding: 7px 9px; border: 1px solid rgba(82,68,49,.12); border-radius: 13px; background: rgba(255,253,247,.76); box-shadow: 0 6px 16px rgba(48,39,27,.1); color: #494438; font-size: 9px; font-weight: 650; line-height: 1.45; animation: float-card 3.6s ease-in-out infinite; }
+.floating-sitri-bubble::after { position: absolute; bottom: -6px; left: 25px; width: 9px; height: 9px; border-right: 1px solid rgba(82,68,49,.12); border-bottom: 1px solid rgba(82,68,49,.12); background: rgba(255,253,247,.76); content: ''; transform: rotate(45deg); }
 .floating-sitri[data-side="right"] .floating-sitri-bubble::after { right: 28px; left: auto; }
 .floating-sitri-bubble .speech-dot { margin-right: 5px; }
-.floating-sitri > img { width: 148px; height: 166px; margin-top: -2px; object-fit: contain; filter: drop-shadow(0 10px 11px rgba(54,43,32,.2)); transform-origin: 50% 90%; animation: sitri-floater-sway 3.4s ease-in-out infinite; }
+.floating-sitri > img { width: 118px; height: 133px; margin-top: -2px; object-fit: contain; filter: drop-shadow(0 10px 11px rgba(54,43,32,.2)); transform-origin: 50% 90%; animation: sitri-floater-sway 3.4s ease-in-out infinite; }
 @keyframes sitri-floater-enter { from { opacity: 0; } to { opacity: 1; } }
 @keyframes sitri-floater-sway { 0%, 100% { transform: translateY(0) rotate(-5deg); } 50% { transform: translateY(-9px) rotate(5deg); } }
 @keyframes sitri-pop-react { 20% { transform: scale(1.18) rotate(-11deg); } 48% { transform: scale(.9, 1.12) rotate(8deg); } 74% { transform: scale(1.08) rotate(-4deg); } 100% { transform: scale(1) rotate(0); } }
 .floating-sitri.is-excited > img { animation: sitri-pop-react .58s cubic-bezier(.2, 1.6, .4, 1); }
 
 @media (max-width: 760px) {
-  .floating-sitri { width: 142px; min-height: 156px; }
-  .floating-sitri-bubble { max-width: min(164px, 49vw); padding: 8px 10px; font-size: 10px; }
-  .floating-sitri > img { width: 112px; height: 126px; }
+  .floating-sitri { width: 114px; min-height: 125px; }
+  .floating-sitri-bubble { max-width: min(120px, 49vw); padding: 6px 8px; font-size: 8px; }
+  .floating-sitri > img { width: 90px; height: 101px; }
 }
 @media (max-width: 390px) {
-  .floating-sitri { width: 126px; min-height: 142px; }
-  .floating-sitri-bubble { max-width: min(152px, 48vw); font-size: 9px; }
-  .floating-sitri > img { width: 100px; height: 112px; }
+  .floating-sitri { width: 101px; min-height: 114px; }
+  .floating-sitri-bubble { max-width: min(108px, 48vw); font-size: 8px; }
+  .floating-sitri > img { width: 80px; height: 90px; }
 }
 @media (prefers-reduced-motion: reduce) {
   .floating-sitri, .floating-sitri-bubble, .floating-sitri > img { animation: none; opacity: 1; }
