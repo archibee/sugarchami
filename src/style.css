@@ -13,6 +13,7 @@
 }
 
 * { box-sizing: border-box; }
+.asterisk-shape { display: block; width: 1em; height: 1em; flex: 0 0 auto; overflow: visible; }
 html { min-width: 320px; scroll-behavior: smooth; }
 body { min-width: 320px; margin: 0; }
 body { padding-bottom: 76px; }
@@ -136,7 +137,9 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .winner-panel b, .winner-panel small { display: block; }
 .winner-panel b { font-size: 13px; }
 .winner-panel small { margin-top: 4px; color: #9c6e51; font-size: 10px; line-height: 1.5; }
-.winner-confetti { position: absolute; right: 18px; top: 12px; color: #d58a5c; letter-spacing: 12px; animation: confetti-drift 1.8s ease-in-out infinite alternate; }
+.winner-confetti { position: absolute; right: 18px; top: 12px; display: flex; align-items: center; gap: 9px; color: #d58a5c; animation: confetti-drift 1.8s ease-in-out infinite alternate; }
+.winner-confetti .asterisk-shape { width: 16px; height: 16px; }
+.winner-confetti i { font-size: 14px; font-style: normal; line-height: 1; }
 @keyframes winner-panel-in { from { opacity: 0; transform: translateY(12px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes confetti-drift { from { transform: translateY(0) rotate(-7deg); } to { transform: translateY(6px) rotate(7deg); } }
 .lab-footer { min-height: 58px; margin-top: 17px; padding: 16px 2px 0; display: flex; align-items: start; justify-content: space-between; gap: 16px; border-top: 1px solid var(--line); }

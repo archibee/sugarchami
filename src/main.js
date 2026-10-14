@@ -577,7 +577,7 @@ function renderMemoryBoard() {
   board.innerHTML = memoryState.deck.map((card, index) => {
     const isFaceUp = memoryState.open.includes(index) || memoryState.matched.has(card.pair)
     return `<button class="memory-card ${isFaceUp ? 'is-face-up' : ''} ${memoryState.matched.has(card.pair) ? 'is-matched' : ''}" type="button" data-card-index="${index}" aria-label="${isFaceUp ? '차미 표본 공개' : `표본 카드 ${index + 1} 뒤집기`}" aria-pressed="${isFaceUp}" ${memoryState.active ? '' : 'disabled'}>
-      <span class="memory-card-inner"><span class="memory-card-back" aria-hidden="true">✳</span><span class="memory-card-front"><img src="${card.sprite}" alt="" /></span></span>
+      <span class="memory-card-inner"><span class="memory-card-back" aria-hidden="true"><svg class="asterisk-shape" viewBox="0 0 100 100"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg></span><span class="memory-card-front"><img src="${card.sprite}" alt="" /></span></span>
     </button>`
   }).join('')
   if (focusedIndex !== null && focusedIndex !== undefined) {
@@ -679,7 +679,7 @@ function tickMemoryClock() {
 app.innerHTML = `
   <header class="site-header">
     <a class="brand" href="#top" aria-label="차미 당도 연구소 홈">
-      <span class="brand-mark" aria-hidden="true">✳</span>
+      <svg class="brand-mark asterisk-shape" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg>
       <span>차미 당도 연구소<small>SUGAR LAB</small></span>
     </a>
     <nav class="header-nav" aria-label="페이지 메뉴">
@@ -702,7 +702,7 @@ app.innerHTML = `
         <span class="sun-disc" aria-hidden="true"></span>
         <span class="orbit orbit-one" aria-hidden="true"></span>
         <span class="orbit orbit-two" aria-hidden="true"></span>
-        <span class="hero-spark spark-one" aria-hidden="true">✳</span>
+        <svg class="hero-spark spark-one asterisk-shape" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg>
         <span class="hero-spark spark-two" aria-hidden="true">✦</span>
         <img class="sitri" src="/images/sitri-hero-expanded.png" alt="머리 장식부터 허벅지까지 온전히 보이는 시트리 팬 일러스트" role="button" tabindex="0" aria-label="시트리 클릭하기" />
         <div class="speech-card" aria-label="시트리의 대사"><span class="speech-dot" aria-hidden="true"></span><span class="speech-line">${sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]}</span><span class="speech-timer" aria-hidden="true"><span class="speech-timer-fill"></span></span></div>
@@ -723,7 +723,7 @@ app.innerHTML = `
         </div>
       </div>
       <div class="pop-action">
-        <div class="pop-explainer"><span class="pop-star" aria-hidden="true">✳</span><span><b>누가 나올지는 시트리도 몰라요.</b><small>여섯 번 팡! 해서 당도왕을 찾아보세요.</small></span></div>
+        <div class="pop-explainer"><svg class="pop-star asterisk-shape" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg><span><b>누가 나올지는 시트리도 몰라요.</b><small>여섯 번 팡! 해서 당도왕을 찾아보세요.</small></span></div>
         <button class="pop-button" id="pop-button" type="button">
           <span class="pop-title">차미 팡!</span><span class="pop-subtitle">랜덤 측정 <i aria-hidden="true">↗</i></span>
         </button>
@@ -732,7 +732,7 @@ app.innerHTML = `
       <div class="winner-panel" id="winner-panel" hidden aria-live="polite">
         <span class="winner-crown" aria-hidden="true">♛</span>
         <span><b id="winner-title">오늘의 당도왕!</b><small id="winner-copy"></small></span>
-        <span class="winner-confetti" aria-hidden="true">✦ ✳ ✦</span>
+        <span class="winner-confetti" aria-hidden="true"><i>✦</i><svg class="asterisk-shape" viewBox="0 0 100 100"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg><i>✦</i></span>
       </div>
       <div class="lab-footer">
         <p id="lab-status" role="status" aria-live="polite">버튼을 누르면 차미 한 명이 무작위로 팡! 측정돼요.</p>
@@ -765,7 +765,7 @@ app.innerHTML = `
         </article>
 
         <article class="mini-game-card fizz-game" id="fizz-game">
-          <div class="mini-game-topline"><span>03 · 기포 제거반</span><span class="mini-game-icon" aria-hidden="true">✳</span></div>
+          <div class="mini-game-topline"><span>03 · 기포 제거반</span><svg class="mini-game-icon asterisk-shape" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg></div>
           <h3>차미 기포 빼기</h3>
           <p class="mini-game-copy">차미 안에 기포가 들어갔대요. 7초 동안 팡팡 눌러서 빼주세요!</p>
           <div class="fizz-stage">
