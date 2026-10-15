@@ -463,6 +463,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
 .trophy-heading .trophy-view-note { margin-top: 7px; color: #9b8d78; font-size: 10px; line-height: 1.6; }
 
 .trophy-card-dialog { width: min(1040px, calc(100vw - 28px)); max-width: none; max-height: min(88dvh, 780px); padding: 0; overflow: visible; border: 0; border-radius: 18px; background: transparent; color: #fff8ed; }
+html:has(.trophy-card-dialog[open]) { overflow: hidden; }
 .trophy-card-dialog[open] { animation: trophy-dialog-in .3s cubic-bezier(.2, 1.1, .35, 1) both; }
 .trophy-card-dialog::backdrop { background: rgba(24, 21, 19, .72); backdrop-filter: blur(9px); animation: trophy-backdrop-in .2s ease both; }
 .trophy-showcase { --card-tilt-x: 0deg; --card-tilt-y: 0deg; position: relative; display: grid; grid-template-columns: minmax(280px, .82fr) minmax(0, 1.18fr); width: 100%; max-height: min(88dvh, 780px); overflow: hidden; border: 1px solid rgba(255, 255, 255, .72); border-radius: 18px; background: linear-gradient(140deg, #342b2d, #665044 48%, #322d2b); box-shadow: 0 28px 90px rgba(0, 0, 0, .48), inset 0 1px rgba(255, 255, 255, .35); transform: perspective(1400px) rotateX(var(--card-tilt-y)) rotateY(var(--card-tilt-x)); transform-style: preserve-3d; transition: transform .18s ease-out; }
@@ -470,9 +471,10 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
 .trophy-showcase-close:hover { background: rgba(38, 32, 29, .82); }
 .trophy-showcase-art { position: relative; min-height: 620px; overflow: hidden; background: radial-gradient(ellipse at 48% 28%, rgba(255, 225, 188, .72), transparent 48%), linear-gradient(155deg, #ebc59e 0%, #9e7164 50%, #342e33 100%); }
 .trophy-showcase-art::after { position: absolute; inset: 35% 0 0; content: ''; background: linear-gradient(0deg, rgba(30, 25, 26, .72), transparent 72%); pointer-events: none; }
-.trophy-showcase-art img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: center bottom; filter: drop-shadow(0 20px 26px rgba(25, 20, 20, .32)); }
+.trophy-showcase-art img { position: absolute; top: -10%; left: -15%; width: 130%; height: 120%; object-fit: contain; object-position: center; filter: drop-shadow(0 20px 26px rgba(25, 20, 20, .32)); }
 .trophy-art-label { position: absolute; z-index: 1; right: 20px; bottom: 19px; left: 20px; color: rgba(255, 247, 232, .92); font-size: 10px; font-weight: 850; letter-spacing: .13em; text-shadow: 0 2px 8px rgba(0, 0, 0, .45); }
-.trophy-showcase-info { min-width: 0; max-height: min(88dvh, 780px); padding: 42px 30px 22px; overflow-y: auto; overscroll-behavior: contain; background: linear-gradient(145deg, rgba(43, 39, 36, .82), rgba(55, 46, 41, .75)); backdrop-filter: blur(18px); }
+.trophy-showcase-info { min-width: 0; max-height: min(88dvh, 780px); padding: 42px 30px 22px; overflow-y: auto; scrollbar-width: none; overscroll-behavior: contain; background: linear-gradient(145deg, rgba(43, 39, 36, .82), rgba(55, 46, 41, .75)); backdrop-filter: blur(18px); }
+.trophy-showcase-info::-webkit-scrollbar { display: none; }
 .trophy-showcase-info .kicker { color: #e4b17c; font-size: 9px; letter-spacing: .12em; }
 .trophy-showcase-info h2 { margin: 11px 0 4px; color: #fff7e9; font-size: clamp(25px, 4vw, 38px); letter-spacing: -.065em; }
 .trophy-showcase-subtitle { margin: 0; color: rgba(255, 246, 228, .67); font-size: 12px; }
@@ -502,7 +504,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
   .trophy-card-dialog { width: calc(100vw - 18px); max-height: 90dvh; }
   .trophy-showcase { grid-template-columns: 1fr; grid-template-rows: minmax(190px, 29dvh) minmax(0, 1fr); max-height: 90dvh; border-radius: 14px; }
   .trophy-showcase-art { min-height: 0; }
-  .trophy-showcase-art img { object-position: center 28%; }
+  .trophy-showcase-art img { top: -10%; left: -15%; width: 130%; height: 120%; object-position: center 28%; }
   .trophy-showcase-info { max-height: none; padding: 19px 16px 18px; }
   .trophy-showcase-info h2 { margin-top: 7px; font-size: 25px; }
   .trophy-showcase-stats { gap: 6px; margin-top: 14px; }
