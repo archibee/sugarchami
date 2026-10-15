@@ -8,6 +8,7 @@ if (window.matchMedia('(pointer: coarse)').matches) {
 }
 
 const app = document.querySelector('#app')
+const mobileHeroLayout = window.matchMedia('(max-width: 760px)')
 const sampleCount = 6
 const saveKey = 'chami-sugar-lab-research-v1'
 const chamiSprites = [
@@ -713,7 +714,7 @@ app.innerHTML = `
         <svg class="hero-spark spark-one asterisk-shape" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg>
         <span class="hero-spark spark-two" aria-hidden="true">✦</span>
         <img class="sitri" src="/images/sitri-hero-expanded.png" alt="머리 장식부터 허벅지까지 온전히 보이는 시트리 팬 일러스트" role="button" tabindex="0" aria-label="시트리 클릭하기" loading="eager" fetchpriority="high" decoding="sync" />
-        <div class="speech-card" aria-label="시트리의 대사"><span class="speech-dot" aria-hidden="true"></span><span class="speech-line">${sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]}</span><span class="speech-timer" aria-hidden="true"><span class="speech-timer-fill"></span></span></div>
+        ${mobileHeroLayout.matches ? '' : `<div class="speech-card" aria-label="시트리의 대사"><span class="speech-dot" aria-hidden="true"></span><span class="speech-line">${sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]}</span><span class="speech-timer" aria-hidden="true"><span class="speech-timer-fill"></span></span></div>`}
         <span class="art-caption">SITRY · SUGAR RESEARCHER</span>
       </div>
       <span class="hero-index" aria-hidden="true">01 <i>—</i> 02</span>
@@ -1067,17 +1068,32 @@ samples = makeSamples()
 renderSamples()
 memoryState.deck = makeMemoryDeck()
 renderMemoryBoard()
-const heroSpeechLine = document.querySelector('.speech-line')
-const heroSpeechTimer = document.querySelector('.speech-timer-fill')
-heroSpeechTimer.addEventListener('animationiteration', () => {
-  const currentLine = heroSpeechLine.textContent
-  const nextLines = sitriDialogues.filter((line) => line !== currentLine)
-  const nextLine = nextLines[Math.floor(Math.random() * nextLines.length)]
-  heroSpeechLine.classList.add('is-changing')
-  window.setTimeout(() => {
-    heroSpeechLine.textContent = nextLine
-    heroSpeechLine.classList.remove('is-changing')
-  }, 180)
+function bindHeroSpeechTimer() {
+  const heroSpeechLine = document.querySelector('.speech-line')
+  const heroSpeechTimer = document.querySelector('.speech-timer-fill')
+  if (!heroSpeechLine || !heroSpeechTimer) return
+  heroSpeechTimer.addEventListener('animationiteration', () => {
+    const currentLine = heroSpeechLine.textContent
+    const nextLines = sitriDialogues.filter((line) => line !== currentLine)
+    const nextLine = nextLines[Math.floor(Math.random() * nextLines.length)]
+    heroSpeechLine.classList.add('is-changing')
+    window.setTimeout(() => {
+      heroSpeechLine.textContent = nextLine
+      heroSpeechLine.classList.remove('is-changing')
+    }, 180)
+  })
+}
+bindHeroSpeechTimer()
+mobileHeroLayout.addEventListener('change', ({ matches }) => {
+  const heroArt = document.querySelector('.hero-art')
+  const speechCard = heroArt.querySelector('.speech-card')
+  if (matches) {
+    speechCard?.remove()
+    return
+  }
+  if (speechCard) return
+  heroArt.insertAdjacentHTML('beforeend', `<div class="speech-card" aria-label="시트리의 대사"><span class="speech-dot" aria-hidden="true"></span><span class="speech-line">${sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]}</span><span class="speech-timer" aria-hidden="true"><span class="speech-timer-fill"></span></span></div>`)
+  bindHeroSpeechTimer()
 })
 renderTrophies(trophyCatalog, [
   ...research.trophies.map((id) => ({ id, earnedAt: true })),
