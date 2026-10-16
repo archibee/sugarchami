@@ -71,12 +71,12 @@ let catchState = { running: false, count: 0, endsAt: 0, timer: null, mover: null
 let memoryState = { active: false, locked: false, deck: [], open: [], matched: new Set(), moves: 0, startedAt: 0, mismatchTimer: null, clockTimer: null }
 let moleState = { running: false, hits: 0, combo: 0, bestCombo: 0, endsAt: 0, timer: null, mover: null, target: -1 }
 let radarState = { running: false, correct: 0, rounds: 0, endsAt: 0, timer: null, target: '' }
-let towerState = { running: false, height: 0, width: 34, position: 0, direction: 1, speed: 0.42, frame: null, lastFrame: 0 }
-let mazeState = { active: false, size: 9, cells: [], player: 0, collected: 0, exit: 80, endsAt: 0, timer: null, sugars: new Set() }
+let towerState = { running: false, height: 0, width: 34, position: 0, direction: 1, speed: 0.055, frame: null, lastFrame: 0 }
+let pingpongState = { active: false, hits: 0, x: 50, y: 18, vx: 0, vy: 0, paddleX: 50, frame: null, lastFrame: 0 }
 let profileSyncPromise = null
 
 function loadResearch() {
-  const fresh = { completedRounds: 0, bestSugar: 0, bestMashes: 0, bestCatches: 0, catchPlays: 0, gaugePlays: 0, precisionHits: 0, mashPlays: 0, bestMemoryMoves: 0, memoryPlays: 0, memoryGolds: 0, molePlays: 0, radarPlays: 0, towerPlays: 0, mazePlays: 0, totalScore: 0 }
+  const fresh = { completedRounds: 0, bestSugar: 0, bestMashes: 0, bestCatches: 0, catchPlays: 0, gaugePlays: 0, precisionHits: 0, mashPlays: 0, bestMemoryMoves: 0, memoryPlays: 0, memoryGolds: 0, molePlays: 0, radarPlays: 0, towerPlays: 0, pingpongPlays: 0, totalScore: 0 }
   try {
     const saved = JSON.parse(localStorage.getItem(saveKey))
     const { badges, trophies, ...researchRecord } = saved || {}
@@ -110,7 +110,7 @@ function trophyTierForScore(score) {
 
 function applyServerProfile(profile) {
   const stats = profile.stats || {}
-  const localOnly = { molePlays: research.molePlays, radarPlays: research.radarPlays, towerPlays: research.towerPlays, mazePlays: research.mazePlays, totalScore: research.totalScore || 0 }
+  const localOnly = { molePlays: research.molePlays, radarPlays: research.radarPlays, towerPlays: research.towerPlays, pingpongPlays: research.pingpongPlays, totalScore: research.totalScore || 0 }
   research = {
     completedRounds: Number(stats.completed_rounds) || 0,
     bestSugar: Number(stats.best_sugar) || 0,
@@ -660,7 +660,7 @@ function startTower() {
   towerState.width = 34
   towerState.position = 0
   towerState.direction = 1
-  towerState.speed = 0.012
+  towerState.speed = 0.055
   towerState.lastFrame = 0
   document.querySelector('#tower-status').textContent = '움직이는 설탕 블록을 차미 탑 위에 맞춰 쌓아요.'
   document.querySelector('#tower-start-button').textContent = '게임 진행 중'
@@ -691,91 +691,78 @@ function placeTowerBlock() {
   towerState.width = Math.min(towerState.width, overlap)
   towerState.position = 50 - towerState.width / 2
   towerState.direction = Math.random() > .5 ? 1 : -1
-  towerState.speed = Math.min(.022, towerState.speed + .0015)
+  towerState.speed = Math.min(.12, towerState.speed + .008)
   document.querySelector('#tower-moving').style.width = `${towerState.width}%`
   renderTower()
   document.querySelector('#tower-status').textContent = `${towerState.height}층! 움직이는 블록이 천천히 이동 중이에요. 맞춰 쌓으려면 ‘블록 놓기’를 누르세요.`
 }
 
-function carveMaze(size) {
-  const cells = Array.from({ length: size * size }, () => ({ walls: [1, 1, 1, 1], visited: false }))
-  const stack = [0]
-  cells[0].visited = true
-  const dirs = [{ dx: 0, dy: -1, wall: 0, opposite: 2 }, { dx: 1, dy: 0, wall: 1, opposite: 3 }, { dx: 0, dy: 1, wall: 2, opposite: 0 }, { dx: -1, dy: 0, wall: 3, opposite: 1 }]
-  while (stack.length) {
-    const current = stack[stack.length - 1]
-    const x = current % size
-    const y = Math.floor(current / size)
-    const options = shuffle(dirs.map((dir) => ({ ...dir, nx: x + dir.dx, ny: y + dir.dy })).filter((dir) => dir.nx >= 0 && dir.nx < size && dir.ny >= 0 && dir.ny < size && !cells[dir.ny * size + dir.nx].visited))
-    if (!options.length) { stack.pop(); continue }
-    const dir = options[0]
-    const next = dir.ny * size + dir.nx
-    cells[current].walls[dir.wall] = 0
-    cells[next].walls[dir.opposite] = 0
-    cells[next].visited = true
-    stack.push(next)
+function finishPingpong() {
+  if (!pingpongState.active) return
+  pingpongState.active = false
+  cancelAnimationFrame(pingpongState.frame)
+  research.pingpongPlays += 1
+  addResearchScore(pingpongState.hits * 5)
+  saveResearch()
+  document.querySelector('#pingpong-start-button').disabled = false
+  document.querySelector('#pingpong-start-button').textContent = '다시 도전하기'
+  document.querySelector('#pingpong-status').textContent = `공을 ${pingpongState.hits}번 받아쳤어요. 다음 랠리에 도전해봐요!`
+}
+
+function animatePingpong(timestamp) {
+  if (!pingpongState.active) return
+  const elapsed = Math.min(32, timestamp - (pingpongState.lastFrame || timestamp))
+  pingpongState.lastFrame = timestamp
+  pingpongState.x += pingpongState.vx * elapsed
+  pingpongState.y += pingpongState.vy * elapsed
+  if (pingpongState.x < 3 || pingpongState.x > 97) {
+    pingpongState.x = Math.max(3, Math.min(97, pingpongState.x))
+    pingpongState.vx *= -1
   }
-  return cells
-}
-
-function renderMaze() {
-  const board = document.querySelector('#maze-board')
-  board.innerHTML = mazeState.cells.map((cell, index) => `<span class="maze-cell ${mazeState.sugars.has(index) ? 'has-sugar' : ''} ${index === mazeState.exit ? 'is-exit' : ''}" style="border-top:${cell.walls[0] ? '2px solid #aa9678' : '0'};border-right:${cell.walls[1] ? '2px solid #aa9678' : '0'};border-bottom:${cell.walls[2] ? '2px solid #aa9678' : '0'};border-left:${cell.walls[3] ? '2px solid #aa9678' : '0'}">${mazeState.sugars.has(index) ? '✦' : index === mazeState.exit ? '⌂' : ''}</span>`).join('')
-  board.insertAdjacentHTML('beforeend', '<img class="maze-player" src="/images/variants/chami/chami-cheerful.png" alt="차미 위치">')
-  updateMazePlayer()
-}
-
-function updateMazePlayer() {
-  const player = document.querySelector('.maze-player')
-  if (!player) return
-  const x = mazeState.player % mazeState.size
-  const y = Math.floor(mazeState.player / mazeState.size)
-  player.style.left = `${((x + .5) / mazeState.size) * 100}%`
-  player.style.top = `${((y + .5) / mazeState.size) * 100}%`
-}
-
-function finishMaze(completed) {
-  if (!mazeState.active) return
-  mazeState.active = false
-  clearInterval(mazeState.timer)
-  research.mazePlays += 1
-  addResearchScore(mazeState.collected * 4 + (completed ? 35 : 0))
-  document.querySelector('#maze-start-button').textContent = '새 미로 연구'
-  document.querySelector('#maze-status').textContent = completed ? `출구 도착! 당도 결정 ${mazeState.collected}개를 모았어요.` : `시간이 다 됐어요. 당도 결정 ${mazeState.collected}개를 모았어요.`
-}
-
-function startMaze() {
-  mazeState = { active: true, size: 9, cells: carveMaze(9), player: 0, collected: 0, exit: 80, endsAt: Date.now() + 45000, timer: null, sugars: new Set(shuffle(Array.from({ length: 79 }, (_, index) => index + 1)).slice(0, 10)) }
-  document.querySelector('#maze-count').textContent = '0'
-  document.querySelector('#maze-clock').textContent = '45'
-  document.querySelector('#maze-start-button').textContent = '미로 탐험 중…'
-  document.querySelector('#maze-status').textContent = '당도 결정을 모아 미로 끝 출구로 가요.'
-  renderMaze()
-  mazeState.timer = window.setInterval(() => {
-    const remain = Math.max(0, mazeState.endsAt - Date.now())
-    document.querySelector('#maze-clock').textContent = Math.ceil(remain / 1000)
-    if (!remain) finishMaze(false)
-  }, 200)
-}
-
-function moveMaze(dx, dy) {
-  if (!mazeState.active) return
-  const size = mazeState.size
-  const x = mazeState.player % size
-  const y = Math.floor(mazeState.player / size)
-  const direction = dy < 0 ? 0 : dx > 0 ? 1 : dy > 0 ? 2 : 3
-  if (mazeState.cells[mazeState.player].walls[direction]) return
-  const next = (y + dy) * size + x + dx
-  mazeState.player = next
-  if (mazeState.sugars.delete(next)) {
-    mazeState.collected += 1
-    document.querySelector('#maze-count').textContent = mazeState.collected
-    const cell = document.querySelectorAll('#maze-board .maze-cell')[next]
-    cell?.classList.remove('has-sugar')
-    if (cell) cell.textContent = ''
+  if (pingpongState.y < 4) {
+    pingpongState.y = 4
+    pingpongState.vy = Math.abs(pingpongState.vy)
   }
-  updateMazePlayer()
-  if (next === mazeState.exit) finishMaze(true)
+  if (pingpongState.vy > 0 && pingpongState.y >= 86) {
+    if (Math.abs(pingpongState.x - pingpongState.paddleX) <= 14) {
+      pingpongState.hits += 1
+      document.querySelector('#pingpong-hits').textContent = pingpongState.hits
+      document.querySelector('#pingpong-status').textContent = `${pingpongState.hits}번 받아쳤어요! 차미 패들을 움직여 공을 받아요.`
+      const offset = (pingpongState.x - pingpongState.paddleX) / 14
+      pingpongState.vx = Math.max(-.045, Math.min(.045, pingpongState.vx + offset * .009))
+      pingpongState.vy = -Math.min(.075, Math.abs(pingpongState.vy) + .001)
+      pingpongState.y = 85
+    } else {
+      finishPingpong()
+      return
+    }
+  }
+  const ball = document.querySelector('#pingpong-ball')
+  const paddle = document.querySelector('#pingpong-paddle')
+  ball.style.left = `${pingpongState.x}%`
+  ball.style.top = `${pingpongState.y}%`
+  paddle.style.left = `${pingpongState.paddleX}%`
+  pingpongState.frame = requestAnimationFrame(animatePingpong)
+}
+
+function startPingpong() {
+  if (pingpongState.active) return
+  pingpongState = { active: true, hits: 0, x: 50, y: 18, vx: Math.random() > .5 ? .018 : -.018, vy: .038, paddleX: 50, frame: null, lastFrame: 0 }
+  document.querySelector('#pingpong-hits').textContent = '0'
+  document.querySelector('#pingpong-start-button').textContent = '랠리 중…'
+  document.querySelector('#pingpong-start-button').disabled = true
+  document.querySelector('#pingpong-status').textContent = '포인터나 방향키로 차미를 움직여 공을 받아요!'
+  document.querySelector('#pingpong-ball').style.left = '50%'
+  document.querySelector('#pingpong-ball').style.top = '18%'
+  document.querySelector('#pingpong-paddle').style.left = '50%'
+  pingpongState.frame = requestAnimationFrame(animatePingpong)
+}
+
+function movePingpongPaddle(event) {
+  if (!pingpongState.active) return
+  const court = document.querySelector('#pingpong-court').getBoundingClientRect()
+  pingpongState.paddleX = Math.max(13, Math.min(87, ((event.clientX - court.left) / court.width) * 100))
+  document.querySelector('#pingpong-paddle').style.left = `${pingpongState.paddleX}%`
 }
 
 app.innerHTML = `
@@ -925,7 +912,7 @@ document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
   <article class="mini-game-card mole-game" id="mole-game"><div class="mini-game-topline"><span>06 · 차미 두더지팡</span><span class="mini-game-icon" aria-hidden="true">🔨</span></div><h3>두더지 차미 팡!</h3><p class="mini-game-copy">15초 동안 구멍에서 나오는 차미를 재빨리 눌러요.</p><div class="catch-score"><b id="mole-count">0</b><span>마리 포착</span><small><b id="mole-clock">15.0</b>초</small></div><div class="mole-board">${Array.from({ length: 9 }, (_, index) => `<button class="mole-hole" type="button" data-hole="${index}" aria-label="구멍 ${index + 1}" disabled><img src="${randomChamiSprite()}" alt="" loading="lazy" decoding="async"></button>`).join('')}</div><button class="mini-game-button" id="mole-start-button" type="button">두더지팡 시작</button><p class="mini-game-status" id="mole-status" role="status" aria-live="polite">차미가 나타나면 빠르게 눌러요!</p></article>
   <article class="mini-game-card radar-game" id="radar-game"><div class="mini-game-topline"><span>07 · 표정 레이더</span><span class="mini-game-icon" aria-hidden="true">🔎</span></div><h3>차미 표정 레이더</h3><p class="mini-game-copy">20초 동안 설명에 맞는 표정의 차미를 찾아요.</p><div class="radar-score"><b id="radar-correct">0</b><span>정답</span><small><b id="radar-clock">20.0</b>초</small></div><strong class="radar-prompt" id="radar-prompt">시작하면 표정이 나타나요.</strong><div class="radar-options" id="radar-options"></div><button class="mini-game-button" id="radar-start-button" type="button">표정 관찰 시작</button><p class="mini-game-status" id="radar-status" role="status" aria-live="polite">설명을 읽고 알맞은 표정을 골라봐요.</p></article>
   <article class="mini-game-card tower-game" id="tower-game"><div class="mini-game-topline"><span>08 · 차미 균형탑</span><span class="mini-game-icon" aria-hidden="true">🧱</span></div><h3>설탕 균형탑</h3><p class="mini-game-copy">게임을 시작한 뒤, 천천히 움직이는 블록을 맞춰 놓아요.</p><div class="catch-score"><b id="tower-height">0</b><span>층</span></div><div class="tower-board"><div id="tower-stack" class="tower-stack"></div><i class="tower-foundation" aria-hidden="true"></i><i id="tower-moving" class="tower-moving"></i></div><div class="tower-actions"><button class="mini-game-button" id="tower-start-button" type="button">게임 시작</button><button class="mini-game-button tower-drop-button" id="tower-drop-button" type="button" disabled>블록 놓기</button></div><p class="mini-game-status" id="tower-status" role="status" aria-live="polite">게임 시작을 누르면 움직임이 시작돼요.</p></article>
-  <article class="mini-game-card maze-game" id="maze-game"><div class="mini-game-topline"><span>09 · 당도 연구 미로</span><span class="mini-game-icon" aria-hidden="true">🧭</span></div><h3>차미 연구실 미로</h3><p class="mini-game-copy">당도 결정을 모아 출구까지 찾아가요. 방향 버튼이나 키보드를 사용해요.</p><div class="catch-score"><b id="maze-count">0</b><span>결정</span><small><b id="maze-clock">45</b>초</small></div><div class="maze-board" id="maze-board" aria-label="연구실 미로"></div><div class="maze-controls"><button type="button" data-maze="0,-1" aria-label="위로">▲</button><button type="button" data-maze="-1,0" aria-label="왼쪽으로">◀</button><button type="button" data-maze="0,1" aria-label="아래로">▼</button><button type="button" data-maze="1,0" aria-label="오른쪽으로">▶</button></div><button class="mini-game-button" id="maze-start-button" type="button">미로 연구 시작</button><p class="mini-game-status" id="maze-status" role="status" aria-live="polite">출구를 찾아 당도 결정을 모아요.</p></article>
+  <article class="mini-game-card pingpong-game" id="pingpong-game"><div class="mini-game-topline"><span>09 · 차미 핑퐁</span><span class="mini-game-icon" aria-hidden="true">🏓</span></div><h3>차미 핑퐁</h3><p class="mini-game-copy">포인터나 좌우 방향키로 차미를 움직여 공을 받아쳐요. 한 번 놓치면 끝!</p><div class="catch-score"><b id="pingpong-hits">0</b><span>번 받아침</span></div><div class="pingpong-court" id="pingpong-court" aria-label="차미 핑퐁 경기장"><span class="pingpong-center-line" aria-hidden="true"></span><i class="pingpong-ball" id="pingpong-ball" aria-hidden="true"></i><img class="pingpong-paddle" id="pingpong-paddle" src="/images/variants/chami/chami-cheerful.png" alt="차미 패들"></div><button class="mini-game-button" id="pingpong-start-button" type="button">핑퐁 시작</button><p class="mini-game-status" id="pingpong-status" role="status" aria-live="polite">시작 버튼을 누르고 공을 받아쳐요!</p></article>
 `)
 nextRadarPrompt()
 document.body.insertAdjacentHTML('beforeend', `
@@ -964,7 +951,7 @@ document.body.insertAdjacentHTML('beforeend', `
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 문구와 대사, 기획·프런트엔드 코드 작성에 AI를 보조 도구로 사용했습니다. 실제 게임 동작과 팡 이펙트는 JavaScript와 CSS로 실행하며, 무작위 선택은 코드의 난수 기능을 사용합니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>음성·음악·효과음 생성</b><p>음성 합성, 캐릭터 음성 변환, AI 음악·BGM 및 AI 효과음 생성은 사용하지 않았습니다. 현재 사이트에는 음성·음악 재생 기능이 없습니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>영상 생성·모델 학습</b><p>AI 영상 생성은 사용하지 않았습니다. 이 프로젝트에서 공식 자료를 이용한 자체 모델 학습이나 파인튜닝도 하지 않았습니다. 이미지 생성 시 캐릭터와 의상 특징을 참고 입력으로 사용한 것과 모델 학습은 구분됩니다.</p></div></article>
-          <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>이미지 가공·웹 효과의 생성형 AI 사용</b><p>생성된 이미지를 웹용 크기로 줄이고, 파비콘을 만드는 작업은 코드로 처리했습니다. 9종 게임 결과의 누적 점수와 5단계 트로피 등급은 브라우저 로컬 기록과 코드 규칙으로 계산합니다. 새 두더지팡·표정 레이더·균형탑·연구실 미로의 동작과 게임 이펙트도 JavaScript와 CSS로 구현했으며 생성형 AI를 사용하지 않았습니다.</p></div></article>
+          <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>이미지 가공·웹 효과의 생성형 AI 사용</b><p>생성된 이미지를 웹용 크기로 줄이고, 파비콘을 만드는 작업은 코드로 처리했습니다. 9종 게임 결과의 누적 점수와 5단계 트로피 등급은 브라우저 로컬 기록과 코드 규칙으로 계산합니다. 새 두더지팡·표정 레이더·균형탑·차미 핑퐁의 동작과 게임 이펙트도 JavaScript와 CSS로 구현했으며 생성형 AI를 사용하지 않았습니다.</p></div></article>
         </div>
         <p class="ai-name-note">사이트에서는 캐릭터 이름을 시트리와 차미로 표기합니다. 차미에는 별도의 공식 영문 키워드가 없어 영문 이름 표기를 사용하지 않습니다.</p>
         <p class="ai-source-links"><b>이미지 참고 출처:</b> <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">SITRY 의상 참고 VOD ↗</a> · <a href="https://www.sooplive.com/station/vlupsitry" target="_blank" rel="noopener noreferrer">시트리의 숲 공식 방송국 ↗</a></p>
@@ -1196,17 +1183,15 @@ document.querySelector('#radar-start-button').addEventListener('click', startRad
 document.querySelector('#radar-options').addEventListener('click', chooseRadarExpression)
 document.querySelector('#tower-start-button').addEventListener('click', startTower)
 document.querySelector('#tower-drop-button').addEventListener('click', placeTowerBlock)
-document.querySelector('#maze-start-button').addEventListener('click', startMaze)
-document.querySelector('.maze-controls').addEventListener('click', (event) => {
-  const button = event.target.closest('[data-maze]')
-  if (button) moveMaze(...button.dataset.maze.split(',').map(Number))
-})
+document.querySelector('#pingpong-start-button').addEventListener('click', startPingpong)
+document.querySelector('#pingpong-court').addEventListener('pointermove', movePingpongPaddle)
+document.querySelector('#pingpong-court').addEventListener('pointerdown', movePingpongPaddle)
 document.addEventListener('keydown', (event) => {
-  if (!mazeState.active || !['ArrowUp', 'ArrowRight', 'ArrowDown', 'ArrowLeft', 'w', 'a', 's', 'd'].includes(event.key)) return
-  if (event.target instanceof HTMLElement && /^(INPUT|TEXTAREA|BUTTON|SELECT)$/.test(event.target.tagName)) return
+  if (!pingpongState.active || !['ArrowRight', 'ArrowLeft', 'a', 'd'].includes(event.key)) return
+  if (event.target instanceof HTMLElement && /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName)) return
   event.preventDefault()
-  const moves = { ArrowUp: [0, -1], w: [0, -1], ArrowRight: [1, 0], d: [1, 0], ArrowDown: [0, 1], s: [0, 1], ArrowLeft: [-1, 0], a: [-1, 0] }
-  moveMaze(...moves[event.key])
+  pingpongState.paddleX = Math.max(13, Math.min(87, pingpongState.paddleX + (['ArrowRight', 'd'].includes(event.key) ? 6 : -6)))
+  document.querySelector('#pingpong-paddle').style.left = `${pingpongState.paddleX}%`
 })
 const dockSectionLinks = [...document.querySelectorAll('.quick-dock a[href^="#"]')]
 const dockSections = dockSectionLinks
