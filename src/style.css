@@ -66,6 +66,11 @@ h1 em { color: var(--orange); font-style: normal; }
 .speech-card[data-mood="overload"] .speech-dot { background: #fff4e8; }
 .speech-card[data-mood="overload"] .speech-timer { background: rgba(255, 255, 255, .24); }
 .speech-card[data-mood="overload"] .speech-timer-fill { background: linear-gradient(90deg, #fff0b7, #fffaf4); }
+.speech-card[data-mood="secret"] { border-color: #4a090d; background: rgba(255, 226, 220, .99); color: #3d080d; box-shadow: 0 12px 36px rgba(74, 9, 13, .4); }
+.speech-card[data-mood="secret"] .speech-line { font-size: 1.1em; font-weight: 800; }
+.speech-card[data-mood="secret"] .speech-dot { background: #4a090d; }
+.speech-card[data-mood="secret"] .speech-timer { background: rgba(74, 9, 13, .16); }
+.speech-card[data-mood="secret"] .speech-timer-fill { background: linear-gradient(90deg, #4a090d, #9e272e); }
 .speech-dot { display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: var(--orange); vertical-align: 1px; }
 .speech-line { display: inline; white-space: pre-line; transition: opacity .18s ease, transform .18s ease; }
 .speech-line.is-changing { opacity: 0; transform: translateY(3px); }
