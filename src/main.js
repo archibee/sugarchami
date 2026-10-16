@@ -39,6 +39,16 @@ const sitriHeroReactions = [
   '제 차례인가요?\n차미 연구, 함께해요!',
   '눈이 마주쳤네요!\n오늘은 뭘 해볼까요?',
 ]
+const sitriHeroWarningLines = [
+  ['앗, 너무 자주 누르면 간지러워요!', '잠깐만 천천히 불러주세요~'],
+  ['저 여기 있어요! 연속 클릭은 살살 부탁해요.', '차미 연구처럼 차분하게 눌러주세요!'],
+  ['우앗, 호출이 너무 빠른걸요?', '조금만 쉬었다가 다시 불러주세요~'],
+]
+const sitriHeroOverloadLines = [
+  ['자, 잠깐만요! 정말 정신없어요!', '아까 천천히 부탁드렸는데… 조금 쉬어요!'],
+  ['으아, 호출이 너무 많아요!', '저도 숨 돌릴 시간이 필요해요!'],
+  ['잠깐 쉬어갈게요! 연속으로 부르면 어지러워요.', '으으, 이제 정말 잠깐만 기다려주세요!'],
+]
 const sitriGameLines = {
   pop: ['차미의 당도를 살펴봐요!', '표본을 눌러 당도를 재봐요!'],
   gauge: ['초록 구간에 맞춰봐요!', '바늘을 잘 보고 눌러봐요!'],
@@ -889,7 +899,7 @@ app.innerHTML = `
         <svg class="hero-spark spark-one asterisk-shape" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg>
         <span class="hero-spark spark-two" aria-hidden="true">✦</span>
         <img class="sitri" src="/images/sitri-hero-expanded.png" alt="머리 장식부터 허벅지까지 온전히 보이는 시트리 팬 일러스트" role="button" tabindex="0" aria-label="시트리 클릭하기" loading="eager" fetchpriority="high" decoding="sync" />
-        ${mobileHeroLayout.matches ? '' : `<div class="speech-card" aria-label="시트리의 대사"><span class="speech-dot" aria-hidden="true"></span><span class="speech-line">${sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]}</span><span class="speech-timer" aria-hidden="true"><span class="speech-timer-fill"></span></span></div>`}
+        ${mobileHeroLayout.matches ? '' : `<div class="speech-card" aria-label="시트리의 대사"><span class="speech-dot" aria-hidden="true"></span><span class="speech-line" aria-live="polite">${sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]}</span><span class="speech-timer" aria-hidden="true"><span class="speech-timer-fill"></span></span></div>`}
         <span class="art-caption">SITRY · SUGAR RESEARCHER</span>
       </div>
       <span class="hero-index" aria-hidden="true">01 <i>—</i> 02</span>
@@ -1041,14 +1051,14 @@ document.body.insertAdjacentHTML('beforeend', `
 시트리의 숲 방송국: https://www.sooplive.com/station/vlupsitry
 원곡·원본 콘텐츠의 공식 링크: 배포 시 실제 사용한 공식 콘텐츠 URL 추가 기재</pre><p>시트리 일러스트는 AI 생성 팬 일러스트이며, 의상 참고 출처로 위 방송 VOD를 표기합니다. 고해상도 원화·포토카드 원본·음원 원본 파일을 추출하거나 별도 배포할 수 없습니다. 원저작물을 사실상 그대로 복제해 제공하는 형태도 금지됩니다.</p></section>
       <section class="guideline-section"><h3>콘텐츠 제한</h3><p>타인 비방, 선정성, 정치·종교·사상 풍자, 반사회적 표현, 스트리머 사생활 침해·추적·사칭 등 당사 규정을 위반하는 내용은 사용할 수 없습니다.</p></section>
-      <section class="guideline-section"><h3>AI 생성물과 음성 합성</h3><p>AI 생성물은 AI 생성물임을 표시해야 하며, 당사 저작물을 학습 데이터로 사용해서는 안 됩니다. 아래 O/X 표에 이 사이트에서 실제 사용한 AI 기능을 표시했습니다. 시트리와 차미 캐릭터 및 공식 IP의 권리는 각 권리자에게 있으며 이 팬게임이 권리를 주장하지 않습니다. 넓은 화면에서는 히어로 시트리를 누르면 짧은 반응 대사가 표시되며, 음성은 재생되지 않습니다.</p><p>음성 합성은 이주인, 시트리, 노이, 리미, 라즈에 한해 비영리 목적으로 허용됩니다. 벨디르 미스틸테인, 이아나 이그노시스, 베루의 음성 합성은 허용되지 않습니다. 허용 범위의 음성 합성도 당사 요청 시 즉시 중단해야 합니다.</p></section>
+      <section class="guideline-section"><h3>AI 생성물과 음성 합성</h3><p>AI 생성물은 AI 생성물임을 표시해야 하며, 당사 저작물을 학습 데이터로 사용해서는 안 됩니다. 아래 O/X 표에 이 사이트에서 실제 사용한 AI 기능을 표시했습니다. 시트리와 차미 캐릭터 및 공식 IP의 권리는 각 권리자에게 있으며 이 팬게임이 권리를 주장하지 않습니다. 넓은 화면에서는 히어로 시트리를 반복해서 누를 때 횟수에 따라 말풍선 색이 짙어지고 가벼운 경계 대사가 표시됩니다. 대사 게이지가 끝나면 기본 색과 일반 대사로 돌아옵니다. 음성은 재생되지 않습니다.</p><p>음성 합성은 이주인, 시트리, 노이, 리미, 라즈에 한해 비영리 목적으로 허용됩니다. 벨디르 미스틸테인, 이아나 이그노시스, 베루의 음성 합성은 허용되지 않습니다. 허용 범위의 음성 합성도 당사 요청 시 즉시 중단해야 합니다.</p></section>
       <section class="guideline-section ai-disclosure" aria-labelledby="ai-disclosure-title">
         <h3 id="ai-disclosure-title">이 사이트의 AI 사용 내역 O/X</h3>
         <p class="ai-disclosure-intro">O는 실제 사용, X는 사용하지 않음을 뜻합니다. 공식 캐릭터를 참고해 새로 생성한 팬 이미지이며, 공식 원화 파일을 그대로 사이트 에셋으로 쓰지 않습니다.</p>
         <div class="ai-disclosure-list">
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>시트리 이미지 생성</b><p>메인 시트리 일러스트와 SD 포즈 이미지를 AI 이미지 생성으로 제작했습니다. 메인 의상은 <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">참고 VOD</a>의 시트리 의상을 참고했습니다. 원본 방송 캡처를 복사한 이미지는 사용하지 않습니다.</p></div></article>
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>차미 이미지 생성</b><p>공식 캐릭터의 둥근 몸, 잎 장식 등 특징을 참고해 표정·잎 형태 변형 이미지를 새로 생성했습니다. 생성된 표본 이미지는 당도왕 차미가 시트리 뒤를 따라가는 작은 위성 캐릭터로도 사용합니다. AI가 스스로 해석한 별도의 그림체로 표현했습니다.</p></div></article>
-          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 문구와 대사, 기획·프런트엔드 코드 작성에 AI를 보조 도구로 사용했습니다. 실제 게임 동작과 팡 이펙트는 JavaScript와 CSS로 실행하며, 무작위 선택은 코드의 난수 기능을 사용합니다.</p></div></article>
+          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 문구와 대사(반복 클릭에 대한 단계별 경계 반응 포함), 기획·프런트엔드 코드 작성에 AI를 보조 도구로 사용했습니다. 실제 게임 동작과 팡 이펙트는 JavaScript와 CSS로 실행하며, 무작위 선택은 코드의 난수 기능을 사용합니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>음성·음악·효과음 생성</b><p>음성 합성, 캐릭터 음성 변환, AI 음악·BGM 및 AI 효과음 생성은 사용하지 않았습니다. 현재 사이트에는 음성·음악 재생 기능이 없습니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>영상 생성·모델 학습</b><p>AI 영상 생성은 사용하지 않았습니다. 이 프로젝트에서 공식 자료를 이용한 자체 모델 학습이나 파인튜닝도 하지 않았습니다. 이미지 생성 시 캐릭터와 의상 특징을 참고 입력으로 사용한 것과 모델 학습은 구분됩니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>이미지 가공·웹 효과의 생성형 AI 사용</b><p>생성된 이미지를 웹용 크기로 줄이고, 파비콘을 만드는 작업은 코드로 처리했습니다. 9종 게임 결과의 누적 점수와 5단계 트로피 등급은 브라우저 로컬 기록과 코드 규칙으로 계산합니다. 새 두더지팡·표정 레이더·균형탑·차미 핑퐁의 동작과 게임 이펙트도 JavaScript와 CSS로 구현했으며 생성형 AI를 사용하지 않았습니다.</p></div></article>
@@ -1310,6 +1320,16 @@ function bindHeroSpeechTimer() {
   const heroSpeechTimer = document.querySelector('.speech-timer-fill')
   if (!heroSpeechLine || !heroSpeechTimer) return
   heroSpeechTimer.addEventListener('animationiteration', () => {
+    const speechCard = heroSpeechLine.closest('.speech-card')
+    const clickState = showHeroReaction.clickState
+    if (clickState) {
+      clickState.streak = 0
+      clickState.followups = 0
+      clickState.stage = 0
+      window.clearTimeout(clickState.resetTimer)
+      clickState.resetTimer = 0
+    }
+    speechCard?.removeAttribute('data-mood')
     const currentLine = heroSpeechLine.textContent
     const nextLines = sitriDialogues.filter((line) => line !== currentLine)
     const nextLine = nextLines[Math.floor(Math.random() * nextLines.length)]
@@ -1325,12 +1345,40 @@ function showHeroReaction() {
   const heroSpeechLine = document.querySelector('.hero-art .speech-line')
   const heroSpeechTimer = document.querySelector('.hero-art .speech-timer-fill')
   if (!heroSpeechLine || !heroSpeechTimer) return
-  const nextLines = sitriHeroReactions.filter((line) => line !== heroSpeechLine.textContent)
-  heroSpeechLine.textContent = nextLines[Math.floor(Math.random() * nextLines.length)]
-  heroSpeechLine.classList.remove('is-changing')
+  const speechCard = heroSpeechLine.closest('.speech-card')
+  const now = performance.now()
+  const clickState = showHeroReaction.clickState ??= { streak: 0, stage: 0, followups: 0, lastClick: 0, resetTimer: 0 }
+  const isRapid = now - clickState.lastClick <= 1250
+  clickState.streak = isRapid ? clickState.streak + 1 : 1
+  if (!isRapid) clickState.followups = 0
+  clickState.lastClick = now
+  window.clearTimeout(clickState.resetTimer)
+
+  if (clickState.stage === 0 && clickState.streak >= 5) {
+    clickState.stage = 1
+    setHeroSpeechMood(speechCard, heroSpeechLine, pickLine(sitriHeroWarningLines))
+  } else if (clickState.stage === 1 && isRapid && ++clickState.followups >= 3) {
+    clickState.stage = 2
+    setHeroSpeechMood(speechCard, heroSpeechLine, pickLine(sitriHeroOverloadLines))
+  } else if (clickState.stage === 0) {
+    const nextLines = sitriHeroReactions.filter((line) => line.replace('\n', ' ') !== heroSpeechLine.textContent)
+    setHeroSpeechMood(speechCard, heroSpeechLine, nextLines[Math.floor(Math.random() * nextLines.length)].replace('\n', ' '))
+  }
   heroSpeechTimer.style.animation = 'none'
   void heroSpeechTimer.offsetWidth
   heroSpeechTimer.style.animation = ''
+}
+function pickLine(groups) {
+  const group = groups[Math.floor(Math.random() * groups.length)]
+  return group[Math.floor(Math.random() * group.length)]
+}
+function setHeroSpeechMood(speechCard, line, text) {
+  const stage = showHeroReaction.clickState?.stage ?? 0
+  if (speechCard) {
+    if (stage === 0) speechCard.removeAttribute('data-mood')
+    else speechCard.dataset.mood = stage === 2 ? 'overload' : 'warning'
+  }
+  line.textContent = text
 }
 document.querySelector('.hero-art .sitri').addEventListener('click', showHeroReaction)
 mobileHeroLayout.addEventListener('change', ({ matches }) => {
@@ -1341,7 +1389,7 @@ mobileHeroLayout.addEventListener('change', ({ matches }) => {
     return
   }
   if (speechCard) return
-  heroArt.insertAdjacentHTML('beforeend', `<div class="speech-card" aria-label="시트리의 대사"><span class="speech-dot" aria-hidden="true"></span><span class="speech-line">${sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]}</span><span class="speech-timer" aria-hidden="true"><span class="speech-timer-fill"></span></span></div>`)
+  heroArt.insertAdjacentHTML('beforeend', `<div class="speech-card" aria-label="시트리의 대사"><span class="speech-dot" aria-hidden="true"></span><span class="speech-line" aria-live="polite">${sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]}</span><span class="speech-timer" aria-hidden="true"><span class="speech-timer-fill"></span></span></div>`)
   bindHeroSpeechTimer()
 })
 document.querySelector('#pop-button').addEventListener('click', () => {
