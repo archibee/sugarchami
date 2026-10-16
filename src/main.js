@@ -1575,14 +1575,14 @@ trophyCardDialog.addEventListener('click', (event) => {
   if (event.target === trophyCardDialog) trophyCardDialog.close()
 })
 function setTrophyTilt(x, y) {
-  trophyShowcase.style.setProperty('--card-tilt-x', `${Math.max(-5, Math.min(5, x))}deg`)
-  trophyShowcase.style.setProperty('--card-tilt-y', `${Math.max(-5, Math.min(5, y))}deg`)
+  trophyShowcase.style.setProperty('--card-tilt-x', `${Math.max(-9, Math.min(9, x))}deg`)
+  trophyShowcase.style.setProperty('--card-tilt-y', `${Math.max(-9, Math.min(9, y))}deg`)
 }
 function setTrophyTiltFromPointer(event) {
   const bounds = trophyShowcase.getBoundingClientRect()
   const x = (event.clientX - bounds.left) / bounds.width - 0.5
   const y = (event.clientY - bounds.top) / bounds.height - 0.5
-  setTrophyTilt(x * 10, y * -10)
+  setTrophyTilt(x * 18, y * -18)
 }
 function resetTrophyTilt() {
   trophyShowcase.classList.remove('is-touching')
@@ -1600,7 +1600,7 @@ trophyShowcase.addEventListener('pointermove', (event) => {
     const bounds = trophyShowcase.getBoundingClientRect()
     const x = (event.clientX - bounds.left) / bounds.width - 0.5
     const y = (event.clientY - bounds.top) / bounds.height - 0.5
-    setTrophyTilt(x * 10, y * -10)
+    setTrophyTilt(x * 18, y * -18)
   } else if (mobileTouchTilt.matches && trophyShowcase.classList.contains('is-touching')) setTrophyTiltFromPointer(event)
 })
 trophyShowcase.addEventListener('pointerup', (event) => { if (event.pointerType !== 'mouse') resetTrophyTilt() })
