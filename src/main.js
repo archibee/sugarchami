@@ -68,7 +68,7 @@ let roundSerial = 0
 let gaugeState = { running: false, target: 50, position: 50, startedAt: 0, frame: null }
 let fizzState = { running: false, count: 0, endsAt: 0, timer: null }
 let catchState = { running: false, count: 0, endsAt: 0, timer: null, mover: null }
-let memoryState = { active: false, locked: false, deck: [], open: [], matched: new Set(), moves: 0, startedAt: 0, mismatchTimer: null, clockTimer: null }
+let memoryState = { active: false, locked: false, hintReveal: false, hintsRemaining: 3, deck: [], open: [], matched: new Set(), moves: 0, startedAt: 0, mismatchTimer: null, clockTimer: null, hintTimer: null }
 let moleState = { running: false, hits: 0, combo: 0, bestCombo: 0, endsAt: 0, timer: null, mover: null, target: -1 }
 let radarState = { running: false, correct: 0, rounds: 0, endsAt: 0, timer: null, target: '' }
 let towerState = { running: false, height: 0, width: 34, position: 0, direction: 1, speed: 0.055, frame: null, lastFrame: 0 }
@@ -442,14 +442,40 @@ function renderMemoryBoard() {
     ? document.activeElement.closest('.memory-card')?.dataset.cardIndex
     : null
   board.innerHTML = memoryState.deck.map((card, index) => {
-    const isFaceUp = memoryState.open.includes(index) || memoryState.matched.has(card.pair)
-    return `<button class="memory-card ${isFaceUp ? 'is-face-up' : ''} ${memoryState.matched.has(card.pair) ? 'is-matched' : ''}" type="button" data-card-index="${index}" aria-label="${isFaceUp ? '차미 표본 공개' : `표본 카드 ${index + 1} 뒤집기`}" aria-pressed="${isFaceUp}" ${memoryState.active ? '' : 'disabled'}>
+    const isFaceUp = memoryState.hintReveal || memoryState.open.includes(index) || memoryState.matched.has(card.pair)
+    return `<button class="memory-card ${isFaceUp ? 'is-face-up' : ''} ${memoryState.matched.has(card.pair) ? 'is-matched' : ''}" type="button" data-card-index="${index}" aria-label="${isFaceUp ? '차미 표본 공개' : `표본 카드 ${index + 1} 뒤집기`}" aria-pressed="${isFaceUp}" ${memoryState.active && !memoryState.locked ? '' : 'disabled'}>
       <span class="memory-card-inner"><span class="memory-card-back" aria-hidden="true"><svg class="asterisk-shape" viewBox="0 0 100 100"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg></span><span class="memory-card-front"><img src="${card.sprite}" alt="" loading="lazy" fetchpriority="low" decoding="async" /></span></span>
     </button>`
   }).join('')
   if (focusedIndex !== null && focusedIndex !== undefined) {
     board.querySelector(`[data-card-index="${focusedIndex}"]`)?.focus({ preventScroll: true })
   }
+}
+
+function updateMemoryHintButton() {
+  const button = document.querySelector('#memory-hint-button')
+  if (!button) return
+  button.textContent = `전체 보기 힌트 · ${memoryState.hintsRemaining}회`
+  button.disabled = !memoryState.active || memoryState.locked || memoryState.hintsRemaining === 0
+}
+
+function useMemoryHint() {
+  if (!memoryState.active || memoryState.locked || memoryState.hintsRemaining === 0) return
+  memoryState.hintsRemaining -= 1
+  memoryState.locked = true
+  memoryState.hintReveal = true
+  const status = document.querySelector('#memory-status')
+  const previousStatus = status.textContent
+  status.textContent = '힌트! 2초 동안 카드 위치를 기억해보세요.'
+  updateMemoryHintButton()
+  renderMemoryBoard()
+  memoryState.hintTimer = window.setTimeout(() => {
+    memoryState.hintReveal = false
+    memoryState.locked = false
+    renderMemoryBoard()
+    updateMemoryHintButton()
+    if (memoryState.active) status.textContent = previousStatus
+  }, 2000)
 }
 
 function makeMemoryDeck() {
@@ -460,9 +486,12 @@ function makeMemoryDeck() {
 function startMemoryGame() {
   window.clearTimeout(memoryState.mismatchTimer)
   window.clearTimeout(memoryState.clockTimer)
+  window.clearTimeout(memoryState.hintTimer)
   memoryState = {
     active: true,
     locked: false,
+    hintReveal: false,
+    hintsRemaining: 3,
     deck: makeMemoryDeck(),
     open: [],
     matched: new Set(),
@@ -470,18 +499,22 @@ function startMemoryGame() {
     startedAt: Date.now(),
     mismatchTimer: null,
     clockTimer: null,
+    hintTimer: null,
   }
   document.querySelector('#memory-moves').textContent = '0'
   document.querySelector('#memory-clock').textContent = '0'
   document.querySelector('#memory-start-button').textContent = '다시 섞기'
   document.querySelector('#memory-status').textContent = '표본을 뒤집어 같은 차미끼리 짝을 맞춰봐요!'
   document.querySelector('#memory-game').classList.remove('is-memory-complete')
+  updateMemoryHintButton()
   renderMemoryBoard()
 }
 
 function finishMemoryGame() {
   memoryState.active = false
   window.clearTimeout(memoryState.clockTimer)
+  window.clearTimeout(memoryState.hintTimer)
+  memoryState.hintReveal = false
   const seconds = Math.max(1, Math.round((Date.now() - memoryState.startedAt) / 1000))
   const isGold = memoryState.moves <= 12 && seconds <= 60
   research.memoryPlays += 1
@@ -496,6 +529,7 @@ function finishMemoryGame() {
     : memoryState.moves <= 16
       ? `${memoryState.moves}수 · ${seconds}초! 눈썰미가 좋네요.`
       : `${memoryState.moves}수 · ${seconds}초 만에 완주했어요! 다음엔 더 적은 수에 도전해봐요.`
+  updateMemoryHintButton()
 }
 
 function selectMemoryCard(event) {
@@ -524,11 +558,13 @@ function selectMemoryCard(event) {
   }
 
   memoryState.locked = true
+  updateMemoryHintButton()
   document.querySelector('#memory-status').textContent = '다른 표본이에요. 위치를 기억해두세요!'
   memoryState.mismatchTimer = window.setTimeout(() => {
     memoryState.open = []
     memoryState.locked = false
     renderMemoryBoard()
+    updateMemoryHintButton()
   }, 720)
 }
 
@@ -908,9 +944,10 @@ document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
   <article class="mini-game-card memory-game" id="memory-game">
     <div class="mini-game-topline"><span>05 · 차미 표본 정리</span><span class="mini-game-icon" aria-hidden="true">🧩</span></div>
     <h3>같은 차미를 찾아라!</h3>
-    <p class="mini-game-copy">16장의 표본에서 여덟 쌍을 찾아요. 위치를 잘 기억해보세요.</p>
+    <p class="mini-game-copy">16장의 표본에서 여덟 쌍을 찾아요. 힌트는 한 판에 3회, 전체를 2초간 보여줘요.</p>
     <div class="memory-score"><b id="memory-moves">0</b><span>뒤집은 횟수</span><small><b id="memory-clock">0</b>초</small></div>
     <div class="memory-board" id="memory-board" aria-label="차미 표본 짝맞추기 카드"></div>
+    <button class="memory-hint-button" id="memory-hint-button" type="button" disabled>전체 보기 힌트 · 3회</button>
     <button class="mini-game-button" id="memory-start-button" type="button">표본 연구 시작</button>
     <p class="mini-game-status" id="memory-status" role="status" aria-live="polite">8쌍의 표본을 찾아보세요.</p>
   </article>
@@ -1186,6 +1223,7 @@ document.querySelector('#catch-start-button').addEventListener('click', startCat
 document.querySelector('#catch-target').addEventListener('click', catchChami)
 document.querySelector('#memory-start-button').addEventListener('click', () => { startMemoryGame(); tickMemoryClock() })
 document.querySelector('#memory-board').addEventListener('click', selectMemoryCard)
+document.querySelector('#memory-hint-button').addEventListener('click', useMemoryHint)
 document.querySelector('#mole-start-button').addEventListener('click', startMoleRound)
 document.querySelector('#mole-game').addEventListener('click', hitMole)
 document.querySelector('#radar-start-button').addEventListener('click', startRadarRound)

@@ -228,6 +228,8 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .memory-score > small { margin-left: auto; color: #817a6b; font-size: 10px; }
 .memory-score > small b { color: #575448; font-size: 13px; }
 .memory-board { width: min(100%, 500px); margin: 12px auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; perspective: 850px; }
+.memory-hint-button { align-self: center; margin: 0 auto 8px; padding: 8px 14px; border: 1px solid #dfc9a8; border-radius: 99px; background: #fffaf0; color: #8c6744; font-size: 10px; font-weight: 700; cursor: pointer; }
+.memory-hint-button:disabled { opacity: .48; cursor: default; }
 .memory-card { min-width: 0; padding: 0; border: 0; border-radius: 9px; aspect-ratio: 1; background: transparent; cursor: pointer; perspective: 700px; touch-action: manipulation; }
 .memory-card-inner { position: relative; display: block; width: 100%; height: 100%; border-radius: inherit; transform-style: preserve-3d; transition: transform .42s cubic-bezier(.2, .72, .25, 1); }
 .memory-card-back, .memory-card-front { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; border: 1px solid #e0c9a8; border-radius: inherit; backface-visibility: hidden; box-shadow: 0 4px 9px rgba(69, 52, 33, .12); }
