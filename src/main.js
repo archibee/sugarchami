@@ -97,7 +97,7 @@ let gaugeState = { running: false, target: 50, position: 50, startedAt: 0, frame
 let fizzState = { running: false, count: 0, endsAt: 0, timer: null }
 let catchState = { running: false, count: 0, endsAt: 0, timer: null, mover: null }
 let memoryState = { active: false, locked: false, hintReveal: false, hintsRemaining: 3, deck: [], open: [], matched: new Set(), moves: 0, startedAt: 0, mismatchTimer: null, clockTimer: null, hintTimer: null }
-let moleState = { running: false, hits: 0, combo: 0, bestCombo: 0, endsAt: 0, timer: null, mover: null, target: -1, targetCaught: false }
+let moleState = { running: false, hits: 0, combo: 0, bestCombo: 0, endsAt: 0, timer: null, mover: null, target: -1, targetCaught: false, avoidHole: -1 }
 let radarState = { running: false, correct: 0, rounds: 0, endsAt: 0, timer: null, feedbackTimer: null, target: '' }
 let towerState = { running: false, height: 0, width: 34, position: 0, direction: 1, speed: 0.055, frame: null, lastFrame: 0 }
 let pingpongState = { active: false, hits: 0, x: 50, y: 18, vx: 0, vy: 0, paddleX: 50, frame: null, lastFrame: 0 }
@@ -676,9 +676,9 @@ function finishMoleRound() {
 
 function showMoleTarget() {
   const holes = [...document.querySelectorAll('.mole-hole')]
-  holes.forEach((hole) => { hole.classList.remove('has-chami', 'is-mole-hit'); hole.disabled = !moleState.running })
+  holes.forEach((hole) => { hole.classList.remove('has-chami'); hole.disabled = !moleState.running })
   if (!moleState.running) return
-  const availableTargets = holes.map((_, index) => index).filter((index) => index !== moleState.target)
+  const availableTargets = holes.map((_, index) => index).filter((index) => index !== moleState.target && index !== moleState.avoidHole)
   moleState.target = availableTargets[Math.floor(Math.random() * availableTargets.length)]
   moleState.targetCaught = false
   const target = holes[moleState.target]
@@ -688,7 +688,7 @@ function showMoleTarget() {
 
 function startMoleRound() {
   if (moleState.running) return
-  moleState = { running: true, hits: 0, combo: 0, bestCombo: 0, endsAt: Date.now() + 15000, timer: null, mover: null, target: -1, targetCaught: false }
+  moleState = { running: true, hits: 0, combo: 0, bestCombo: 0, endsAt: Date.now() + 15000, timer: null, mover: null, target: -1, targetCaught: false, avoidHole: -1 }
   document.querySelector('#mole-count').textContent = '0'
   document.querySelector('#mole-clock').textContent = '15.0'
   document.querySelector('#mole-timer-fill').style.transform = 'scaleX(1)'
@@ -713,15 +713,18 @@ function hitMole(event) {
   }
   if (moleState.targetCaught) return
   moleState.targetCaught = true
+  moleState.avoidHole = Number(hole.dataset.hole)
+  hole.disabled = true
+  hole.classList.remove('has-chami')
+  hole.classList.remove('is-mole-hit')
+  void hole.offsetWidth
+  hole.classList.add('is-mole-hit')
   moleState.hits += 1
   moleState.combo += 1
   moleState.bestCombo = Math.max(moleState.bestCombo, moleState.combo)
   document.querySelector('#mole-count').textContent = moleState.hits
   document.querySelector('#mole-status').textContent = moleState.combo > 1 ? `${moleState.combo}연속 포착!` : '잡았다! 다음 차미를 찾아요.'
   showMoleTarget()
-  hole.classList.remove('is-mole-hit')
-  void hole.offsetWidth
-  hole.classList.add('is-mole-hit')
 }
 
 function nextRadarPrompt() {
