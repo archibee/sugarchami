@@ -58,7 +58,6 @@ h1 em { color: var(--orange); font-style: normal; }
 .sitri { position: absolute; z-index: 1; right: max(8%, calc(100vw - 1244px)); bottom: 0; display: block; width: auto; height: 100%; max-width: none; max-height: none; object-fit: contain; object-position: bottom; filter: drop-shadow(0 24px 24px rgba(67, 50, 39, .12)); transform-origin: 50% 88%; animation: sitri-sway 5.5s ease-in-out infinite; will-change: transform; backface-visibility: hidden; pointer-events: auto; cursor: pointer; }
 @keyframes sitri-sway { 0%, 100% { transform: translateY(4px) rotate(-.8deg) scale(1.12); } 50% { transform: translateY(-7px) rotate(.8deg) scale(1.12); } }
 .speech-card { position: absolute; z-index: 2; top: 48%; right: 18%; width: max-content; max-width: min(300px, 40vw); padding: 10px 13px 14px; border: 1px solid rgba(40, 40, 32, .11); border-radius: 4px; background: rgba(255, 253, 247, .93); box-shadow: 0 10px 30px rgba(50, 45, 34, .08); font-size: 11px; font-weight: 600; line-height: 1.5; animation: float-card 4s ease-in-out infinite; }
-.speech-card::after { position: absolute; right: 28px; bottom: -6px; width: 10px; height: 10px; border-right: 1px solid rgba(40,40,32,.11); border-bottom: 1px solid rgba(40,40,32,.11); background: #fffdf7; content: ''; transform: rotate(45deg); }
 .speech-dot { display: inline-block; width: 6px; height: 6px; margin-right: 7px; border-radius: 50%; background: var(--orange); vertical-align: 1px; }
 .speech-line { display: inline; transition: opacity .18s ease, transform .18s ease; }
 .speech-line.is-changing { opacity: 0; transform: translateY(3px); }
@@ -384,8 +383,6 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
 .floating-sitri { position: fixed; z-index: 40; top: 50%; left: 50%; width: 169px; min-height: 185px; display: grid; justify-items: center; pointer-events: none; opacity: 0; transform: translate(-50%, -50%); animation: sitri-floater-enter .7s .25s ease-out forwards; }
 .floating-sitri.is-disabled { display: none; }
 .floating-sitri-bubble { position: relative; z-index: 1; width: max-content; max-width: min(169px, 55vw); padding: 8px 10px; border: 1px solid rgba(82,68,49,.12); border-radius: 13px; background: rgba(255,253,247,.76); box-shadow: 0 6px 16px rgba(48,39,27,.1); color: #494438; font-size: 10px; font-weight: 650; line-height: 1.45; animation: float-card 3.6s ease-in-out infinite; }
-.floating-sitri-bubble::after { position: absolute; bottom: -6px; left: 25px; width: 9px; height: 9px; border-right: 1px solid rgba(82,68,49,.12); border-bottom: 1px solid rgba(82,68,49,.12); background: rgba(255,253,247,.76); content: ''; transform: rotate(45deg); }
-.floating-sitri[data-side="right"] .floating-sitri-bubble::after { right: 28px; left: auto; }
 .floating-sitri-bubble .speech-dot { margin-right: 5px; }
 .floating-sitri > img { width: 133px; height: 150px; margin-top: -2px; object-fit: contain; filter: drop-shadow(0 10px 11px rgba(54,43,32,.2)); transform-origin: 50% 90%; animation: sitri-floater-sway 3.4s ease-in-out infinite; }
 @keyframes sitri-floater-enter { from { opacity: 0; } to { opacity: 1; } }
