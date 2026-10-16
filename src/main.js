@@ -33,6 +33,12 @@ const sitriDialogues = [
   '차미의 표정을 찾아봐요!',
   '요정 시트리가 응원할게요!',
 ]
+const sitriHeroReactions = [
+  '앗, 저를 눌렀네요!\n불러줘서 기뻐요.',
+  '저 여기 있어요!\n오늘도 같이 놀아요.',
+  '제 차례인가요?\n차미 연구, 함께해요!',
+  '눈이 마주쳤네요!\n오늘은 뭘 해볼까요?',
+]
 const sitriGameLines = {
   pop: ['차미의 당도를 살펴봐요!', '표본을 눌러 당도를 재봐요!'],
   gauge: ['초록 구간에 맞춰봐요!', '바늘을 잘 보고 눌러봐요!'],
@@ -1035,7 +1041,7 @@ document.body.insertAdjacentHTML('beforeend', `
 시트리의 숲 방송국: https://www.sooplive.com/station/vlupsitry
 원곡·원본 콘텐츠의 공식 링크: 배포 시 실제 사용한 공식 콘텐츠 URL 추가 기재</pre><p>시트리 일러스트는 AI 생성 팬 일러스트이며, 의상 참고 출처로 위 방송 VOD를 표기합니다. 고해상도 원화·포토카드 원본·음원 원본 파일을 추출하거나 별도 배포할 수 없습니다. 원저작물을 사실상 그대로 복제해 제공하는 형태도 금지됩니다.</p></section>
       <section class="guideline-section"><h3>콘텐츠 제한</h3><p>타인 비방, 선정성, 정치·종교·사상 풍자, 반사회적 표현, 스트리머 사생활 침해·추적·사칭 등 당사 규정을 위반하는 내용은 사용할 수 없습니다.</p></section>
-      <section class="guideline-section"><h3>AI 생성물과 음성 합성</h3><p>AI 생성물은 AI 생성물임을 표시해야 하며, 당사 저작물을 학습 데이터로 사용해서는 안 됩니다. 아래 O/X 표에 이 사이트에서 실제 사용한 AI 기능을 표시했습니다. 시트리와 차미 캐릭터 및 공식 IP의 권리는 각 권리자에게 있으며 이 팬게임이 권리를 주장하지 않습니다.</p><p>음성 합성은 이주인, 시트리, 노이, 리미, 라즈에 한해 비영리 목적으로 허용됩니다. 벨디르 미스틸테인, 이아나 이그노시스, 베루의 음성 합성은 허용되지 않습니다. 허용 범위의 음성 합성도 당사 요청 시 즉시 중단해야 합니다.</p></section>
+      <section class="guideline-section"><h3>AI 생성물과 음성 합성</h3><p>AI 생성물은 AI 생성물임을 표시해야 하며, 당사 저작물을 학습 데이터로 사용해서는 안 됩니다. 아래 O/X 표에 이 사이트에서 실제 사용한 AI 기능을 표시했습니다. 시트리와 차미 캐릭터 및 공식 IP의 권리는 각 권리자에게 있으며 이 팬게임이 권리를 주장하지 않습니다. 넓은 화면에서는 히어로 시트리를 누르면 짧은 반응 대사가 표시되며, 음성은 재생되지 않습니다.</p><p>음성 합성은 이주인, 시트리, 노이, 리미, 라즈에 한해 비영리 목적으로 허용됩니다. 벨디르 미스틸테인, 이아나 이그노시스, 베루의 음성 합성은 허용되지 않습니다. 허용 범위의 음성 합성도 당사 요청 시 즉시 중단해야 합니다.</p></section>
       <section class="guideline-section ai-disclosure" aria-labelledby="ai-disclosure-title">
         <h3 id="ai-disclosure-title">이 사이트의 AI 사용 내역 O/X</h3>
         <p class="ai-disclosure-intro">O는 실제 사용, X는 사용하지 않음을 뜻합니다. 공식 캐릭터를 참고해 새로 생성한 팬 이미지이며, 공식 원화 파일을 그대로 사이트 에셋으로 쓰지 않습니다.</p>
@@ -1284,8 +1290,10 @@ floatingSitri.style.left = `${floaterX}px`
 floatingSitri.style.top = `${floaterY}px`
 document.addEventListener('click', respondToClick)
 document.addEventListener('keydown', (event) => {
-  if (floatingSitriEnabled && (event.key === 'Enter' || event.key === ' ') && event.target instanceof Element && event.target.matches('.hero-art .sitri')) {
+  if ((event.key === 'Enter' || event.key === ' ') && event.target instanceof Element && event.target.matches('.hero-art .sitri')) {
     event.preventDefault()
+    showHeroReaction()
+    if (!floatingSitriEnabled) return
     sayAsSitri(sitriGameLines.hero, 'sitri-wave-mascot')
     const bounds = event.target.getBoundingClientRect()
     setFloaterTarget(bounds.left + bounds.width * 0.55, bounds.top + bounds.height * 0.55)
@@ -1313,6 +1321,18 @@ function bindHeroSpeechTimer() {
   })
 }
 bindHeroSpeechTimer()
+function showHeroReaction() {
+  const heroSpeechLine = document.querySelector('.hero-art .speech-line')
+  const heroSpeechTimer = document.querySelector('.hero-art .speech-timer-fill')
+  if (!heroSpeechLine || !heroSpeechTimer) return
+  const nextLines = sitriHeroReactions.filter((line) => line !== heroSpeechLine.textContent)
+  heroSpeechLine.textContent = nextLines[Math.floor(Math.random() * nextLines.length)]
+  heroSpeechLine.classList.remove('is-changing')
+  heroSpeechTimer.style.animation = 'none'
+  void heroSpeechTimer.offsetWidth
+  heroSpeechTimer.style.animation = ''
+}
+document.querySelector('.hero-art .sitri').addEventListener('click', showHeroReaction)
 mobileHeroLayout.addEventListener('change', ({ matches }) => {
   const heroArt = document.querySelector('.hero-art')
   const speechCard = heroArt.querySelector('.speech-card')
