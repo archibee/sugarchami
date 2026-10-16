@@ -1085,7 +1085,6 @@ const floatingSitriLine = document.querySelector('#floating-sitri-line')
 const chamiSatellitesLayer = document.querySelector('#chami-satellites')
 const floatingSitriToggle = document.querySelector('#floating-sitri-toggle')
 const sitriPoses = ['sitri-wave-mascot', 'sitri-pointing-mascot', 'sitri-trophy-mascot', 'sitri-sugar-meter-mascot']
-const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
 let floatingSitriEnabled = true
 try {
   floatingSitriEnabled = localStorage.getItem('chami-floating-sitri') !== 'off'
@@ -1138,14 +1137,6 @@ function setFloaterTarget(x, y) {
   targetX = Math.max(marginX, Math.min(window.innerWidth - marginX, x))
   targetY = Math.max(marginY, Math.min(window.innerHeight - marginY, y))
   clickChaseUntil = performance.now() + 950
-  if (reducedMotion) {
-    floaterX = targetX
-    floaterY = targetY
-    floatingSitri.style.left = `${floaterX}px`
-    floatingSitri.style.top = `${floaterY}px`
-    scheduleChamiSatellites()
-    return
-  }
   if (floaterFrame === null) {
     lastFloaterFrame = 0
     floaterFrame = requestAnimationFrame(moveFloaterFrame)
@@ -1179,7 +1170,7 @@ function moveChamiSatellites(now = performance.now()) {
   if (!floatingSitriEnabled || !chamiSatellites.length) return
   const delta = lastSatelliteFrame ? Math.min((now - lastSatelliteFrame) / 1000, 0.05) : 0.016
   lastSatelliteFrame = now
-  const easing = reducedMotion ? 1 : 1 - Math.exp(-1.7 * delta)
+  const easing = 1 - Math.exp(-1.7 * delta)
   let stillFollowing = false
   chamiSatellites.forEach((satellite, index) => {
     const leader = index === 0 ? { x: floaterX, y: floaterY } : chamiSatellites[index - 1]
@@ -1198,15 +1189,10 @@ function moveChamiSatellites(now = performance.now()) {
 function moveFloaterFrame(now = performance.now()) {
   const delta = lastFloaterFrame ? Math.min((now - lastFloaterFrame) / 1000, 0.05) : 0.016
   lastFloaterFrame = now
-  const response = reducedMotion ? 100 : now < clickChaseUntil ? 4.2 : 0.62
+  const response = now < clickChaseUntil ? 4.2 : 0.62
   const easing = 1 - Math.exp(-response * delta)
-  if (reducedMotion) {
-    floaterX = targetX
-    floaterY = targetY
-  } else {
-    floaterX += (targetX - floaterX) * easing
-    floaterY += (targetY - floaterY) * easing
-  }
+  floaterX += (targetX - floaterX) * easing
+  floaterY += (targetY - floaterY) * easing
   floatingSitri.style.left = `${floaterX}px`
   floatingSitri.style.top = `${floaterY}px`
   scheduleChamiSatellites()
@@ -1386,7 +1372,7 @@ trophyCardDialog.addEventListener('click', (event) => {
   if (event.target === trophyCardDialog) trophyCardDialog.close()
 })
 trophyShowcase.addEventListener('pointermove', (event) => {
-  if (event.pointerType !== 'mouse' || reducedMotion) return
+  if (event.pointerType !== 'mouse') return
   const bounds = trophyShowcase.getBoundingClientRect()
   const x = (event.clientX - bounds.left) / bounds.width - 0.5
   const y = (event.clientY - bounds.top) / bounds.height - 0.5

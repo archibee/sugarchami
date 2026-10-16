@@ -11,7 +11,6 @@
   --orange: #d97845;
   --line: #ddd8cb;
 }
-
 * {
   box-sizing: border-box;
   -webkit-user-select: none;
@@ -401,10 +400,6 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
   .sample-figure { height: 100px; }
 }
 
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto !important; }
-}
-
 .chami-satellites { position: fixed; z-index: 39; inset: 0; overflow: visible; pointer-events: none; }
 .chami-satellites.is-disabled { display: none; }
 .chami-satellite { position: fixed; left: 50%; top: 50%; width: var(--satellite-size, 34px); height: var(--satellite-size, 34px); object-fit: contain; filter: drop-shadow(0 3px 5px rgba(54,43,32,.22)); opacity: 0; transform: translate(-50%, -50%); animation: satellite-appear .45s ease-out forwards, satellite-hover 2.8s ease-in-out infinite; }
@@ -430,10 +425,6 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
   .floating-sitri-bubble { max-width: min(122px, 48vw); font-size: 9px; }
   .floating-sitri > img { width: 90px; height: 101px; }
 }
-@media (prefers-reduced-motion: reduce) {
-  .floating-sitri, .floating-sitri-bubble, .floating-sitri > img, .chami-satellite { animation: none; opacity: 1; }
-}
-
 .guideline-open-button { background: rgba(255,255,255,.1) !important; }
 .guideline-open-button:hover { background: rgba(255,255,255,.19) !important; }
 .guideline-button-short { display: none; }
@@ -539,14 +530,4 @@ html:has(.trophy-card-dialog[open]) { overflow: hidden; }
   .trophy-modal-item { min-height: 100px; }
   .trophy-modal-item > span { font-size: 36px; }
   .trophy-showcase-close { top: 9px; right: 9px; width: 38px; height: 38px; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .trophy-showcase { transition: none; transform: none; }
-  .trophy-card-dialog[open], .trophy-card-dialog::backdrop { animation: none; }
-  .trophy-modal-item::before, .trophy-modal-item > span { animation: none; }
-  .memory-card-inner, .memory-card-front img { transition: none; animation: none; }
-  .memory-card.is-pang .memory-card-front, .memory-card.is-pang .memory-card-front::after, .mole-hole.is-mole-hit img, .mole-hole.is-mole-hit::after,
-  .radar-option.is-correct, .radar-option.is-wrong, .radar-game.is-radar-correct .radar-options, .radar-game.is-radar-wrong .radar-options { animation: none; }
-  .pingpong-court.is-pingpong-hit::after, .pingpong-court.is-pingpong-hit .pingpong-paddle, .pingpong-court.is-pingpong-hit .pingpong-ball { animation: none; }
 }
