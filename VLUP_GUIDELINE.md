@@ -56,6 +56,7 @@ Original By Creatorbus Inc.
 
 > 다음 링크는 프로젝트의 시트리 의상 참고 및 공식 방송국 출처이며, 위 팬게임 지침 원문과는 별도입니다.
 
+- 프로젝트 배포 게시글: [브이럽 공식 카페 배포 게시글](https://cafe.naver.com/vlup?iframe_url_utf8=%2Fca-fe%2Fcafes%2F30653039%2Farticles%2F40609%253Fmenuid%3D153%2526oldPath%3D%252FArticleRead.nhn%253Fclubid%253D30653039%2526articleid%253D40609%2526menuid%253D153)
 - 의상 참고 방송 VOD: [https://vod.sooplive.com/player/209820895](https://vod.sooplive.com/player/209820895)
 - 시트리의 숲 공식 방송국: [https://www.sooplive.com/station/vlupsitry](https://www.sooplive.com/station/vlupsitry)
 
