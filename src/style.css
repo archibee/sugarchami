@@ -431,9 +431,20 @@ html:has(.trophy-card-dialog[open]) { overflow: hidden; }
 .trophy-showcase-stats small { display: block; margin-bottom: 6px; color: rgba(255, 244, 225, .68); font-size: 8px; }
 .trophy-showcase-stats b { display: block; overflow: hidden; color: #fff7e9; font-size: clamp(18px, 3vw, 25px); text-overflow: ellipsis; white-space: nowrap; }
 .trophy-showcase-stats em { margin-left: 4px; color: #f0b67e; font-size: 8px; font-style: normal; }
-.trophy-modal-item { width: 100%; min-height: 112px; padding: 16px; display: flex; align-items: center; justify-content: center; gap: 14px; border: 1px solid rgba(255, 255, 255, .22); border-radius: 10px; background: rgba(255, 255, 255, .09); color: #ffe0a4; }
-.trophy-modal-item span { font-size: 36px; }
-.trophy-modal-item b { color: #fff7e9; font-size: 14px; }
+.trophy-modal-item { --tier-accent: #aaa8a3; position: relative; width: 100%; min-height: 112px; padding: 16px; display: flex; align-items: center; justify-content: center; gap: 16px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--tier-accent), transparent 25%); border-radius: 10px; background: linear-gradient(125deg, color-mix(in srgb, var(--tier-accent), #292523 84%), color-mix(in srgb, var(--tier-accent), #292523 57%), color-mix(in srgb, var(--tier-accent), #fff 88%)); color: #fff7e9; box-shadow: inset 0 1px rgba(255, 255, 255, .26), 0 10px 28px color-mix(in srgb, var(--tier-accent), transparent 76%); transition: background .35s, border-color .35s, box-shadow .35s; }
+.trophy-modal-item::before { position: absolute; inset: -45% -70%; content: ''; background: linear-gradient(105deg, transparent 42%, rgba(255,255,255,.08) 47%, rgba(255,255,255,.52) 50%, rgba(255,255,255,.08) 53%, transparent 58%); transform: translateX(-50%) rotate(-8deg); animation: trophy-shine 5.5s ease-in-out infinite; pointer-events: none; }
+.trophy-modal-item[data-tier="silver"] { --tier-accent: #c7cbd0; }
+.trophy-modal-item[data-tier="gold"] { --tier-accent: #f4bf62; }
+.trophy-modal-item[data-tier="platinum"] { --tier-accent: #80daca; }
+.trophy-modal-item[data-tier="diamond"] { --tier-accent: #6edbff; }
+.trophy-modal-item[data-tier="master"] { --tier-accent: #d58dff; }
+.trophy-modal-item > span { position: relative; z-index: 1; font-size: 42px; filter: drop-shadow(0 5px 8px color-mix(in srgb, var(--tier-accent), transparent 32%)); animation: trophy-icon-float 3.2s ease-in-out infinite; }
+.trophy-modal-item > div { position: relative; z-index: 1; min-width: 0; display: grid; gap: 4px; }
+.trophy-modal-item small { color: rgba(255, 247, 233, .7); font-size: 8px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+.trophy-modal-item b { color: #fffdf8; font-size: 20px; font-weight: 900; letter-spacing: .02em; text-shadow: 0 2px 12px color-mix(in srgb, var(--tier-accent), transparent 55%); }
+.trophy-modal-item strong { color: var(--tier-accent); font-size: 12px; letter-spacing: .04em; }
+@keyframes trophy-shine { 0%, 24% { transform: translateX(-55%) rotate(-8deg); } 60%, 100% { transform: translateX(55%) rotate(-8deg); } }
+@keyframes trophy-icon-float { 0%, 100% { transform: translateY(1px) rotate(-3deg); } 50% { transform: translateY(-3px) rotate(3deg); } }
 @keyframes trophy-dialog-in { from { opacity: 0; transform: translateY(15px) scale(.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
 @keyframes trophy-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
 @media (max-width: 680px) {
@@ -445,11 +456,14 @@ html:has(.trophy-card-dialog[open]) { overflow: hidden; }
   .trophy-showcase-info h2 { margin-top: 7px; font-size: 25px; }
   .trophy-showcase-stats { gap: 6px; margin-top: 14px; }
   .trophy-showcase-stats > div { padding: 9px 7px; }
+  .trophy-modal-item { min-height: 100px; }
+  .trophy-modal-item > span { font-size: 36px; }
   .trophy-showcase-close { top: 9px; right: 9px; width: 38px; height: 38px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .trophy-showcase { transition: none; transform: none; }
   .trophy-card-dialog[open], .trophy-card-dialog::backdrop { animation: none; }
+  .trophy-modal-item::before, .trophy-modal-item > span { animation: none; }
   .memory-card-inner, .memory-card-front img { transition: none; animation: none; }
 }

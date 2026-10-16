@@ -11,6 +11,13 @@ const app = document.querySelector('#app')
 const mobileHeroLayout = window.matchMedia('(max-width: 760px)')
 const sampleCount = 6
 const saveKey = 'chami-sugar-lab-research-v1'
+const trophyTiers = [
+  { id: 'silver', name: '실버', minimum: 160, icon: '🥈' },
+  { id: 'gold', name: '골드', minimum: 500, icon: '🥇' },
+  { id: 'platinum', name: '플래티넘', minimum: 1200, icon: '🏆' },
+  { id: 'diamond', name: '다이아', minimum: 2500, icon: '💎' },
+  { id: 'master', name: '마스터', minimum: 5000, icon: '👑' },
+]
 const chamiSprites = [
   'chami-cheerful', 'chami-sleepy', 'chami-determined', 'chami-surprised', 'chami-dozy', 'chami-sparkle',
   'chami-cheering', 'chami-yawning', 'chami-curious', 'chami-bashful', 'chami-grumpy', 'chami-dizzy',
@@ -65,11 +72,11 @@ let memoryState = { active: false, locked: false, deck: [], open: [], matched: n
 let profileSyncPromise = null
 
 function loadResearch() {
-  const fresh = { completedRounds: 0, bestSugar: 0, bestMashes: 0, bestCatches: 0, catchPlays: 0, gaugePlays: 0, precisionHits: 0, mashPlays: 0, bestMemoryMoves: 0, memoryPlays: 0, memoryGolds: 0 }
+  const fresh = { completedRounds: 0, bestSugar: 0, bestMashes: 0, bestCatches: 0, catchPlays: 0, gaugePlays: 0, precisionHits: 0, mashPlays: 0, bestMemoryMoves: 0, memoryPlays: 0, memoryGolds: 0, totalScore: 0 }
   try {
     const saved = JSON.parse(localStorage.getItem(saveKey))
     const { badges, trophies, ...researchRecord } = saved || {}
-    return { ...fresh, ...researchRecord }
+    return { ...fresh, ...researchRecord, totalScore: Math.max(0, Math.floor(Number(researchRecord.totalScore) || 0)) }
   } catch {
     return fresh
   }
@@ -85,8 +92,21 @@ function saveResearch() {
   }
 }
 
+function addResearchScore(points) {
+  const earned = Math.max(0, Math.round(Number(points) || 0))
+  if (!earned) return
+  research.totalScore = (Number(research.totalScore) || 0) + earned
+  saveResearch()
+}
+
+function trophyTierForScore(score) {
+  return [...trophyTiers].reverse().find((tier) => score >= tier.minimum)
+    || { id: 'research', name: '연구 중', icon: '🏆' }
+}
+
 function applyServerProfile(profile) {
   const stats = profile.stats || {}
+  const totalScore = research.totalScore || 0
   research = {
     completedRounds: Number(stats.completed_rounds) || 0,
     bestSugar: Number(stats.best_sugar) || 0,
@@ -99,6 +119,7 @@ function applyServerProfile(profile) {
     bestMemoryMoves: Number(stats.best_memory_moves) || 0,
     memoryPlays: Number(stats.memory_plays) || 0,
     memoryGolds: Number(stats.memory_golds) || 0,
+    totalScore,
   }
   saveResearch()
 }
@@ -217,7 +238,7 @@ function measureRandomSample() {
       winners.forEach((winner) => { winner.winner = true })
       research.completedRounds += 1
       research.bestSugar = Math.max(research.bestSugar, highest)
-      saveResearch()
+      addResearchScore(25 + Math.round(highest * 0.3))
       renderSamples()
       const winnerIds = winners.map((winner) => `차미 ${String(winner.id).padStart(2, '0')}`).join(' · ')
       document.querySelector('#winner-title').textContent = winners.length > 1 ? '공동 당도왕 탄생!' : '오늘의 당도왕!'
@@ -280,7 +301,7 @@ function useGauge() {
   const difference = Math.abs(actual - expected)
   research.gaugePlays += 1
   if (difference <= 2) research.precisionHits += 1
-  saveResearch()
+  addResearchScore(5 + Math.max(0, 25 - difference))
   submitGameEvent({ type: 'gauge_result', difference })
   const readout = document.querySelector('#gauge-readout')
   readout.textContent = `${actual}°S`
@@ -300,7 +321,7 @@ function finishFizzRound() {
   submitGameEvent({ type: 'mash_result', count: fizzState.count })
   research.mashPlays += 1
   research.bestMashes = Math.max(research.bestMashes, fizzState.count)
-  saveResearch()
+  addResearchScore(6 + Math.min(40, fizzState.count))
   document.querySelector('#fizz-button').textContent = '한 판 더 팡팡!'
   document.querySelector('#fizz-status').textContent = fizzState.count >= 18
     ? `${fizzState.count}회! 차미가 팝콘인 줄 알고 줄을 섰어요.`
@@ -361,7 +382,7 @@ function finishCatchRound() {
   submitGameEvent({ type: 'catch_result', count: catchState.count })
   research.catchPlays += 1
   research.bestCatches = Math.max(research.bestCatches, catchState.count)
-  saveResearch()
+  addResearchScore(6 + Math.min(40, catchState.count * 2))
   document.querySelector('#catch-target').disabled = true
   document.querySelector('#catch-start-button').textContent = '한 판 더!'
   document.querySelector('#catch-status').textContent = `${catchState.count}마리 포착! 차미가 연구소 CCTV 사각지대로 도망갔어요.`
@@ -462,7 +483,7 @@ function finishMemoryGame() {
   research.memoryPlays += 1
   research.bestMemoryMoves = research.bestMemoryMoves ? Math.min(research.bestMemoryMoves, memoryState.moves) : memoryState.moves
   if (isGold) research.memoryGolds += 1
-  saveResearch()
+  addResearchScore(12 + Math.max(0, 30 - memoryState.moves * 2 - Math.floor(seconds / 5)))
   submitGameEvent({ type: 'memory_result', moves: memoryState.moves, seconds })
   document.querySelector('#memory-game').classList.add('is-memory-complete')
   document.querySelector('#memory-start-button').textContent = '한 판 더 연구하기'
@@ -692,7 +713,7 @@ document.body.insertAdjacentHTML('beforeend', `
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 문구와 대사, 기획·프런트엔드 코드 작성에 AI를 보조 도구로 사용했습니다. 실제 게임 동작과 팡 이펙트는 JavaScript와 CSS로 실행하며, 무작위 선택은 코드의 난수 기능을 사용합니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>음성·음악·효과음 생성</b><p>음성 합성, 캐릭터 음성 변환, AI 음악·BGM 및 AI 효과음 생성은 사용하지 않았습니다. 현재 사이트에는 음성·음악 재생 기능이 없습니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>영상 생성·모델 학습</b><p>AI 영상 생성은 사용하지 않았습니다. 이 프로젝트에서 공식 자료를 이용한 자체 모델 학습이나 파인튜닝도 하지 않았습니다. 이미지 생성 시 캐릭터와 의상 특징을 참고 입력으로 사용한 것과 모델 학습은 구분됩니다.</p></div></article>
-          <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>이미지 가공·웹 효과의 생성형 AI 사용</b><p>생성된 이미지를 웹용 크기로 줄이고, 파비콘을 만드는 작업은 코드로 처리했습니다. 연구카드에는 브라우저에 저장된 연구 기록과 정적인 트로피 한 항목만 표시하며 별도 달성·보상 시스템은 없습니다. CSS 흔들림, 파티클, 게임 이펙트도 코드로 만든 시각 효과입니다.</p></div></article>
+          <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>이미지 가공·웹 효과의 생성형 AI 사용</b><p>생성된 이미지를 웹용 크기로 줄이고, 파비콘을 만드는 작업은 코드로 처리했습니다. 연구 점수 누적과 5단계 트로피 등급은 브라우저 로컬 기록과 코드 규칙으로 계산합니다. CSS 트로피 효과, 흔들림, 파티클, 게임 이펙트에도 생성형 AI를 사용하지 않았습니다.</p></div></article>
         </div>
         <p class="ai-name-note">사이트에서는 캐릭터 이름을 시트리와 차미로 표기합니다. 차미에는 별도의 공식 영문 키워드가 없어 영문 이름 표기를 사용하지 않습니다.</p>
         <p class="ai-source-links"><b>이미지 참고 출처:</b> <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">SITRY 의상 참고 VOD ↗</a> · <a href="https://www.sooplive.com/station/vlupsitry" target="_blank" rel="noopener noreferrer">시트리의 숲 공식 방송국 ↗</a></p>
@@ -723,7 +744,10 @@ document.body.insertAdjacentHTML('beforeend', `
         <h2 id="trophy-card-title">시트리 당도 연구카드</h2>
         <p class="trophy-showcase-subtitle">이 브라우저에 저장된 연구 기록</p>
         <div class="trophy-showcase-stats" id="trophy-showcase-stats"></div>
-        <div class="single-trophy trophy-modal-item" aria-label="트로피"><span aria-hidden="true">🏆</span><b>트로피</b></div>
+        <div class="single-trophy trophy-modal-item" id="trophy-rank-card" data-tier="research" aria-label="현재 트로피 등급">
+          <span id="trophy-rank-icon" aria-hidden="true">🏆</span>
+          <div><small>현재 등급</small><b id="trophy-tier-name">연구 중</b><strong id="trophy-total-score">총 0점</strong></div>
+        </div>
       </section>
     </article>
   </dialog>
@@ -956,6 +980,12 @@ document.querySelector('#view-trophy-card').addEventListener('click', () => {
     ['최고 당도', research.bestSugar || '—', '°S'],
     ['최고 팡팡', research.bestMashes, '회'],
   ].map(([label, value, unit]) => `<div><small>${label}</small><b>${value}<em>${unit}</em></b></div>`).join('')
+  const tier = trophyTierForScore(research.totalScore)
+  const rankCard = document.querySelector('#trophy-rank-card')
+  rankCard.dataset.tier = tier.id
+  document.querySelector('#trophy-rank-icon').textContent = tier.icon
+  document.querySelector('#trophy-tier-name').textContent = tier.name
+  document.querySelector('#trophy-total-score').textContent = `총 ${research.totalScore}점`
   trophyCardDialog.showModal()
 })
 document.querySelector('#trophy-showcase-close').addEventListener('click', () => trophyCardDialog.close())
