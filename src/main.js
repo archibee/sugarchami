@@ -20,7 +20,7 @@ const trophyTiers = [
   { id: 'gold', name: '골드', minimum: 500, icon: '🥇' },
   { id: 'platinum', name: '플래티넘', minimum: 1200, icon: '🏆' },
   { id: 'diamond', name: '다이아', minimum: 2500, icon: '💎' },
-  { id: 'master', name: '마스터', minimum: 5000, icon: '👑' },
+  { id: 'master', name: '최고 등급 마스터', minimum: 5000, icon: '👑' },
 ]
 const chamiSprites = [
   'chami-cheerful', 'chami-sleepy', 'chami-determined', 'chami-surprised', 'chami-dozy', 'chami-sparkle',
