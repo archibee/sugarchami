@@ -108,6 +108,7 @@ function addResearchScore(points) {
   if (!earned) return
   research.totalScore = (Number(research.totalScore) || 0) + earned
   saveResearch()
+  updateTrophyScoreDisplay()
 }
 
 function totalMiniGamePlays() {
@@ -122,7 +123,7 @@ function trophyTierForScore(score) {
 
 function applyServerProfile(profile) {
   const stats = profile.stats || {}
-  const localOnly = { molePlays: research.molePlays, radarPlays: research.radarPlays, towerPlays: research.towerPlays, pingpongPlays: research.pingpongPlays, totalScore: research.totalScore || 0 }
+  const localOnly = { molePlays: research.molePlays, radarPlays: research.radarPlays, towerPlays: research.towerPlays, pingpongPlays: research.pingpongPlays, totalScore: research.totalScore || 0, siteTimeRemainderMs: research.siteTimeRemainderMs || 0 }
   research = {
     completedRounds: Number(stats.completed_rounds) || 0,
     bestSugar: Number(stats.best_sugar) || 0,
@@ -1378,20 +1379,45 @@ window.addEventListener('resize', scheduleDockSectionUpdate)
 updateDockSection()
 const trophyCardDialog = document.querySelector('#trophy-card-dialog')
 const trophyShowcase = document.querySelector('#trophy-showcase')
+function updateTrophyScoreDisplay() {
+  const rankCard = document.querySelector('#trophy-rank-card')
+  if (!rankCard) return
+  const tier = trophyTierForScore(Number(research.totalScore) || 0)
+  rankCard.dataset.tier = tier.id
+  document.querySelector('#trophy-rank-icon').textContent = tier.icon
+  document.querySelector('#trophy-tier-name').textContent = tier.name
+  document.querySelector('#trophy-total-score').textContent = `총 ${research.totalScore || 0}점`
+}
+
 document.querySelector('#view-trophy-card').addEventListener('click', () => {
   document.querySelector('#trophy-showcase-stats').innerHTML = [
     ['완료 연구', Number(research.completedRounds) || 0, '회'],
     ['미니게임 참여', totalMiniGamePlays(), '회'],
     ['정밀 측정', Number(research.precisionHits) || 0, '회'],
   ].map(([label, value, unit]) => `<div><small>${label}</small><b>${value}<em>${unit}</em></b></div>`).join('')
-  const tier = trophyTierForScore(research.totalScore)
-  const rankCard = document.querySelector('#trophy-rank-card')
-  rankCard.dataset.tier = tier.id
-  document.querySelector('#trophy-rank-icon').textContent = tier.icon
-  document.querySelector('#trophy-tier-name').textContent = tier.name
-  document.querySelector('#trophy-total-score').textContent = `총 ${research.totalScore}점`
+  updateTrophyScoreDisplay()
   trophyCardDialog.showModal()
 })
+
+let sitePresenceLastAt = Date.now()
+let sitePresenceLastSaveAt = sitePresenceLastAt
+window.setInterval(() => {
+  const now = Date.now()
+  const elapsed = Math.max(0, now - sitePresenceLastAt)
+  sitePresenceLastAt = now
+  research.siteTimeRemainderMs = (Number(research.siteTimeRemainderMs) || 0) + elapsed
+  const earned = Math.floor(research.siteTimeRemainderMs / 1000)
+  if (earned > 0) {
+    research.siteTimeRemainderMs %= 1000
+    addResearchScore(earned)
+    sitePresenceLastSaveAt = now
+  } else if (now - sitePresenceLastSaveAt >= 15000) {
+    saveResearch()
+    sitePresenceLastSaveAt = now
+  }
+}, 1000)
+document.addEventListener('visibilitychange', saveResearch)
+
 document.querySelector('#trophy-showcase-close').addEventListener('click', () => trophyCardDialog.close())
 trophyCardDialog.addEventListener('click', (event) => {
   if (event.target === trophyCardDialog) trophyCardDialog.close()
