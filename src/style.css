@@ -183,6 +183,8 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .section-stamp { width: 58px; height: 58px; display: grid; place-content: center; border: 1px solid #d4cbbb; border-radius: 50%; color: #a08a6b; font-size: 9px; font-weight: 700; line-height: 1.2; text-align: center; transform: rotate(10deg); }
 .mini-game-grid { width: 100%; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: minmax(760px, 1fr); align-items: stretch; gap: 22px; }
 .mini-game-card { min-width: 0; height: 100%; padding: 24px; display: flex; flex-direction: column; border: 1px solid #ded8cb; border-radius: 5px; background: #f8f5ee; }
+.mini-game-header { margin: -24px -24px 16px; padding: 16px 24px 12px; border-bottom: 1px solid #d8cbb7; background: #e9e1d3; }
+.mini-game-header .mini-game-copy { margin-bottom: 0; }
 .mini-game-topline { display: flex; align-items: center; justify-content: space-between; color: #9b9587; font-size: 9px; font-weight: 700; letter-spacing: .1em; }
 .mini-game-icon { color: var(--orange); font-size: 22px; }
 .mini-game-card h3 { margin: 10px 0 8px; font-size: 21px; letter-spacing: -.06em; }
@@ -243,8 +245,10 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .memory-score > small { margin-left: auto; color: #817a6b; font-size: 10px; }
 .memory-score > small b { color: #575448; font-size: 13px; }
 .memory-board { width: min(100%, 500px); margin: 12px auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; perspective: 850px; }
-.memory-hint-button { align-self: center; margin: 0 auto 8px; padding: 8px 14px; border: 1px solid #dfc9a8; border-radius: 99px; background: #fffaf0; color: #8c6744; font-size: 10px; font-weight: 700; cursor: pointer; }
-.memory-hint-button:disabled { opacity: .48; cursor: default; }
+.memory-hint-button { align-self: center; margin: 0 auto 8px; padding: 9px 16px; border: 1px solid #b7a17f; border-radius: 5px; background: #fffaf0; color: #463a2c; box-shadow: 0 2px 5px rgba(74,60,43,.08); font-size: 11px; font-weight: 700; cursor: pointer; }
+.memory-hint-button:hover:not(:disabled) { border-color: #927954; background: #f5ecdc; }
+.memory-hint-button:focus-visible { outline: 2px solid #a66b3f; outline-offset: 2px; }
+.memory-hint-button:disabled { border-color: #c8b99f; background: #eee8dc; color: #51483b; box-shadow: none; cursor: default; }
 .memory-card { min-width: 0; padding: 0; border: 0; border-radius: 9px; aspect-ratio: 1; background: transparent; cursor: pointer; perspective: 700px; touch-action: manipulation; }
 .memory-card-inner { position: relative; display: block; width: 100%; height: 100%; border-radius: inherit; transform-style: preserve-3d; transition: transform .42s cubic-bezier(.2, .72, .25, 1); }
 .memory-card-back, .memory-card-front { position: absolute; inset: 0; display: grid; place-items: center; overflow: hidden; border: 1px solid #e0c9a8; border-radius: inherit; backface-visibility: hidden; box-shadow: 0 4px 9px rgba(69, 52, 33, .12); }
@@ -260,7 +264,7 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 @keyframes memory-card-pang { 0% { filter: brightness(1); } 30% { filter: brightness(1.3) drop-shadow(0 0 10px rgba(255, 186, 90, .8)); } 100% { filter: brightness(1); } }
 @keyframes memory-pang-ring { 0% { opacity: 0; transform: scale(.25); } 32% { opacity: 1; transform: scale(1.08); } 100% { opacity: 0; transform: scale(1.4); } }
 .memory-game.is-memory-complete { border-color: #d6b06f; background: linear-gradient(145deg, #fff8e9, #f7ebd4); box-shadow: 0 0 0 3px rgba(222, 175, 102, .14), 0 12px 30px rgba(155, 117, 62, .15); }
-.mole-board { width: min(100%, 680px); margin: 8px auto 14px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.mole-board { width: min(100%, 680px); margin: 16px auto 14px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
 .mole-hole { position: relative; aspect-ratio: 1.45; padding: 0; overflow: hidden; border: 0; border-radius: 50% 50% 42% 42%; background: radial-gradient(ellipse at 50% 65%, #594333 0 43%, #9b7858 45% 57%, #dfc8a5 60%); cursor: crosshair; touch-action: manipulation; }
 .mole-hole img { position: absolute; left: 50%; bottom: 5%; width: 76%; height: 76%; object-fit: contain; opacity: 0; transform: translate(-50%, 70%) scale(.7); transition: transform .15s ease-out, opacity .12s; }
 .mole-hole.has-chami img { opacity: 1; transform: translate(-50%, 0) scale(1); }
@@ -271,7 +275,7 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .radar-score { margin: 8px 0 10px; display: flex; align-items: baseline; gap: 8px; color: #827b6d; font-size: 10px; }
 .radar-score > b { color: var(--orange); font-size: 33px; line-height: 1; }
 .radar-score > small { margin-left: auto; color: #817a6b; font-size: 10px; }
-.radar-prompt { min-height: 38px; display: grid; place-items: center; color: #a35d3b; font-size: 15px; }
+.radar-prompt { min-height: 38px; box-sizing: border-box; display: grid; place-items: center; margin: 0 0 8px; padding: 7px 12px; border: 1px solid #e4d5c1; border-radius: 5px; background: #fffaf0; color: #784b36; font-size: 14px; font-weight: 700; letter-spacing: -.02em; }
 .radar-options { min-height: 390px; flex: 1; margin: 8px 0 14px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: center; gap: 10px; }
 .radar-option { min-width: 0; padding: 4px; border: 1px solid #e4d5c1; border-radius: 8px; background: #fffaf0; cursor: pointer; }
 .radar-option:hover { border-color: #c87d52; background: #fff2dd; }
@@ -393,6 +397,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
   .mini-games-section, .collection-section { padding: 58px 6% 52px; }
   .mini-game-grid { grid-template-columns: 1fr; grid-auto-rows: auto; gap: 12px; }
   .mini-game-card { height: auto; padding: 20px; }
+  .mini-game-header { margin: -20px -20px 16px; padding: 14px 20px 12px; }
   .gauge-stage { min-height: 220px; }
   .gauge-readout { margin-bottom: 22px; font-size: 12px; }
   .gauge-readout > b { font-size: 30px; }
