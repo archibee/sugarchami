@@ -12,7 +12,13 @@
   --line: #ddd8cb;
 }
 
-* { box-sizing: border-box; }
+* {
+  box-sizing: border-box;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-user-drag: none;
+  -webkit-tap-highlight-color: transparent;
+}
 @media (pointer: coarse) {
   html, body { touch-action: pan-x pan-y; }
   button, a { touch-action: manipulation; }
