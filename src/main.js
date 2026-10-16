@@ -48,6 +48,7 @@ const sitriGameLines = {
   miniGames: ['마음에 드는 게임을 골라봐요!', '어떤 게임부터 해볼까요?'],
   lab: ['차미 표본을 살펴봐요!', '당도 연구를 시작해봐요!'],
   hero: ['불러줘서 반가워요!', '오늘도 함께 놀아요!'],
+  default: ['함께 둘러봐요!', '어디부터 살펴볼까요?'],
 }
 function shuffle(items) {
   const shuffled = [...items]
@@ -1102,7 +1103,6 @@ let floaterY = initialMarginY + Math.random() * Math.max(1, window.innerHeight -
 let targetX = floaterX
 let targetY = floaterY
 let reactionTimer
-let sitriLastSpokeAt = -Infinity
 let clickChaseUntil = 0
 let lastFloaterFrame = 0
 let floaterFrame = null
@@ -1149,6 +1149,22 @@ function setFloaterTarget(x, y) {
     floaterFrame = requestAnimationFrame(moveFloaterFrame)
   }
   scheduleChamiSatellites()
+}
+
+function setFloaterNearPointer(x, y) {
+  const marginX = Math.min(112, window.innerWidth * 0.28)
+  const marginY = Math.min(142, window.innerHeight * 0.3)
+  const clampX = (value) => Math.max(marginX, Math.min(window.innerWidth - marginX, value))
+  const clampY = (value) => Math.max(marginY, Math.min(window.innerHeight - marginY, value))
+  const gap = 148
+  const candidates = [
+    { x, y: y - gap },
+    { x, y: y + gap },
+    { x: x - gap, y },
+    { x: x + gap, y },
+  ].map((point) => ({ x: clampX(point.x), y: clampY(point.y) }))
+  candidates.sort((a, b) => Math.abs(Math.hypot(a.x - x, a.y - y) - gap) - Math.abs(Math.hypot(b.x - x, b.y - y) - gap))
+  setFloaterTarget(candidates[0].x, candidates[0].y)
 }
 
 function attachChamiSatellite(sprite) {
@@ -1245,11 +1261,7 @@ function respondToClick(event) {
     ['#lab', sitriGameLines.lab, 'sitri-sugar-meter-mascot'],
   ]
   const context = contexts.find(([selector]) => inContext(selector))
-  if (!context) return
-  const now = performance.now()
-  if (now - sitriLastSpokeAt < 3200) return
-  sitriLastSpokeAt = now
-  sayAsSitri(context[1], context[2])
+  sayAsSitri(context?.[1] ?? sitriGameLines.default, context?.[2] ?? 'sitri-wave-mascot')
 
   let pointX = event.clientX
   let pointY = event.clientY
@@ -1258,7 +1270,7 @@ function respondToClick(event) {
     pointX = bounds.left + bounds.width / 2
     pointY = bounds.top + bounds.height / 2
   }
-  setFloaterTarget(pointX + (pointX < window.innerWidth / 2 ? 92 : -92), pointY - 76)
+  setFloaterNearPointer(pointX, pointY)
 }
 floatingSitriImage.src = `/images/variants/sitri/${sitriPoses[Math.floor(Math.random() * sitriPoses.length)]}.png`
 floatingSitriLine.textContent = sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]
