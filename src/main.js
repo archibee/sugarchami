@@ -248,7 +248,10 @@ function measureRandomSample() {
       const highest = Math.max(...samples.map((item) => item.sugar))
       const winners = samples.filter((item) => item.sugar === highest)
       submitGameEvent({ type: 'round_complete', sugars: samples.map((item) => item.sugar) })
-      winners.forEach((winner) => { winner.winner = true })
+      winners.forEach((winner) => {
+        winner.winner = true
+        attachChamiSatellite(winner.sprite)
+      })
       research.completedRounds += 1
       research.bestSugar = Math.max(research.bestSugar, highest)
       addResearchScore(25 + Math.round(highest * 0.3))
@@ -862,7 +865,7 @@ app.innerHTML = `
         </div>
       </div>
       <div class="pop-action">
-        <div class="pop-explainer"><svg class="pop-star asterisk-shape" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg><span><b>누가 나올지는 시트리도 몰라요.</b><small>차미마다 1~5번 팡팡 눌러 당도를 측정해요.</small></span></div>
+        <div class="pop-explainer"><svg class="pop-star asterisk-shape" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg><span><b>당도왕 차미는 요정 시트리 뒤를 따라다녀요.</b><small>차미마다 1~5번 팡팡 눌러 당도를 측정해요.</small></span></div>
         <button class="pop-button" id="pop-button" type="button">
           <span class="pop-title">차미 팡!</span><span class="pop-subtitle">남은 차미 팡팡 <i aria-hidden="true">↗</i></span>
         </button>
@@ -1002,7 +1005,7 @@ document.body.insertAdjacentHTML('beforeend', `
         <p class="ai-disclosure-intro">O는 실제 사용, X는 사용하지 않음을 뜻합니다. 공식 캐릭터를 참고해 새로 생성한 팬 이미지이며, 공식 원화 파일을 그대로 사이트 에셋으로 쓰지 않습니다.</p>
         <div class="ai-disclosure-list">
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>시트리 이미지 생성</b><p>메인 시트리 일러스트와 SD 포즈 이미지를 AI 이미지 생성으로 제작했습니다. 메인 의상은 <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">참고 VOD</a>의 시트리 의상을 참고했습니다. 원본 방송 캡처를 복사한 이미지는 사용하지 않습니다.</p></div></article>
-          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>차미 이미지 생성</b><p>공식 캐릭터의 둥근 몸, 잎 장식 등 특징을 참고해 표정·잎 형태 변형 이미지를 새로 생성했습니다. AI가 스스로 해석한 별도의 그림체로 표현했습니다.</p></div></article>
+          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>차미 이미지 생성</b><p>공식 캐릭터의 둥근 몸, 잎 장식 등 특징을 참고해 표정·잎 형태 변형 이미지를 새로 생성했습니다. 생성된 표본 이미지는 당도왕 차미가 시트리 뒤를 따라가는 작은 위성 캐릭터로도 사용합니다. AI가 스스로 해석한 별도의 그림체로 표현했습니다.</p></div></article>
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 문구와 대사, 기획·프런트엔드 코드 작성에 AI를 보조 도구로 사용했습니다. 실제 게임 동작과 팡 이펙트는 JavaScript와 CSS로 실행하며, 무작위 선택은 코드의 난수 기능을 사용합니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>음성·음악·효과음 생성</b><p>음성 합성, 캐릭터 음성 변환, AI 음악·BGM 및 AI 효과음 생성은 사용하지 않았습니다. 현재 사이트에는 음성·음악 재생 기능이 없습니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>영상 생성·모델 학습</b><p>AI 영상 생성은 사용하지 않았습니다. 이 프로젝트에서 공식 자료를 이용한 자체 모델 학습이나 파인튜닝도 하지 않았습니다. 이미지 생성 시 캐릭터와 의상 특징을 참고 입력으로 사용한 것과 모델 학습은 구분됩니다.</p></div></article>
@@ -1046,6 +1049,7 @@ document.body.insertAdjacentHTML('beforeend', `
   </dialog>
 `)
 document.body.insertAdjacentHTML('beforeend', `
+  <div class="chami-satellites is-disabled" id="chami-satellites" aria-hidden="true"></div>
   <aside class="floating-sitri" id="floating-sitri" aria-label="시트리의 한마디">
     <div class="floating-sitri-bubble"><span class="speech-dot" aria-hidden="true"></span><span id="floating-sitri-line"></span></div>
     <img id="floating-sitri-image" src="/images/variants/sitri/sitri-wave-mascot.png" alt="시트리 SD 캐릭터" loading="lazy" fetchpriority="low" decoding="async" />
@@ -1055,6 +1059,7 @@ document.body.insertAdjacentHTML('beforeend', `
 const floatingSitri = document.querySelector('#floating-sitri')
 const floatingSitriImage = document.querySelector('#floating-sitri-image')
 const floatingSitriLine = document.querySelector('#floating-sitri-line')
+const chamiSatellitesLayer = document.querySelector('#chami-satellites')
 const floatingSitriToggle = document.querySelector('#floating-sitri-toggle')
 const sitriPoses = ['sitri-wave-mascot', 'sitri-pointing-mascot', 'sitri-trophy-mascot', 'sitri-sugar-meter-mascot']
 const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
@@ -1072,10 +1077,14 @@ let reactionTimer
 let clickChaseUntil = 0
 let lastFloaterFrame = 0
 let floaterFrame = null
+let chamiSatellites = []
+let satelliteFrame = null
+let lastSatelliteFrame = 0
 
 function setFloatingSitriEnabled(enabled) {
   floatingSitriEnabled = enabled
   floatingSitri.classList.toggle('is-disabled', !enabled)
+  chamiSatellitesLayer.classList.toggle('is-disabled', !enabled)
   floatingSitri.setAttribute('aria-hidden', String(!enabled))
   floatingSitriToggle.setAttribute('aria-pressed', String(enabled))
   floatingSitriToggle.setAttribute('aria-label', `시트리 요정 ${enabled ? '끄기' : '켜기'}`)
@@ -1084,6 +1093,12 @@ function setFloatingSitriEnabled(enabled) {
   if (!enabled && floaterFrame !== null) {
     cancelAnimationFrame(floaterFrame)
     floaterFrame = null
+  }
+  if (!enabled && satelliteFrame !== null) {
+    cancelAnimationFrame(satelliteFrame)
+    satelliteFrame = null
+  } else if (enabled && chamiSatellites.length) {
+    scheduleChamiSatellites()
   }
   try {
     localStorage.setItem('chami-floating-sitri', enabled ? 'on' : 'off')
@@ -1105,12 +1120,56 @@ function setFloaterTarget(x, y) {
     floaterY = targetY
     floatingSitri.style.left = `${floaterX}px`
     floatingSitri.style.top = `${floaterY}px`
+    scheduleChamiSatellites()
     return
   }
   if (floaterFrame === null) {
     lastFloaterFrame = 0
     floaterFrame = requestAnimationFrame(moveFloaterFrame)
   }
+  scheduleChamiSatellites()
+}
+
+function attachChamiSatellite(sprite) {
+  const image = document.createElement('img')
+  const index = chamiSatellites.length
+  image.className = 'chami-satellite'
+  image.src = sprite
+  image.alt = ''
+  image.setAttribute('aria-hidden', 'true')
+  image.loading = 'lazy'
+  image.decoding = 'async'
+  image.style.setProperty('--satellite-size', `${Math.max(17, 34 - index * 1.1)}px`)
+  chamiSatellitesLayer.append(image)
+  chamiSatellites.push({ element: image, x: floaterX, y: floaterY })
+  scheduleChamiSatellites()
+}
+
+function scheduleChamiSatellites() {
+  if (!floatingSitriEnabled || !chamiSatellites.length || satelliteFrame !== null) return
+  lastSatelliteFrame = 0
+  satelliteFrame = requestAnimationFrame(moveChamiSatellites)
+}
+
+function moveChamiSatellites(now = performance.now()) {
+  satelliteFrame = null
+  if (!floatingSitriEnabled || !chamiSatellites.length) return
+  const delta = lastSatelliteFrame ? Math.min((now - lastSatelliteFrame) / 1000, 0.05) : 0.016
+  lastSatelliteFrame = now
+  const easing = reducedMotion ? 1 : 1 - Math.exp(-1.7 * delta)
+  let stillFollowing = false
+  chamiSatellites.forEach((satellite, index) => {
+    const leader = index === 0 ? { x: floaterX, y: floaterY } : chamiSatellites[index - 1]
+    const targetX = Math.max(18, Math.min(window.innerWidth - 18, leader.x - (index === 0 ? 34 : 27)))
+    const targetY = Math.max(20, Math.min(window.innerHeight - 20, leader.y + (index === 0 ? 48 : 17)))
+    satellite.x += (targetX - satellite.x) * easing
+    satellite.y += (targetY - satellite.y) * easing
+    satellite.element.style.left = `${satellite.x}px`
+    satellite.element.style.top = `${satellite.y}px`
+    if (Math.hypot(targetX - satellite.x, targetY - satellite.y) > 0.7) stillFollowing = true
+  })
+  if (stillFollowing) satelliteFrame = requestAnimationFrame(moveChamiSatellites)
+  else lastSatelliteFrame = 0
 }
 
 function moveFloaterFrame(now = performance.now()) {
@@ -1127,6 +1186,7 @@ function moveFloaterFrame(now = performance.now()) {
   }
   floatingSitri.style.left = `${floaterX}px`
   floatingSitri.style.top = `${floaterY}px`
+  scheduleChamiSatellites()
   if (Math.hypot(targetX - floaterX, targetY - floaterY) < 0.8) {
     floaterX = targetX
     floaterY = targetY

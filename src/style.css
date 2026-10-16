@@ -376,6 +376,11 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
   html { scroll-behavior: auto !important; }
 }
 
+.chami-satellites { position: fixed; z-index: 39; inset: 0; overflow: visible; pointer-events: none; }
+.chami-satellites.is-disabled { display: none; }
+.chami-satellite { position: fixed; left: 50%; top: 50%; width: var(--satellite-size, 34px); height: var(--satellite-size, 34px); object-fit: contain; filter: drop-shadow(0 3px 5px rgba(54,43,32,.22)); opacity: 0; transform: translate(-50%, -50%); animation: satellite-appear .45s ease-out forwards, satellite-hover 2.8s ease-in-out infinite; }
+@keyframes satellite-appear { to { opacity: .96; } }
+@keyframes satellite-hover { 0%, 100% { margin-top: 0; } 50% { margin-top: -3px; } }
 .floating-sitri { position: fixed; z-index: 40; top: 50%; left: 50%; width: 169px; min-height: 185px; display: grid; justify-items: center; pointer-events: none; opacity: 0; transform: translate(-50%, -50%); animation: sitri-floater-enter .7s .25s ease-out forwards; }
 .floating-sitri.is-disabled { display: none; }
 .floating-sitri-bubble { position: relative; z-index: 1; width: max-content; max-width: min(169px, 55vw); padding: 8px 10px; border: 1px solid rgba(82,68,49,.12); border-radius: 13px; background: rgba(255,253,247,.76); box-shadow: 0 6px 16px rgba(48,39,27,.1); color: #494438; font-size: 10px; font-weight: 650; line-height: 1.45; animation: float-card 3.6s ease-in-out infinite; }
@@ -399,7 +404,7 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
   .floating-sitri > img { width: 90px; height: 101px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .floating-sitri, .floating-sitri-bubble, .floating-sitri > img { animation: none; opacity: 1; }
+  .floating-sitri, .floating-sitri-bubble, .floating-sitri > img, .chami-satellite { animation: none; opacity: 1; }
 }
 
 .guideline-open-button { background: rgba(255,255,255,.1) !important; }
