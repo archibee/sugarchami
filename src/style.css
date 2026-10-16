@@ -247,7 +247,7 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .collection-count { display: flex; align-items: center; gap: 4px; color: #928b7c; font-size: 10px; }
 .collection-count b { color: var(--orange); font-size: 27px; }
 .collection-note { margin: 14px 0 0; color: #a39d90; font-size: 9px; }
-.view-trophy-button { min-height: 46px; margin: 0 auto; padding: 0 17px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #b85e37; border-radius: 5px; background: linear-gradient(135deg, #e78852, #c75e38); color: #fff9ef; box-shadow: 0 5px 12px rgba(177,94,55,.2), inset 0 -3px 0 rgba(113,49,27,.2); font-size: 11px; font-weight: 800; cursor: pointer; transition: transform .16s, box-shadow .16s; }
+.view-trophy-button { min-height: 46px; margin: 0 auto 0 0; padding: 0 17px; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid #b85e37; border-radius: 5px; background: linear-gradient(135deg, #e78852, #c75e38); color: #fff9ef; box-shadow: 0 5px 12px rgba(177,94,55,.2), inset 0 -3px 0 rgba(113,49,27,.2); font-size: 11px; font-weight: 800; cursor: pointer; transition: transform .16s, box-shadow .16s; }
 .view-trophy-button:hover { transform: translateY(-2px); box-shadow: 0 8px 18px rgba(177,94,55,.28), inset 0 -3px 0 rgba(113,49,27,.2); }
 .view-trophy-button span { font-size: 16px; }
 .quick-dock { position: fixed; z-index: 50; right: 18px; bottom: max(14px, env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 5px; padding: 6px; border: 1px solid rgba(255,255,255,.7); border-radius: 99px; background: rgba(45,43,36,.93); box-shadow: 0 10px 30px rgba(29,27,22,.25); color: #fffaf2; backdrop-filter: blur(12px); }
