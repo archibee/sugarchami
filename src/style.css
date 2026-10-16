@@ -237,6 +237,33 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .memory-card.is-matched .memory-card-front { border-color: #d3aa71; background: linear-gradient(145deg, #fff5df, #f5dfb5); box-shadow: 0 0 0 2px rgba(220, 169, 102, .18), 0 0 18px rgba(214, 169, 102, .32); }
 .memory-card.is-matched .memory-card-front img { animation: memory-match-pop .42s cubic-bezier(.2, 1.7, .4, 1); }
 .memory-game.is-memory-complete { border-color: #d6b06f; background: linear-gradient(145deg, #fff8e9, #f7ebd4); box-shadow: 0 0 0 3px rgba(222, 175, 102, .14), 0 12px 30px rgba(155, 117, 62, .15); }
+.mole-board { width: min(100%, 360px); margin: 8px auto 14px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.mole-hole { position: relative; aspect-ratio: 1.25; padding: 0; overflow: hidden; border: 0; border-radius: 50% 50% 42% 42%; background: radial-gradient(ellipse at 50% 65%, #594333 0 43%, #9b7858 45% 57%, #dfc8a5 60%); cursor: crosshair; touch-action: manipulation; }
+.mole-hole img { position: absolute; left: 50%; bottom: 5%; width: 76%; height: 76%; object-fit: contain; opacity: 0; transform: translate(-50%, 70%) scale(.7); transition: transform .15s ease-out, opacity .12s; }
+.mole-hole.has-chami img { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.radar-score { margin: 8px 0 10px; display: flex; align-items: baseline; gap: 8px; color: #827b6d; font-size: 10px; }
+.radar-score > b { color: var(--orange); font-size: 33px; line-height: 1; }
+.radar-score > small { margin-left: auto; color: #817a6b; font-size: 10px; }
+.radar-prompt { min-height: 38px; display: grid; place-items: center; color: #a35d3b; font-size: 15px; }
+.radar-options { min-height: 214px; margin: 8px 0 14px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.radar-option { min-width: 0; padding: 4px; border: 1px solid #e4d5c1; border-radius: 8px; background: #fffaf0; cursor: pointer; }
+.radar-option:hover { border-color: #c87d52; background: #fff2dd; }
+.radar-option img { width: 100%; height: 100%; object-fit: contain; }
+.tower-board { position: relative; height: 230px; margin: 8px 0 14px; overflow: hidden; border-bottom: 5px solid #a98963; background: linear-gradient(#fffaf1, #f0e6d4); }
+.tower-stack { position: absolute; inset: 0; display: flex; flex-direction: column-reverse; align-items: center; justify-content: flex-start; padding-bottom: 0; }
+.tower-block { width: var(--block-width); height: 22px; flex: 0 0 22px; display: block; overflow: hidden; border: 1px solid rgba(149, 106, 63, .4); border-radius: 5px; background: linear-gradient(135deg, #eed2a3, #cf9d66); box-shadow: 0 2px 4px rgba(95, 65, 37, .12); }
+.tower-block img { width: 100%; height: 100%; object-fit: contain; }
+.tower-moving { position: absolute; top: 0; left: 0; height: 22px; border: 1px solid #b9784c; border-radius: 5px; background: linear-gradient(135deg, #ffdfac, #e5a05c); box-shadow: 0 2px 8px rgba(177, 103, 51, .22); }
+.maze-board { width: min(100%, 342px); margin: 8px auto 10px; display: grid; grid-template-columns: repeat(9, minmax(0, 1fr)); aspect-ratio: 1; background: #f8f2e6; }
+.maze-cell { min-width: 0; display: grid; place-items: center; color: #dfa34a; font-size: clamp(8px, 2.2vw, 15px); }
+.maze-cell img { width: 100%; height: 100%; object-fit: contain; }
+.maze-cell.is-exit { background: rgba(173, 194, 139, .28); color: #788d56; }
+.maze-controls { width: 130px; margin: 0 auto 12px; display: grid; grid-template-columns: repeat(3, 38px); justify-content: center; gap: 3px; }
+.maze-controls button { min-height: 32px; border: 1px solid #dfd3bf; border-radius: 5px; background: #fffaf1; color: #685944; cursor: pointer; touch-action: manipulation; }
+.maze-controls button:first-child { grid-column: 2; }
+.maze-controls button:nth-child(2) { grid-column: 1; }
+.maze-controls button:nth-child(3) { grid-column: 2; }
+.maze-controls button:nth-child(4) { grid-column: 3; grid-row: 2; }
 @keyframes memory-match-pop { 45% { transform: scale(1.2) rotate(-7deg); } 100% { transform: scale(1) rotate(0); } }
 @keyframes catch-squish { 18% { transform: scale(1.35,.72) rotate(-12deg); } 45% { transform: scale(.82,1.25) rotate(12deg); } 72% { transform: scale(1.12,.9) rotate(-5deg); } 100% { transform: scale(1) rotate(0); } }
 @keyframes catch-arena-hit { 25% { transform: translateX(-5px); } 50% { transform: translateX(5px); } 75% { transform: translateX(-2px); } 100% { transform: translateX(0); } }
