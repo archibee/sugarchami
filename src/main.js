@@ -110,6 +110,11 @@ function addResearchScore(points) {
   saveResearch()
 }
 
+function totalMiniGamePlays() {
+  return ['gaugePlays', 'mashPlays', 'catchPlays', 'memoryPlays', 'molePlays', 'radarPlays', 'towerPlays', 'pingpongPlays']
+    .reduce((total, key) => total + (Number(research[key]) || 0), 0)
+}
+
 function trophyTierForScore(score) {
   return [...trophyTiers].reverse().find((tier) => score >= tier.minimum)
     || { id: 'research', name: '연구 중', icon: '🏆' }
@@ -1375,9 +1380,9 @@ const trophyCardDialog = document.querySelector('#trophy-card-dialog')
 const trophyShowcase = document.querySelector('#trophy-showcase')
 document.querySelector('#view-trophy-card').addEventListener('click', () => {
   document.querySelector('#trophy-showcase-stats').innerHTML = [
-    ['완료 연구', research.completedRounds, 'ROUND'],
-    ['최고 당도', research.bestSugar || '—', '°S'],
-    ['최고 팡팡', research.bestMashes, '회'],
+    ['완료 연구', Number(research.completedRounds) || 0, '회'],
+    ['미니게임 참여', totalMiniGamePlays(), '회'],
+    ['정밀 측정', Number(research.precisionHits) || 0, '회'],
   ].map(([label, value, unit]) => `<div><small>${label}</small><b>${value}<em>${unit}</em></b></div>`).join('')
   const tier = trophyTierForScore(research.totalScore)
   const rankCard = document.querySelector('#trophy-rank-card')
