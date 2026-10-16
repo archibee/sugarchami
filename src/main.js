@@ -844,12 +844,14 @@ app.innerHTML = `
           <div class="mini-game-topline"><span>02 · 정밀 측정실</span><span class="mini-game-icon" aria-hidden="true">🧪</span></div>
           <h3>당도계 눈금 맞추기</h3>
           <p class="mini-game-copy">목표 구간을 지나가는 바늘을 팡! 멈춰요. 손 떨림은 연구의 일부입니다.</p>
-          <div class="gauge-readout"><span>현재 측정값</span><b id="gauge-readout">—<small>°S</small></b></div>
-          <div class="gauge-track" aria-label="당도계 바늘 눈금">
-            <span class="gauge-target" id="gauge-target" style="left:50%"><i>목표</i></span>
-            <span class="gauge-needle" id="gauge-needle"></span>
+          <div class="gauge-stage">
+            <div class="gauge-readout"><span>현재 측정값</span><b id="gauge-readout">—<small>°S</small></b></div>
+            <div class="gauge-track" aria-label="당도계 바늘 눈금">
+              <span class="gauge-target" id="gauge-target" style="left:50%"><i>목표</i></span>
+              <span class="gauge-needle" id="gauge-needle"></span>
+            </div>
+            <div class="gauge-labels"><span>덜 달다</span><span>너무 달다</span></div>
           </div>
-          <div class="gauge-labels"><span>덜 달다</span><span>너무 달다</span></div>
           <button class="mini-game-button" id="gauge-button" type="button">측정 시작</button>
           <p class="mini-game-status" id="gauge-status" role="status" aria-live="polite">초록 구간을 노려서 멈춰보세요.</p>
         </article>
