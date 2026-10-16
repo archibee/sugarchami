@@ -237,8 +237,8 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .memory-card.is-matched .memory-card-front { border-color: #d3aa71; background: linear-gradient(145deg, #fff5df, #f5dfb5); box-shadow: 0 0 0 2px rgba(220, 169, 102, .18), 0 0 18px rgba(214, 169, 102, .32); }
 .memory-card.is-matched .memory-card-front img { animation: memory-match-pop .42s cubic-bezier(.2, 1.7, .4, 1); }
 .memory-game.is-memory-complete { border-color: #d6b06f; background: linear-gradient(145deg, #fff8e9, #f7ebd4); box-shadow: 0 0 0 3px rgba(222, 175, 102, .14), 0 12px 30px rgba(155, 117, 62, .15); }
-.mole-board { width: min(100%, 360px); margin: 8px auto 14px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.mole-hole { position: relative; aspect-ratio: 1.25; padding: 0; overflow: hidden; border: 0; border-radius: 50% 50% 42% 42%; background: radial-gradient(ellipse at 50% 65%, #594333 0 43%, #9b7858 45% 57%, #dfc8a5 60%); cursor: crosshair; touch-action: manipulation; }
+.mole-board { width: min(100%, 680px); margin: 8px auto 14px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.mole-hole { position: relative; aspect-ratio: 1.45; padding: 0; overflow: hidden; border: 0; border-radius: 50% 50% 42% 42%; background: radial-gradient(ellipse at 50% 65%, #594333 0 43%, #9b7858 45% 57%, #dfc8a5 60%); cursor: crosshair; touch-action: manipulation; }
 .mole-hole img { position: absolute; left: 50%; bottom: 5%; width: 76%; height: 76%; object-fit: contain; opacity: 0; transform: translate(-50%, 70%) scale(.7); transition: transform .15s ease-out, opacity .12s; }
 .mole-hole.has-chami img { opacity: 1; transform: translate(-50%, 0) scale(1); }
 .radar-score { margin: 8px 0 10px; display: flex; align-items: baseline; gap: 8px; color: #827b6d; font-size: 10px; }

@@ -727,10 +727,11 @@ function animatePingpong(timestamp) {
     if (Math.abs(pingpongState.x - pingpongState.paddleX) <= 14) {
       pingpongState.hits += 1
       document.querySelector('#pingpong-hits').textContent = pingpongState.hits
-      document.querySelector('#pingpong-status').textContent = `${pingpongState.hits}번 받아쳤어요! 차미 패들을 움직여 공을 받아요.`
+      document.querySelector('#pingpong-status').textContent = `${pingpongState.hits}번 받아쳤어요! 속도 단계 ${pingpongState.hits + 1} · 포인터나 방향키로 계속 받아요.`
       const offset = (pingpongState.x - pingpongState.paddleX) / 14
-      pingpongState.vx = Math.max(-.045, Math.min(.045, pingpongState.vx + offset * .009))
-      pingpongState.vy = -Math.min(.075, Math.abs(pingpongState.vy) + .001)
+      const horizontalVelocity = pingpongState.vx + offset * .005
+      pingpongState.vx = Math.sign(horizontalVelocity || pingpongState.vx || 1) * (Math.abs(horizontalVelocity) + .001)
+      pingpongState.vy = -(Math.abs(pingpongState.vy) + .003)
       pingpongState.y = 85
     } else {
       finishPingpong()
