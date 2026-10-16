@@ -70,7 +70,7 @@ let fizzState = { running: false, count: 0, endsAt: 0, timer: null }
 let catchState = { running: false, count: 0, endsAt: 0, timer: null, mover: null }
 let memoryState = { active: false, locked: false, hintReveal: false, hintsRemaining: 3, deck: [], open: [], matched: new Set(), moves: 0, startedAt: 0, mismatchTimer: null, clockTimer: null, hintTimer: null }
 let moleState = { running: false, hits: 0, combo: 0, bestCombo: 0, endsAt: 0, timer: null, mover: null, target: -1 }
-let radarState = { running: false, correct: 0, rounds: 0, endsAt: 0, timer: null, target: '' }
+let radarState = { running: false, correct: 0, rounds: 0, endsAt: 0, timer: null, feedbackTimer: null, target: '' }
 let towerState = { running: false, height: 0, width: 34, position: 0, direction: 1, speed: 0.055, frame: null, lastFrame: 0 }
 let pingpongState = { active: false, hits: 0, x: 50, y: 18, vx: 0, vy: 0, paddleX: 50, frame: null, lastFrame: 0 }
 let profileSyncPromise = null
@@ -448,14 +448,14 @@ function catchChami() {
   if ('vibrate' in navigator) navigator.vibrate(18)
 }
 
-function renderMemoryBoard() {
+function renderMemoryBoard(pangIndices = []) {
   const board = document.querySelector('#memory-board')
   const focusedIndex = document.activeElement instanceof Element
     ? document.activeElement.closest('.memory-card')?.dataset.cardIndex
     : null
   board.innerHTML = memoryState.deck.map((card, index) => {
     const isFaceUp = memoryState.hintReveal || memoryState.open.includes(index) || memoryState.matched.has(card.pair)
-    return `<button class="memory-card ${isFaceUp ? 'is-face-up' : ''} ${memoryState.matched.has(card.pair) ? 'is-matched' : ''}" type="button" data-card-index="${index}" aria-label="${isFaceUp ? '차미 표본 공개' : `표본 카드 ${index + 1} 뒤집기`}" aria-pressed="${isFaceUp}" ${memoryState.active && !memoryState.locked ? '' : 'disabled'}>
+    return `<button class="memory-card ${isFaceUp ? 'is-face-up' : ''} ${memoryState.matched.has(card.pair) ? 'is-matched' : ''} ${pangIndices.includes(index) ? 'is-pang' : ''}" type="button" data-card-index="${index}" aria-label="${isFaceUp ? '차미 표본 공개' : `표본 카드 ${index + 1} 뒤집기`}" aria-pressed="${isFaceUp}" ${memoryState.active && !memoryState.locked ? '' : 'disabled'}>
       <span class="memory-card-inner"><span class="memory-card-back" aria-hidden="true"><svg class="asterisk-shape" viewBox="0 0 100 100"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg></span><span class="memory-card-front"><img src="${card.sprite}" alt="" loading="lazy" fetchpriority="low" decoding="async" /></span></span>
     </button>`
   }).join('')
@@ -552,7 +552,7 @@ function selectMemoryCard(event) {
   const item = memoryState.deck[index]
   if (!item || memoryState.open.includes(index) || memoryState.matched.has(item.pair)) return
   memoryState.open.push(index)
-  renderMemoryBoard()
+  renderMemoryBoard([index])
   if (memoryState.open.length < 2) return
 
   memoryState.moves += 1
@@ -601,7 +601,7 @@ function finishMoleRound() {
 
 function showMoleTarget() {
   const holes = [...document.querySelectorAll('.mole-hole')]
-  holes.forEach((hole) => { hole.classList.remove('has-chami'); hole.disabled = !moleState.running })
+  holes.forEach((hole) => { hole.classList.remove('has-chami', 'is-mole-hit'); hole.disabled = !moleState.running })
   if (!moleState.running) return
   moleState.target = Math.floor(Math.random() * holes.length)
   const target = holes[moleState.target]
@@ -639,6 +639,9 @@ function hitMole(event) {
   document.querySelector('#mole-count').textContent = moleState.hits
   document.querySelector('#mole-status').textContent = moleState.combo > 1 ? `${moleState.combo}연속 포착!` : '잡았다! 다음 차미를 찾아요.'
   showMoleTarget()
+  hole.classList.remove('is-mole-hit')
+  void hole.offsetWidth
+  hole.classList.add('is-mole-hit')
 }
 
 function nextRadarPrompt() {
@@ -654,6 +657,8 @@ function finishRadarRound() {
   if (!radarState.running) return
   radarState.running = false
   clearInterval(radarState.timer)
+  clearTimeout(radarState.feedbackTimer)
+  document.querySelector('#radar-game').classList.remove('is-radar-correct', 'is-radar-wrong')
   research.radarPlays += 1
   addResearchScore(radarState.correct * 5 + Math.max(0, radarState.rounds - radarState.correct) * 1)
   document.querySelector('#radar-start-button').textContent = '다시 관찰하기'
@@ -663,7 +668,9 @@ function finishRadarRound() {
 
 function startRadarRound() {
   if (radarState.running) return
-  radarState = { ...radarState, running: true, correct: 0, rounds: 0, endsAt: Date.now() + 20000, timer: null }
+  clearTimeout(radarState.feedbackTimer)
+  document.querySelector('#radar-game').classList.remove('is-radar-correct', 'is-radar-wrong')
+  radarState = { ...radarState, running: true, correct: 0, rounds: 0, endsAt: Date.now() + 20000, timer: null, feedbackTimer: null }
   document.querySelector('#radar-correct').textContent = '0'
   document.querySelector('#radar-clock').textContent = '20.0'
   document.querySelector('#radar-timer-fill').style.transform = 'scaleX(1)'
@@ -682,12 +689,22 @@ function chooseRadarExpression(event) {
   const option = event.target.closest('.radar-option')
   if (!radarState.running || !option) return
   radarState.rounds += 1
-  if (option.dataset.expression === radarState.target) {
+  const correct = option.dataset.expression === radarState.target
+  const game = document.querySelector('#radar-game')
+  game.classList.remove('is-radar-correct', 'is-radar-wrong')
+  void game.offsetWidth
+  game.classList.add(correct ? 'is-radar-correct' : 'is-radar-wrong')
+  option.classList.add(correct ? 'is-correct' : 'is-wrong')
+  document.querySelectorAll('#radar-options .radar-option').forEach((button) => { button.disabled = true })
+  if (correct) {
     radarState.correct += 1
     document.querySelector('#radar-correct').textContent = radarState.correct
     document.querySelector('#radar-status').textContent = '정답이에요! 다음 표정을 찾아봐요.'
   } else document.querySelector('#radar-status').textContent = '다른 표정이에요. 다음 차미를 관찰해봐요.'
-  nextRadarPrompt()
+  radarState.feedbackTimer = window.setTimeout(() => {
+    game.classList.remove('is-radar-correct', 'is-radar-wrong')
+    if (radarState.running) nextRadarPrompt()
+  }, 420)
 }
 
 function renderTower() {
