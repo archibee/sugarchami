@@ -18,6 +18,9 @@
   -webkit-user-drag: none;
   -webkit-tap-highlight-color: transparent;
 }
+@media (hover: hover) and (pointer: fine) {
+  * { cursor: url('./assets/character-variants/cursor/cursor-site.png') 10 8, auto !important; }
+}
 @media (pointer: coarse) {
   html, body { touch-action: pan-x pan-y; }
   button, a { touch-action: manipulation; }
