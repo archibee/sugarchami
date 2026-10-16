@@ -175,21 +175,21 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .mini-game-card h3 { margin: 10px 0 8px; font-size: 21px; letter-spacing: -.06em; }
 .mini-game-copy { min-height: 38px; margin-bottom: 18px; color: #777366; font-size: 11px; line-height: 1.7; }
 .gauge-stage { min-height: 260px; flex: 1; display: flex; flex-direction: column; justify-content: center; }
-.gauge-readout { margin-bottom: 18px; display: flex; align-items: baseline; justify-content: space-between; color: #888375; font-size: 11px; }
-.gauge-readout > b { color: #49463c; font-size: 20px; }
-.gauge-readout small { padding-left: 3px; color: #a19a8c; font-size: 10px; }
-.gauge-track { position: relative; height: 30px; border: 1px solid #ded8cb; border-radius: 99px; background: linear-gradient(90deg, #e4b09a 0%, #f0d69c 48%, #b7c995 100%); }
-.gauge-target { position: absolute; top: -2px; width: 18%; height: 32px; border: 1px solid #73885e; border-radius: 99px; background: rgba(106, 139, 78, .42); transform: translateX(-50%); transition: left .2s; }
-.gauge-target i { position: absolute; top: -17px; left: 50%; color: #667751; font-size: 7px; font-style: normal; transform: translateX(-50%); }
-.gauge-needle { position: absolute; top: -10px; left: 50%; width: 4px; height: 50px; border-radius: 5px; background: #312f27; box-shadow: 0 0 0 3px rgba(255,255,255,.75); transform: translateX(-50%); transition: left .04s linear; }
-.gauge-labels { margin: 14px 0 18px; display: flex; justify-content: space-between; color: #aaa496; font-size: 10px; }
+.gauge-readout { margin-bottom: 26px; display: flex; align-items: baseline; justify-content: space-between; color: #888375; font-size: 13px; }
+.gauge-readout > b { color: #49463c; font-size: 34px; }
+.gauge-readout small { padding-left: 4px; color: #a19a8c; font-size: 13px; }
+.gauge-track { position: relative; height: 58px; border: 1px solid #ded8cb; border-radius: 99px; background: repeating-linear-gradient(90deg, transparent 0 calc(10% - 1px), rgba(85,76,58,.18) calc(10% - 1px) 10%), linear-gradient(90deg, #e4b09a 0%, #f0d69c 48%, #b7c995 100%); box-shadow: inset 0 2px 5px rgba(74,60,43,.12), 0 5px 13px rgba(74,60,43,.08); }
+.gauge-target { position: absolute; top: -3px; width: 18%; height: 64px; border: 2px solid #73885e; border-radius: 99px; background: rgba(106, 139, 78, .38); box-shadow: 0 0 0 4px rgba(255,255,255,.5); transform: translateX(-50%); transition: left .2s; }
+.gauge-target i { position: absolute; top: -23px; left: 50%; color: #667751; font-size: 10px; font-style: normal; font-weight: 700; transform: translateX(-50%); }
+.gauge-needle { position: absolute; z-index: 1; top: -16px; left: 50%; width: 6px; height: 88px; border: 1px solid #fff; border-radius: 5px; background: #312f27; box-shadow: 0 2px 8px rgba(49,47,39,.32); transform: translateX(-50%); transition: left .04s linear; }
+.gauge-labels { margin: 18px 0 22px; display: flex; justify-content: space-between; color: #999181; font-size: 12px; }
 .mini-game-button { width: 100%; min-height: 42px; margin-top: auto; padding: 10px 14px; border: 0; border-radius: 3px; background: #34342c; color: #fffdf7; font-size: 11px; font-weight: 700; cursor: pointer; transition: transform .15s, background .15s; }
 .mini-game-button:hover { background: #535144; transform: translateY(-1px); }
 .mini-game-status { min-height: 31px; margin: 10px 0 0; color: #837c6e; font-size: 9px; line-height: 1.6; }
 .gauge-game.is-precise .gauge-readout > b { color: #708a51; animation: precise-flash .6s ease-in-out 3; }
 @keyframes precise-flash { 50% { transform: scale(1.18); text-shadow: 0 0 12px rgba(112,138,81,.45); } }
-.fizz-stage { min-height: 280px; flex: 1; margin: 2px 0 8px; display: flex; align-items: center; justify-content: center; gap: 36px; }
-.fizz-chami { position: relative; width: 190px; height: 190px; flex: 0 0 auto; }
+.fizz-stage { min-height: 320px; flex: 1; margin: 2px 0 8px; display: flex; align-items: center; justify-content: center; gap: 36px; }
+.fizz-chami { position: relative; width: 270px; height: 270px; flex: 0 0 auto; }
 .fizz-chami::before { position: absolute; inset: 8px; border: 2px solid rgba(217,120,69,.5); border-radius: 50%; content: ''; opacity: 0; transform: scale(.6); }
 .fizz-chami img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 7px 7px rgba(76,66,51,.13)); }
 .is-wobbling .fizz-chami img { animation: chami-bounce .32s ease-in-out; }
@@ -342,9 +342,14 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
   .mini-games-section, .collection-section { padding: 58px 6% 52px; }
   .mini-game-grid { grid-template-columns: 1fr; grid-auto-rows: auto; gap: 12px; }
   .mini-game-card { height: auto; padding: 20px; }
-  .gauge-stage { min-height: 200px; }
-  .fizz-stage { min-height: 220px; }
-  .fizz-chami { width: 150px; height: 150px; }
+  .gauge-stage { min-height: 220px; }
+  .gauge-readout { margin-bottom: 22px; font-size: 12px; }
+  .gauge-readout > b { font-size: 30px; }
+  .gauge-track { height: 48px; }
+  .gauge-target { height: 54px; }
+  .gauge-needle { height: 76px; }
+  .fizz-stage { min-height: 280px; }
+  .fizz-chami { width: 220px; height: 220px; }
   .catch-arena { height: 260px; min-height: 220px; }
   .catch-target { width: 88px; height: 88px; }
   .memory-board { width: min(100%, 430px); }
@@ -365,6 +370,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
   .brand small { font-size: 7px; }
   .header-nav { gap: 9px; }
   .header-nav a { font-size: 8px; }
+  .fizz-stage { gap: 12px; }
+  .fizz-chami { width: 190px; height: 190px; }
   .lab-heading { gap: 10px; }
   .lab-heading .kicker { font-size: 8px; }
   .sample { min-height: 178px; padding: 11px 9px 13px; }
