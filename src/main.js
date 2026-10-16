@@ -103,13 +103,17 @@ let towerState = { running: false, height: 0, width: 34, position: 0, direction:
 let pingpongState = { active: false, hits: 0, x: 50, y: 18, vx: 0, vy: 0, paddleX: 50, frame: null, lastFrame: 0 }
 let profileSyncPromise = null
 let scoreToastTimeout = 0
+let chamiToastTimeout = 0
 
 function loadResearch() {
-  const fresh = { completedRounds: 0, bestSugar: 0, bestMashes: 0, bestCatches: 0, catchPlays: 0, gaugePlays: 0, precisionHits: 0, mashPlays: 0, bestMemoryMoves: 0, memoryPlays: 0, memoryGolds: 0, molePlays: 0, radarPlays: 0, towerPlays: 0, pingpongPlays: 0, totalScore: 0 }
+  const fresh = { completedRounds: 0, bestSugar: 0, bestMashes: 0, bestCatches: 0, catchPlays: 0, gaugePlays: 0, precisionHits: 0, mashPlays: 0, bestMemoryMoves: 0, memoryPlays: 0, memoryGolds: 0, molePlays: 0, radarPlays: 0, towerPlays: 0, pingpongPlays: 0, totalScore: 0, earnedChamis: [] }
   try {
     const saved = JSON.parse(localStorage.getItem(saveKey))
     const { badges, trophies, ...researchRecord } = saved || {}
-    return { ...fresh, ...researchRecord, totalScore: Math.max(0, Math.floor(Number(researchRecord.totalScore) || 0)) }
+    const earnedChamis = Array.isArray(researchRecord.earnedChamis)
+      ? researchRecord.earnedChamis.filter((sprite) => chamiSprites.includes(sprite))
+      : []
+    return { ...fresh, ...researchRecord, earnedChamis, totalScore: Math.max(0, Math.floor(Number(researchRecord.totalScore) || 0)) }
   } catch {
     return fresh
   }
@@ -141,6 +145,22 @@ function showResearchScoreToast(earned) {
   }, 3600)
 }
 
+function showChamiAcquisitionToast(added) {
+  const toast = document.querySelector('#chami-toast')
+  if (!toast) return
+  toast.hidden = false
+  toast.querySelector('.chami-toast-count').textContent = `${added}마리`
+  toast.querySelector('.chami-toast-total').textContent = `이 브라우저에 저장된 당도왕 차미 ${research.earnedChamis.length}마리`
+  toast.classList.remove('is-visible')
+  void toast.offsetWidth
+  toast.classList.add('is-visible')
+  window.clearTimeout(chamiToastTimeout)
+  chamiToastTimeout = window.setTimeout(() => {
+    toast.classList.remove('is-visible')
+    chamiToastTimeout = window.setTimeout(() => { toast.hidden = true }, 240)
+  }, 3600)
+}
+
 function addResearchScore(points, { notify = true } = {}) {
   const earned = Math.max(0, Math.round(Number(points) || 0))
   if (!earned) return
@@ -162,7 +182,7 @@ function trophyTierForScore(score) {
 
 function applyServerProfile(profile) {
   const stats = profile.stats || {}
-  const localOnly = { molePlays: research.molePlays, radarPlays: research.radarPlays, towerPlays: research.towerPlays, pingpongPlays: research.pingpongPlays, totalScore: research.totalScore || 0, siteTimeRemainderMs: research.siteTimeRemainderMs || 0 }
+  const localOnly = { molePlays: research.molePlays, radarPlays: research.radarPlays, towerPlays: research.towerPlays, pingpongPlays: research.pingpongPlays, totalScore: research.totalScore || 0, siteTimeRemainderMs: research.siteTimeRemainderMs || 0, earnedChamis: [...(research.earnedChamis || [])] }
   research = {
     completedRounds: Number(stats.completed_rounds) || 0,
     bestSugar: Number(stats.best_sugar) || 0,
@@ -302,8 +322,11 @@ function measureRandomSample() {
       submitGameEvent({ type: 'round_complete', sugars: samples.map((item) => item.sugar) })
       winners.forEach((winner) => {
         winner.winner = true
+        research.earnedChamis.push(winner.sprite)
         attachChamiSatellite(winner.sprite)
       })
+      saveResearch()
+      showChamiAcquisitionToast(winners.length)
       research.completedRounds += 1
       research.bestSugar = Math.max(research.bestSugar, highest)
       addResearchScore(25 + Math.round(highest * 0.3))
@@ -1061,6 +1084,11 @@ document.body.insertAdjacentHTML('beforeend', `
     <span class="score-toast-copy"><strong>기록 업데이트</strong><span>게임 결과 <b class="score-toast-earned">+0</b>점이 트로피에 합산됐어요</span><small class="score-toast-total">0점 누적</small></span>
     <span class="score-toast-spark" aria-hidden="true">✦</span>
   </aside>
+  <aside class="chami-toast" id="chami-toast" role="status" aria-live="polite" aria-atomic="true" hidden>
+    <span class="score-toast-icon chami-toast-icon" aria-hidden="true">🍃</span>
+    <span class="score-toast-copy"><strong>차미 추가</strong><span><b class="chami-toast-count">1마리</b>가 당도왕으로 합류했어요</span><small class="score-toast-total chami-toast-total">이번 화면에 합류한 차미 1마리</small></span>
+    <span class="score-toast-spark" aria-hidden="true">✦</span>
+  </aside>
 `)
 
 document.body.insertAdjacentHTML('beforeend', `
@@ -1079,14 +1107,14 @@ document.body.insertAdjacentHTML('beforeend', `
 시트리의 숲 방송국: https://www.sooplive.com/station/vlupsitry
 원곡·원본 콘텐츠의 공식 링크: 배포 시 실제 사용한 공식 콘텐츠 URL 추가 기재</pre><p>시트리 일러스트는 AI 생성 팬 일러스트이며, 의상 참고 출처로 위 방송 VOD를 표기합니다. 고해상도 원화·포토카드 원본·음원 원본 파일을 추출하거나 별도 배포할 수 없습니다. 원저작물을 사실상 그대로 복제해 제공하는 형태도 금지됩니다.</p></section>
       <section class="guideline-section"><h3>콘텐츠 제한</h3><p>타인 비방, 선정성, 정치·종교·사상 풍자, 반사회적 표현, 스트리머 사생활 침해·추적·사칭 등 당사 규정을 위반하는 내용은 사용할 수 없습니다.</p></section>
-      <section class="guideline-section"><h3>AI 생성물과 음성 합성</h3><p>AI 생성물은 AI 생성물임을 표시해야 하며, 당사 저작물을 학습 데이터로 사용해서는 안 됩니다. 아래 O/X 표에 이 사이트에서 실제 사용한 AI 기능을 표시했습니다. 시트리와 차미 캐릭터 및 공식 IP의 권리는 각 권리자에게 있으며 이 팬게임이 권리를 주장하지 않습니다. 넓은 화면에서는 히어로 시트리를 반복해서 누르면 1·2단계 경계 대사와 붉은 말풍선이 나타나며, 2단계에서 5초 안에 15회 이상 더 누르면 이스터에그 3단계 대사와 조금 더 크고 검붉은 글씨가 표시됩니다. 대사 게이지가 끝나면 단계·색·대사가 기본 상태로 돌아옵니다. 음성은 재생되지 않습니다.</p><p>음성 합성은 이주인, 시트리, 노이, 리미, 라즈에 한해 비영리 목적으로 허용됩니다. 벨디르 미스틸테인, 이아나 이그노시스, 베루의 음성 합성은 허용되지 않습니다. 허용 범위의 음성 합성도 당사 요청 시 즉시 중단해야 합니다.</p></section>
+      <section class="guideline-section"><h3>AI 생성물과 음성 합성</h3><p>AI 생성물은 AI 생성물임을 표시해야 하며, 당사 저작물을 학습 데이터로 사용해서는 안 됩니다. 아래 O/X 표에 이 사이트에서 실제 사용한 AI 기능을 표시했습니다. 시트리와 차미 캐릭터 및 공식 IP의 권리는 각 권리자에게 있으며 이 팬게임이 권리를 주장하지 않습니다. 넓은 화면에서는 히어로 시트리를 반복해서 누르면 1·2단계 경계 대사와 붉은 말풍선이 나타나며, 2단계에서 5초 안에 15회 이상 더 누르면 이스터에그 3단계 대사와 조금 더 크고 검붉은 글씨가 표시됩니다. 당도왕 차미가 새로 합류하면 알림 토스트가 나타납니다. 대사 게이지가 끝나면 단계·색·대사가 기본 상태로 돌아옵니다. 음성은 재생되지 않습니다.</p><p>음성 합성은 이주인, 시트리, 노이, 리미, 라즈에 한해 비영리 목적으로 허용됩니다. 벨디르 미스틸테인, 이아나 이그노시스, 베루의 음성 합성은 허용되지 않습니다. 허용 범위의 음성 합성도 당사 요청 시 즉시 중단해야 합니다.</p></section>
       <section class="guideline-section ai-disclosure" aria-labelledby="ai-disclosure-title">
         <h3 id="ai-disclosure-title">이 사이트의 AI 사용 내역 O/X</h3>
         <p class="ai-disclosure-intro">O는 실제 사용, X는 사용하지 않음을 뜻합니다. 공식 캐릭터를 참고해 새로 생성한 팬 이미지이며, 공식 원화 파일을 그대로 사이트 에셋으로 쓰지 않습니다.</p>
         <div class="ai-disclosure-list">
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>시트리 이미지 생성</b><p>메인 시트리 일러스트와 SD 포즈 이미지를 AI 이미지 생성으로 제작했습니다. 메인 의상은 <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">참고 VOD</a>의 시트리 의상을 참고했습니다. 원본 방송 캡처를 복사한 이미지는 사용하지 않습니다.</p></div></article>
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>차미 이미지 생성</b><p>공식 캐릭터의 둥근 몸, 잎 장식 등 특징을 참고해 표정·잎 형태 변형 이미지를 새로 생성했습니다. 생성된 표본 이미지는 당도왕 차미가 시트리 뒤를 따라가는 작은 위성 캐릭터로도 사용합니다. AI가 스스로 해석한 별도의 그림체로 표현했습니다.</p></div></article>
-          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 문구와 대사(2단계 붉은 반응 뒤 5초 안에 15회 이상 추가 클릭해야 나타나는 이스터에그 3단계 경계 반응 포함), 점수 반영을 알리는 토스트 문구, 기획·프런트엔드 코드 작성에 AI를 보조 도구로 사용했습니다. 실제 게임 동작과 팡 이펙트는 JavaScript와 CSS로 실행하며, 무작위 선택은 코드의 난수 기능을 사용합니다.</p></div></article>
+          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 문구와 대사(2단계 붉은 반응 뒤 5초 안에 15회 이상 추가 클릭해야 나타나는 이스터에그 3단계 경계 반응 포함), 점수 반영·당도왕 차미 합류 알림과 브라우저 저장 안내 문구, 기획·프런트엔드 코드 작성에 AI를 보조 도구로 사용했습니다. 당도왕 차미 획득 내역은 로컬 저장소에 누적하며 연구카드에 총 획득 수를 표시합니다. 실제 게임 동작과 팡 이펙트는 JavaScript와 CSS로 실행하며, 무작위 선택은 코드의 난수 기능을 사용합니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>음성·음악·효과음 생성</b><p>음성 합성, 캐릭터 음성 변환, AI 음악·BGM 및 AI 효과음 생성은 사용하지 않았습니다. 현재 사이트에는 음성·음악 재생 기능이 없습니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>영상 생성·모델 학습</b><p>AI 영상 생성은 사용하지 않았습니다. 이 프로젝트에서 공식 자료를 이용한 자체 모델 학습이나 파인튜닝도 하지 않았습니다. 이미지 생성 시 캐릭터와 의상 특징을 참고 입력으로 사용한 것과 모델 학습은 구분됩니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>이미지 가공·웹 효과의 생성형 AI 사용</b><p>생성된 이미지를 웹용 크기로 줄이고, 파비콘을 만드는 작업은 코드로 처리했습니다. 9종 게임 결과의 누적 점수와 5단계 트로피 등급은 브라우저 로컬 기록과 코드 규칙으로 계산합니다. 새 두더지팡·표정 레이더·균형탑·차미 핑퐁의 동작과 게임 이펙트도 JavaScript와 CSS로 구현했으며 생성형 AI를 사용하지 않았습니다.</p></div></article>
@@ -1118,7 +1146,7 @@ document.body.insertAdjacentHTML('beforeend', `
       <section class="trophy-showcase-info">
         <p class="kicker"><span></span> SUGAR LAB · RESEARCH FILE</p>
         <h2 id="trophy-card-title">시트리 당도 연구카드</h2>
-        <p class="trophy-showcase-subtitle">이 브라우저에 저장된 연구 기록</p>
+        <p class="trophy-showcase-subtitle">얻은 당도왕 차미 <strong id="trophy-chami-count">0</strong>마리</p>
         <div class="trophy-showcase-stats" id="trophy-showcase-stats"></div>
         <div class="single-trophy trophy-modal-item" id="trophy-rank-card" data-tier="research" aria-label="현재 트로피 등급">
           <span id="trophy-rank-icon" aria-hidden="true">🏆</span>
@@ -1497,6 +1525,7 @@ function updateTrophyScoreDisplay() {
   document.querySelector('#trophy-rank-icon').textContent = tier.icon
   document.querySelector('#trophy-tier-name').textContent = tier.name
   document.querySelector('#trophy-total-score').textContent = `총 ${research.totalScore || 0}점`
+  document.querySelector('#trophy-chami-count').textContent = String(research.earnedChamis?.length || 0)
 }
 
 document.querySelector('#view-trophy-card').addEventListener('click', () => {
