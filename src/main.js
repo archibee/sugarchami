@@ -665,25 +665,29 @@ function finishMoleRound() {
   if (!moleState.running) return
   moleState.running = false
   clearInterval(moleState.timer)
-  clearInterval(moleState.mover)
+  clearTimeout(moleState.mover)
   const score = moleState.hits * 3 + moleState.bestCombo * 2
   research.molePlays += 1
   addResearchScore(score)
-  document.querySelectorAll('.mole-hole').forEach((hole) => hole.classList.remove('has-chami'))
+  document.querySelectorAll('.mole-hole').forEach((hole) => { hole.classList.remove('has-chami'); hole.disabled = true })
   document.querySelector('#mole-start-button').textContent = '다시 팡팡!'
   document.querySelector('#mole-status').textContent = `${moleState.hits}마리 포착! 차미가 땅속 연구실로 돌아갔어요.`
 }
 
 function showMoleTarget() {
   const holes = [...document.querySelectorAll('.mole-hole')]
-  holes.forEach((hole) => { hole.classList.remove('has-chami'); hole.disabled = !moleState.running })
+  holes.forEach((hole) => { hole.classList.remove('has-chami'); hole.disabled = true })
   if (!moleState.running) return
   const availableTargets = holes.map((_, index) => index).filter((index) => index !== moleState.target && index !== moleState.avoidHole)
   moleState.target = availableTargets[Math.floor(Math.random() * availableTargets.length)]
   moleState.targetCaught = false
   const target = holes[moleState.target]
+  target.classList.remove('is-mole-hit')
+  target.disabled = false
   target.querySelector('img').src = randomChamiSprite()
   target.classList.add('has-chami')
+  window.clearTimeout(moleState.mover)
+  moleState.mover = window.setTimeout(showMoleTarget, 760)
 }
 
 function startMoleRound() {
@@ -695,7 +699,6 @@ function startMoleRound() {
   document.querySelector('#mole-start-button').textContent = '팡팡 잡는 중…'
   document.querySelector('#mole-status').textContent = '차미가 나타나는 구멍을 빠르게 눌러요!'
   showMoleTarget()
-  moleState.mover = window.setInterval(showMoleTarget, 760)
   moleState.timer = window.setInterval(() => {
     const remain = Math.max(0, moleState.endsAt - Date.now())
     document.querySelector('#mole-clock').textContent = (remain / 1000).toFixed(1)
@@ -706,7 +709,7 @@ function startMoleRound() {
 
 function hitMole(event) {
   const hole = event.target.closest('.mole-hole')
-  if (!moleState.running || !hole) return
+  if (!moleState.running || !hole || hole.disabled || !hole.classList.contains('has-chami')) return
   if (Number(hole.dataset.hole) !== moleState.target) {
     moleState.combo = 0
     return
