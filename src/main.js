@@ -745,6 +745,7 @@ function finishRadarRound() {
   clearInterval(radarState.timer)
   clearTimeout(radarState.feedbackTimer)
   document.querySelector('#radar-game').classList.remove('is-radar-correct', 'is-radar-wrong')
+  document.querySelector('#radar-prompt').style.animation = 'none'
   research.radarPlays += 1
   addResearchScore(radarState.correct * 5 + Math.max(0, radarState.rounds - radarState.correct) * 1)
   document.querySelector('#radar-start-button').textContent = '다시 관찰하기'
@@ -756,6 +757,8 @@ function startRadarRound() {
   if (radarState.running) return
   clearTimeout(radarState.feedbackTimer)
   document.querySelector('#radar-game').classList.remove('is-radar-correct', 'is-radar-wrong')
+  const prompt = document.querySelector('#radar-prompt')
+  prompt.style.animation = 'radar-prompt-blink .8s ease-in-out infinite'
   radarState = { ...radarState, running: true, correct: 0, rounds: 0, endsAt: Date.now() + 20000, timer: null, feedbackTimer: null }
   document.querySelector('#radar-correct').textContent = '0'
   document.querySelector('#radar-clock').textContent = '20.0'

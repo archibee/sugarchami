@@ -276,6 +276,7 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .radar-score > b { color: var(--orange); font-size: 33px; line-height: 1; }
 .radar-score > small { margin-left: auto; color: #817a6b; font-size: 10px; }
 .radar-prompt { min-height: 38px; box-sizing: border-box; display: grid; place-items: center; margin: 0 0 8px; padding: 7px 12px; border: 1px solid #e4d5c1; border-radius: 5px; background: #fffaf0; color: #784b36; font-size: 14px; font-weight: 700; letter-spacing: -.02em; }
+@keyframes radar-prompt-blink { 0%, 100% { border-color: #e4d5c1; background: #fffaf0; box-shadow: 0 0 0 rgba(231, 176, 105, 0); } 50% { border-color: #d18a3c; background: #ffe7bd; box-shadow: 0 0 0 5px rgba(231, 176, 105, .3), 0 0 26px rgba(231, 176, 105, .48); } }
 .radar-options { min-height: 390px; flex: 1; margin: 8px 0 14px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); align-content: center; gap: 10px; }
 .radar-option { min-width: 0; padding: 4px; border: 1px solid #e4d5c1; border-radius: 8px; background: #fffaf0; cursor: pointer; }
 .radar-option:hover { border-color: #c87d52; background: #fff2dd; }
