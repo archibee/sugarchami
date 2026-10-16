@@ -159,6 +159,8 @@ function makeSamples() {
     id: index + 1,
     sugar: Math.floor(Math.random() * 46) + 54,
     sprite: spriteOrder[index],
+    hits: 0,
+    requiredHits: Math.floor(Math.random() * 5) + 1,
     revealed: false,
   }))
 }
@@ -170,9 +172,9 @@ function renderSamples(animateId = null) {
       <span class="sample-number">SAMPLE 0${sample.id}</span>
       <span class="sample-figure" style="--hit-tilt:${Math.round(Math.random() * 44 - 22)}deg; --hit-shift:${Math.round(Math.random() * 28 - 14)}px">
         <img src="${sample.sprite}" alt="" loading="lazy" fetchpriority="low" decoding="async" />
-        <span class="impact" aria-hidden="true">팡!${sample.revealed ? `<small>${sample.sugar}°S</small>` : ''}</span>
+        <span class="impact" aria-hidden="true">팡!${sample.revealed ? `<small>${sample.sugar}°S</small>` : `<small>${sample.hits}/${sample.requiredHits}</small>`}</span>
       </span>
-      <span class="sugar-result">${sample.revealed ? `${sample.sugar}<small>°S</small>` : '<small>측정 대기 중</small>'}</span>
+      <span class="sugar-result">${sample.revealed ? `${sample.sugar}<small>°S</small>` : `<small>팡 ${sample.hits}/${sample.requiredHits}</small>`}</span>
       ${sample.winner ? '<span class="winner-tag">당도 1위 ✦</span>' : ''}
     </article>
   `).join('')
@@ -203,18 +205,21 @@ function launchSugarBurst(sampleId) {
 }
 
 function measureRandomSample() {
-  const unopened = samples.filter((sample) => !sample.revealed)
-  if (unopened.length === 0) return
+  const unfinished = samples.filter((sample) => !sample.revealed)
+  if (unfinished.length === 0) return
 
-  const sample = unopened[Math.floor(Math.random() * unopened.length)]
-  sample.revealed = true
+  const sample = unfinished[Math.floor(Math.random() * unfinished.length)]
+  sample.hits += 1
+  sample.revealed = sample.hits >= sample.requiredHits
   renderSamples(sample.id)
   launchSugarBurst(sample.id)
   if ('vibrate' in navigator) navigator.vibrate([42, 22, 76])
   const remaining = samples.filter((item) => !item.revealed).length
   document.querySelector('#progress-count').textContent = sampleCount - remaining
   document.querySelector('#lab-status').textContent = remaining > 0
-    ? `차미 ${String(sample.id).padStart(2, '0')} — ${sample.sugar}°S. ${measurementNotes[Math.floor(Math.random() * measurementNotes.length)]}`
+    ? sample.revealed
+      ? `차미 ${String(sample.id).padStart(2, '0')} — ${sample.sugar}°S 측정 완료! ${remaining}마리가 남았어요.`
+      : `차미 ${String(sample.id).padStart(2, '0')} 팡 ${sample.hits}/${sample.requiredHits}! 아직 버티고 있어요. ${remaining}마리를 더 완료해요.`
     : `마지막 차미까지 측정 완료! 당도 1위 발표를 준비합니다…`
 
   const popButton = document.querySelector('#pop-button')
@@ -249,7 +254,7 @@ function measureRandomSample() {
       document.querySelector('#winner-copy').textContent = `${winnerIds} — ${highest}°S. 당도계가 왕관을 씌우려다 설탕에 붙었습니다.`
       document.querySelector('#winner-panel').hidden = false
       document.querySelector('#winner-panel').classList.add('is-visible')
-      document.querySelector('#lab-status').textContent = `최고 당도 ${highest}°S! ${winnerIds}가 오늘의 당도왕이에요.`
+      document.querySelector('#lab-status').textContent = `최고 당도 ${highest}°S! ${winnerIds}가 오늘의 당도왕이에요. 새 표본을 시작할 수 있어요.`
       popButton.disabled = false
       popButton.querySelector('.pop-title').textContent = '다시 연구하기'
       popButton.querySelector('.pop-subtitle').textContent = '새 표본 6개'
@@ -261,14 +266,14 @@ function resetLab() {
   roundSerial += 1
   samples = makeSamples()
   renderSamples()
-  document.querySelector('#lab-status').textContent = '버튼을 누르면 차미 한 명이 무작위로 팡! 측정돼요.'
+  document.querySelector('#lab-status').textContent = '차미마다 필요한 만큼 팡팡 눌러 여섯 표본의 측정을 완료해요.'
   document.querySelector('#progress-count').textContent = '0'
   document.querySelector('#winner-panel').hidden = true
   document.querySelector('#winner-panel').classList.remove('is-visible')
   const popButton = document.querySelector('#pop-button')
   popButton.disabled = false
   popButton.querySelector('.pop-title').textContent = '차미 팡!'
-  popButton.querySelector('.pop-subtitle').innerHTML = '랜덤 측정 <i aria-hidden="true">↗</i>'
+  popButton.querySelector('.pop-subtitle').innerHTML = '남은 차미 팡팡 <i aria-hidden="true">↗</i>'
 }
 
 function animateGauge(timestamp) {
@@ -853,9 +858,9 @@ app.innerHTML = `
         </div>
       </div>
       <div class="pop-action">
-        <div class="pop-explainer"><svg class="pop-star asterisk-shape" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg><span><b>누가 나올지는 시트리도 몰라요.</b><small>여섯 번 팡! 해서 당도왕을 찾아보세요.</small></span></div>
+        <div class="pop-explainer"><svg class="pop-star asterisk-shape" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg><span><b>누가 나올지는 시트리도 몰라요.</b><small>차미마다 1~5번 팡팡 눌러 당도를 측정해요.</small></span></div>
         <button class="pop-button" id="pop-button" type="button">
-          <span class="pop-title">차미 팡!</span><span class="pop-subtitle">랜덤 측정 <i aria-hidden="true">↗</i></span>
+          <span class="pop-title">차미 팡!</span><span class="pop-subtitle">남은 차미 팡팡 <i aria-hidden="true">↗</i></span>
         </button>
       </div>
       <div class="sample-board" id="sample-board"></div>
@@ -865,7 +870,7 @@ app.innerHTML = `
         <span class="winner-confetti" aria-hidden="true"><i>✦</i><svg class="asterisk-shape" viewBox="0 0 100 100"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg><i>✦</i></span>
       </div>
       <div class="lab-footer">
-        <p id="lab-status" role="status" aria-live="polite">버튼을 누르면 차미 한 명이 무작위로 팡! 측정돼요.</p>
+        <p id="lab-status" role="status" aria-live="polite">차미마다 필요한 만큼 팡팡 눌러 여섯 표본의 측정을 완료해요.</p>
         <span class="progress-label"><b id="progress-count">0</b> / 06 CHECKED</span>
       </div>
     </section>
