@@ -101,7 +101,6 @@ function applyServerProfile(profile) {
     memoryGolds: Number(stats.memory_golds) || 0,
   }
   saveResearch()
-  renderResearchRecord()
 }
 
 async function syncServerProfile() {
@@ -127,12 +126,6 @@ async function submitGameEvent(event) {
   } catch {
     // Do not interrupt a game round when persistent storage is unavailable.
   }
-}
-
-function renderResearchRecord() {
-  document.querySelector('#round-record').textContent = research.completedRounds
-  document.querySelector('#sugar-record').textContent = research.bestSugar ? `${research.bestSugar}°S` : '—'
-  document.querySelector('#mash-record').textContent = research.bestMashes
 }
 
 function makeSamples() {
@@ -225,7 +218,6 @@ function measureRandomSample() {
       research.completedRounds += 1
       research.bestSugar = Math.max(research.bestSugar, highest)
       saveResearch()
-      renderResearchRecord()
       renderSamples()
       const winnerIds = winners.map((winner) => `차미 ${String(winner.id).padStart(2, '0')}`).join(' · ')
       document.querySelector('#winner-title').textContent = winners.length > 1 ? '공동 당도왕 탄생!' : '오늘의 당도왕!'
@@ -629,15 +621,10 @@ app.innerHTML = `
         <div>
           <p class="kicker"><span></span> 차미 연구 기록</p>
           <h2 id="trophy-title">트로피</h2>
-          <p>이 브라우저에 저장된 연구 기록이에요.</p>
+          <p>브라우저에 저장된 연구 기록을 카드에서 확인해보세요.</p>
         </div>
       </div>
-      <div class="research-stats">
-        <div><span>완료한 연구</span><b id="round-record">0</b><small>ROUND</small></div>
-        <div><span>역대 최고 당도</span><b id="sugar-record">—</b><small>°S</small></div>
-        <div><span>기포 제거 기록</span><b id="mash-record">0</b><small>회</small></div>
-      </div>
-      <div class="single-trophy" aria-label="트로피"><span aria-hidden="true">🏆</span><b>트로피</b></div>
+      <button class="view-trophy-button" id="view-trophy-card" type="button"><span aria-hidden="true">✦</span> 시트리 당도 연구카드 보기</button>
       <p class="collection-note">연구 기록은 이 브라우저에 저장돼요. 다른 기기에서는 새 연구 기록으로 시작합니다.</p>
     </section>
   </main>
@@ -705,7 +692,7 @@ document.body.insertAdjacentHTML('beforeend', `
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 문구와 대사, 기획·프런트엔드 코드 작성에 AI를 보조 도구로 사용했습니다. 실제 게임 동작과 팡 이펙트는 JavaScript와 CSS로 실행하며, 무작위 선택은 코드의 난수 기능을 사용합니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>음성·음악·효과음 생성</b><p>음성 합성, 캐릭터 음성 변환, AI 음악·BGM 및 AI 효과음 생성은 사용하지 않았습니다. 현재 사이트에는 음성·음악 재생 기능이 없습니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>영상 생성·모델 학습</b><p>AI 영상 생성은 사용하지 않았습니다. 이 프로젝트에서 공식 자료를 이용한 자체 모델 학습이나 파인튜닝도 하지 않았습니다. 이미지 생성 시 캐릭터와 의상 특징을 참고 입력으로 사용한 것과 모델 학습은 구분됩니다.</p></div></article>
-          <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>이미지 가공·웹 효과의 생성형 AI 사용</b><p>생성된 이미지를 웹용 크기로 줄이고, 파비콘을 만드는 작업은 코드로 처리했습니다. 트로피 표시는 정적인 장식이며, 별도 달성·보상 시스템은 없습니다. CSS 흔들림, 파티클, 게임 이펙트도 코드로 만든 시각 효과입니다.</p></div></article>
+          <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>이미지 가공·웹 효과의 생성형 AI 사용</b><p>생성된 이미지를 웹용 크기로 줄이고, 파비콘을 만드는 작업은 코드로 처리했습니다. 연구카드에는 브라우저에 저장된 연구 기록과 정적인 트로피 한 항목만 표시하며 별도 달성·보상 시스템은 없습니다. CSS 흔들림, 파티클, 게임 이펙트도 코드로 만든 시각 효과입니다.</p></div></article>
         </div>
         <p class="ai-name-note">사이트에서는 캐릭터 이름을 시트리와 차미로 표기합니다. 차미에는 별도의 공식 영문 키워드가 없어 영문 이름 표기를 사용하지 않습니다.</p>
         <p class="ai-source-links"><b>이미지 참고 출처:</b> <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">SITRY 의상 참고 VOD ↗</a> · <a href="https://www.sooplive.com/station/vlupsitry" target="_blank" rel="noopener noreferrer">시트리의 숲 공식 방송국 ↗</a></p>
@@ -723,6 +710,24 @@ document.querySelector('#guidelines-close').addEventListener('click', () => guid
 guidelinesDialog.addEventListener('click', (event) => {
   if (event.target === guidelinesDialog) guidelinesDialog.close()
 })
+document.body.insertAdjacentHTML('beforeend', `
+  <dialog class="trophy-card-dialog" id="trophy-card-dialog" aria-labelledby="trophy-card-title">
+    <article class="trophy-showcase" id="trophy-showcase">
+      <button class="trophy-showcase-close" id="trophy-showcase-close" type="button" aria-label="연구카드 닫기">✕</button>
+      <section class="trophy-showcase-art" aria-label="시트리 AI 생성 팬 일러스트">
+        <img src="/images/sitri-hero-expanded.png" alt="시트리 AI 생성 팬 일러스트" loading="lazy" fetchpriority="low" decoding="async" />
+        <span class="trophy-art-label">SITRY · SUGAR RESEARCHER · AI FAN ART</span>
+      </section>
+      <section class="trophy-showcase-info">
+        <p class="kicker"><span></span> SUGAR LAB · RESEARCH FILE</p>
+        <h2 id="trophy-card-title">시트리 당도 연구카드</h2>
+        <p class="trophy-showcase-subtitle">이 브라우저에 저장된 연구 기록</p>
+        <div class="trophy-showcase-stats" id="trophy-showcase-stats"></div>
+        <div class="single-trophy trophy-modal-item" aria-label="트로피"><span aria-hidden="true">🏆</span><b>트로피</b></div>
+      </section>
+    </article>
+  </dialog>
+`)
 document.body.insertAdjacentHTML('beforeend', `
   <aside class="floating-sitri" id="floating-sitri" aria-label="시트리의 한마디">
     <div class="floating-sitri-bubble"><span class="speech-dot" aria-hidden="true"></span><span id="floating-sitri-line"></span></div>
@@ -943,7 +948,32 @@ function scheduleDockSectionUpdate() {
 window.addEventListener('scroll', scheduleDockSectionUpdate, { passive: true })
 window.addEventListener('resize', scheduleDockSectionUpdate)
 updateDockSection()
-renderResearchRecord()
+const trophyCardDialog = document.querySelector('#trophy-card-dialog')
+const trophyShowcase = document.querySelector('#trophy-showcase')
+document.querySelector('#view-trophy-card').addEventListener('click', () => {
+  document.querySelector('#trophy-showcase-stats').innerHTML = [
+    ['완료 연구', research.completedRounds, 'ROUND'],
+    ['최고 당도', research.bestSugar || '—', '°S'],
+    ['최고 팡팡', research.bestMashes, '회'],
+  ].map(([label, value, unit]) => `<div><small>${label}</small><b>${value}<em>${unit}</em></b></div>`).join('')
+  trophyCardDialog.showModal()
+})
+document.querySelector('#trophy-showcase-close').addEventListener('click', () => trophyCardDialog.close())
+trophyCardDialog.addEventListener('click', (event) => {
+  if (event.target === trophyCardDialog) trophyCardDialog.close()
+})
+trophyShowcase.addEventListener('pointermove', (event) => {
+  if (event.pointerType !== 'mouse' || reducedMotion) return
+  const bounds = trophyShowcase.getBoundingClientRect()
+  const x = (event.clientX - bounds.left) / bounds.width - 0.5
+  const y = (event.clientY - bounds.top) / bounds.height - 0.5
+  trophyShowcase.style.setProperty('--card-tilt-x', `${x * 5}deg`)
+  trophyShowcase.style.setProperty('--card-tilt-y', `${y * -5}deg`)
+})
+trophyShowcase.addEventListener('pointerleave', () => {
+  trophyShowcase.style.setProperty('--card-tilt-x', '0deg')
+  trophyShowcase.style.setProperty('--card-tilt-y', '0deg')
+})
 const beginProfileSync = () => {
   if (!profileSyncPromise) profileSyncPromise = syncServerProfile()
 }
