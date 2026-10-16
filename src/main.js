@@ -566,6 +566,7 @@ function startMoleRound() {
   moleState = { running: true, hits: 0, combo: 0, bestCombo: 0, endsAt: Date.now() + 15000, timer: null, mover: null, target: -1 }
   document.querySelector('#mole-count').textContent = '0'
   document.querySelector('#mole-clock').textContent = '15.0'
+  document.querySelector('#mole-timer-fill').style.transform = 'scaleX(1)'
   document.querySelector('#mole-start-button').textContent = '팡팡 잡는 중…'
   document.querySelector('#mole-status').textContent = '차미가 나타나는 구멍을 빠르게 눌러요!'
   showMoleTarget()
@@ -573,6 +574,7 @@ function startMoleRound() {
   moleState.timer = window.setInterval(() => {
     const remain = Math.max(0, moleState.endsAt - Date.now())
     document.querySelector('#mole-clock').textContent = (remain / 1000).toFixed(1)
+    document.querySelector('#mole-timer-fill').style.transform = `scaleX(${remain / 15000})`
     if (!remain) finishMoleRound()
   }, 50)
 }
@@ -616,12 +618,14 @@ function startRadarRound() {
   radarState = { ...radarState, running: true, correct: 0, rounds: 0, endsAt: Date.now() + 20000, timer: null }
   document.querySelector('#radar-correct').textContent = '0'
   document.querySelector('#radar-clock').textContent = '20.0'
+  document.querySelector('#radar-timer-fill').style.transform = 'scaleX(1)'
   document.querySelector('#radar-start-button').textContent = '관찰 진행 중'
   document.querySelector('#radar-status').textContent = '표정을 살펴보고 알맞은 차미를 골라요.'
   document.querySelectorAll('#radar-options .radar-option').forEach((option) => { option.disabled = false })
   radarState.timer = window.setInterval(() => {
     const remain = Math.max(0, radarState.endsAt - Date.now())
     document.querySelector('#radar-clock').textContent = (remain / 1000).toFixed(1)
+    document.querySelector('#radar-timer-fill').style.transform = `scaleX(${remain / 20000})`
     if (!remain) finishRadarRound()
   }, 50)
 }
@@ -917,6 +921,8 @@ document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
   <article class="mini-game-card tower-game" id="tower-game"><div class="mini-game-topline"><span>08 · 차미 균형탑</span><span class="mini-game-icon" aria-hidden="true">🧱</span></div><h3>설탕 균형탑</h3><p class="mini-game-copy">게임을 시작한 뒤, 천천히 움직이는 블록을 맞춰 놓아요.</p><div class="catch-score"><b id="tower-height">0</b><span>층</span></div><div class="tower-board"><div id="tower-stack" class="tower-stack"></div><i class="tower-foundation" aria-hidden="true"></i><i id="tower-moving" class="tower-moving"></i></div><div class="tower-actions"><button class="mini-game-button" id="tower-start-button" type="button">게임 시작</button><button class="mini-game-button tower-drop-button" id="tower-drop-button" type="button" disabled>블록 놓기</button></div><p class="mini-game-status" id="tower-status" role="status" aria-live="polite">게임 시작을 누르면 움직임이 시작돼요.</p></article>
   <article class="mini-game-card pingpong-game" id="pingpong-game"><div class="mini-game-topline"><span>09 · 차미 핑퐁</span><span class="mini-game-icon" aria-hidden="true">🏓</span></div><h3>차미 핑퐁</h3><p class="mini-game-copy">포인터나 좌우 방향키로 차미를 움직여 공을 받아쳐요. 한 번 놓치면 끝!</p><div class="catch-score"><b id="pingpong-hits">0</b><span>번 받아침</span></div><div class="pingpong-court" id="pingpong-court" aria-label="차미 핑퐁 경기장"><span class="pingpong-center-line" aria-hidden="true"></span><i class="pingpong-ball" id="pingpong-ball" aria-hidden="true"></i><img class="pingpong-paddle" id="pingpong-paddle" src="/images/variants/chami/chami-cheerful.png" alt="차미 패들"></div><button class="mini-game-button" id="pingpong-start-button" type="button">핑퐁 시작</button><p class="mini-game-status" id="pingpong-status" role="status" aria-live="polite">시작 버튼을 누르고 공을 받아쳐요!</p></article>
 `)
+document.querySelector('#mole-clock').closest('.catch-score').insertAdjacentHTML('afterend', '<div class="fizz-timer game-countdown" aria-hidden="true"><span id="mole-timer-fill"></span></div>')
+document.querySelector('#radar-clock').closest('.radar-score').insertAdjacentHTML('afterend', '<div class="fizz-timer game-countdown" aria-hidden="true"><span id="radar-timer-fill"></span></div>')
 nextRadarPrompt()
 document.body.insertAdjacentHTML('beforeend', `
   <nav class="quick-dock" aria-label="빠른 게임 메뉴">
