@@ -597,7 +597,7 @@ function nextRadarPrompt() {
   radarState.target = names[Math.floor(Math.random() * names.length)]
   document.querySelector('#radar-prompt').textContent = `${labels[radarState.target]} 차미를 찾아요!`
   const options = shuffle([radarState.target, ...shuffle(names.filter((name) => name !== radarState.target)).slice(0, 5)])
-  document.querySelector('#radar-options').innerHTML = options.map((name) => `<button class="radar-option" type="button" data-expression="${name}" aria-label="차미 표정 고르기"><img src="/images/variants/chami/${name}.png" alt="" loading="lazy" decoding="async"></button>`).join('')
+  document.querySelector('#radar-options').innerHTML = options.map((name) => `<button class="radar-option" type="button" data-expression="${name}" aria-label="차미 표정 고르기" ${radarState.running ? '' : 'disabled'}><img src="/images/variants/chami/${name}.png" alt="" loading="lazy" decoding="async"></button>`).join('')
 }
 
 function finishRadarRound() {
@@ -606,19 +606,19 @@ function finishRadarRound() {
   clearInterval(radarState.timer)
   research.radarPlays += 1
   addResearchScore(radarState.correct * 5 + Math.max(0, radarState.rounds - radarState.correct) * 1)
-  document.querySelector('#radar-options').innerHTML = ''
   document.querySelector('#radar-start-button').textContent = '다시 관찰하기'
   document.querySelector('#radar-status').textContent = `${radarState.rounds}번 관찰해 ${radarState.correct}번 찾았어요.`
+  nextRadarPrompt()
 }
 
 function startRadarRound() {
   if (radarState.running) return
-  radarState = { running: true, correct: 0, rounds: 0, endsAt: Date.now() + 20000, timer: null, target: '' }
+  radarState = { ...radarState, running: true, correct: 0, rounds: 0, endsAt: Date.now() + 20000, timer: null }
   document.querySelector('#radar-correct').textContent = '0'
   document.querySelector('#radar-clock').textContent = '20.0'
-  document.querySelector('#radar-start-button').textContent = '관찰 중…'
+  document.querySelector('#radar-start-button').textContent = '관찰 진행 중'
   document.querySelector('#radar-status').textContent = '표정을 살펴보고 알맞은 차미를 골라요.'
-  nextRadarPrompt()
+  document.querySelectorAll('#radar-options .radar-option').forEach((option) => { option.disabled = false })
   radarState.timer = window.setInterval(() => {
     const remain = Math.max(0, radarState.endsAt - Date.now())
     document.querySelector('#radar-clock').textContent = (remain / 1000).toFixed(1)
@@ -640,7 +640,7 @@ function chooseRadarExpression(event) {
 
 function renderTower() {
   const tower = document.querySelector('#tower-stack')
-  tower.innerHTML = Array.from({ length: towerState.height }, (_, index) => `<i class="tower-block" style="--block:${index};--block-width:${Math.max(8, towerState.width)}%"><img src="${index === towerState.height - 1 ? randomChamiSprite() : '/images/variants/chami/chami-cheerful.png'}" alt="" loading="lazy" decoding="async"></i>`).join('')
+  tower.innerHTML = Array.from({ length: towerState.height }, (_, index) => `<i class="tower-block ${index === towerState.height - 1 ? 'just-landed' : ''}" style="--block:${index};--block-width:${Math.max(8, towerState.width)}%"><img src="${index === towerState.height - 1 ? randomChamiSprite() : '/images/variants/chami/chami-cheerful.png'}" alt="" loading="lazy" decoding="async"></i>`).join('')
   document.querySelector('#tower-height').textContent = towerState.height
 }
 
@@ -660,10 +660,12 @@ function startTower() {
   towerState.width = 34
   towerState.position = 0
   towerState.direction = 1
-  towerState.speed = 0.42
+  towerState.speed = 0.012
   towerState.lastFrame = 0
   document.querySelector('#tower-status').textContent = '움직이는 설탕 블록을 차미 탑 위에 맞춰 쌓아요.'
-  document.querySelector('#tower-start-button').textContent = '블록 쌓기!'
+  document.querySelector('#tower-start-button').textContent = '게임 진행 중'
+  document.querySelector('#tower-start-button').disabled = true
+  document.querySelector('#tower-drop-button').disabled = false
   document.querySelector('#tower-moving').style.width = '34%'
   document.querySelector('#tower-moving').style.left = '0%'
   renderTower()
@@ -671,7 +673,7 @@ function startTower() {
 }
 
 function placeTowerBlock() {
-  if (!towerState.running) { startTower(); return }
+  if (!towerState.running) return
   const left = towerState.position
   const overlap = Math.max(0, Math.min(left + towerState.width, 50 + towerState.width / 2) - Math.max(left, 50 - towerState.width / 2))
   if (overlap < 7) {
@@ -681,15 +683,18 @@ function placeTowerBlock() {
     addResearchScore(towerState.height * 8)
     document.querySelector('#tower-status').textContent = `${towerState.height}층까지 쌓았어요! 탑이 포근하게 착지했어요.`
     document.querySelector('#tower-start-button').textContent = '새 탑 쌓기'
+    document.querySelector('#tower-start-button').disabled = false
+    document.querySelector('#tower-drop-button').disabled = true
     return
   }
   towerState.height += 1
   towerState.width = Math.min(towerState.width, overlap)
   towerState.position = 50 - towerState.width / 2
   towerState.direction = Math.random() > .5 ? 1 : -1
-  towerState.speed = Math.min(1.1, towerState.speed + .055)
+  towerState.speed = Math.min(.022, towerState.speed + .0015)
   document.querySelector('#tower-moving').style.width = `${towerState.width}%`
   renderTower()
+  document.querySelector('#tower-status').textContent = `${towerState.height}층! 움직이는 블록이 천천히 이동 중이에요. 맞춰 쌓으려면 ‘블록 놓기’를 누르세요.`
 }
 
 function carveMaze(size) {
@@ -715,7 +720,18 @@ function carveMaze(size) {
 
 function renderMaze() {
   const board = document.querySelector('#maze-board')
-  board.innerHTML = mazeState.cells.map((cell, index) => `<span class="maze-cell ${mazeState.sugars.has(index) ? 'has-sugar' : ''} ${index === mazeState.exit ? 'is-exit' : ''}" style="border-top:${cell.walls[0] ? '2px solid #aa9678' : '0'};border-right:${cell.walls[1] ? '2px solid #aa9678' : '0'};border-bottom:${cell.walls[2] ? '2px solid #aa9678' : '0'};border-left:${cell.walls[3] ? '2px solid #aa9678' : '0'}">${mazeState.player === index ? `<img src="/images/variants/chami/chami-cheerful.png" alt="차미">` : mazeState.sugars.has(index) ? '✦' : index === mazeState.exit ? '⌂' : ''}</span>`).join('')
+  board.innerHTML = mazeState.cells.map((cell, index) => `<span class="maze-cell ${mazeState.sugars.has(index) ? 'has-sugar' : ''} ${index === mazeState.exit ? 'is-exit' : ''}" style="border-top:${cell.walls[0] ? '2px solid #aa9678' : '0'};border-right:${cell.walls[1] ? '2px solid #aa9678' : '0'};border-bottom:${cell.walls[2] ? '2px solid #aa9678' : '0'};border-left:${cell.walls[3] ? '2px solid #aa9678' : '0'}">${mazeState.sugars.has(index) ? '✦' : index === mazeState.exit ? '⌂' : ''}</span>`).join('')
+  board.insertAdjacentHTML('beforeend', '<img class="maze-player" src="/images/variants/chami/chami-cheerful.png" alt="차미 위치">')
+  updateMazePlayer()
+}
+
+function updateMazePlayer() {
+  const player = document.querySelector('.maze-player')
+  if (!player) return
+  const x = mazeState.player % mazeState.size
+  const y = Math.floor(mazeState.player / mazeState.size)
+  player.style.left = `${((x + .5) / mazeState.size) * 100}%`
+  player.style.top = `${((y + .5) / mazeState.size) * 100}%`
 }
 
 function finishMaze(completed) {
@@ -754,8 +770,11 @@ function moveMaze(dx, dy) {
   if (mazeState.sugars.delete(next)) {
     mazeState.collected += 1
     document.querySelector('#maze-count').textContent = mazeState.collected
+    const cell = document.querySelectorAll('#maze-board .maze-cell')[next]
+    cell?.classList.remove('has-sugar')
+    if (cell) cell.textContent = ''
   }
-  renderMaze()
+  updateMazePlayer()
   if (next === mazeState.exit) finishMaze(true)
 }
 
@@ -905,9 +924,10 @@ document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
 document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
   <article class="mini-game-card mole-game" id="mole-game"><div class="mini-game-topline"><span>06 · 차미 두더지팡</span><span class="mini-game-icon" aria-hidden="true">🔨</span></div><h3>두더지 차미 팡!</h3><p class="mini-game-copy">15초 동안 구멍에서 나오는 차미를 재빨리 눌러요.</p><div class="catch-score"><b id="mole-count">0</b><span>마리 포착</span><small><b id="mole-clock">15.0</b>초</small></div><div class="mole-board">${Array.from({ length: 9 }, (_, index) => `<button class="mole-hole" type="button" data-hole="${index}" aria-label="구멍 ${index + 1}" disabled><img src="${randomChamiSprite()}" alt="" loading="lazy" decoding="async"></button>`).join('')}</div><button class="mini-game-button" id="mole-start-button" type="button">두더지팡 시작</button><p class="mini-game-status" id="mole-status" role="status" aria-live="polite">차미가 나타나면 빠르게 눌러요!</p></article>
   <article class="mini-game-card radar-game" id="radar-game"><div class="mini-game-topline"><span>07 · 표정 레이더</span><span class="mini-game-icon" aria-hidden="true">🔎</span></div><h3>차미 표정 레이더</h3><p class="mini-game-copy">20초 동안 설명에 맞는 표정의 차미를 찾아요.</p><div class="radar-score"><b id="radar-correct">0</b><span>정답</span><small><b id="radar-clock">20.0</b>초</small></div><strong class="radar-prompt" id="radar-prompt">시작하면 표정이 나타나요.</strong><div class="radar-options" id="radar-options"></div><button class="mini-game-button" id="radar-start-button" type="button">표정 관찰 시작</button><p class="mini-game-status" id="radar-status" role="status" aria-live="polite">설명을 읽고 알맞은 표정을 골라봐요.</p></article>
-  <article class="mini-game-card tower-game" id="tower-game"><div class="mini-game-topline"><span>08 · 차미 균형탑</span><span class="mini-game-icon" aria-hidden="true">🧱</span></div><h3>설탕 균형탑</h3><p class="mini-game-copy">좌우로 움직이는 블록을 멈춰 탑을 높이 쌓아요.</p><div class="catch-score"><b id="tower-height">0</b><span>층</span></div><div class="tower-board"><div id="tower-stack" class="tower-stack"></div><i id="tower-moving" class="tower-moving"></i></div><button class="mini-game-button" id="tower-start-button" type="button">균형탑 시작</button><p class="mini-game-status" id="tower-status" role="status" aria-live="polite">첫 블록을 놓아 탑을 시작해요.</p></article>
+  <article class="mini-game-card tower-game" id="tower-game"><div class="mini-game-topline"><span>08 · 차미 균형탑</span><span class="mini-game-icon" aria-hidden="true">🧱</span></div><h3>설탕 균형탑</h3><p class="mini-game-copy">게임을 시작한 뒤, 천천히 움직이는 블록을 맞춰 놓아요.</p><div class="catch-score"><b id="tower-height">0</b><span>층</span></div><div class="tower-board"><div id="tower-stack" class="tower-stack"></div><i class="tower-foundation" aria-hidden="true"></i><i id="tower-moving" class="tower-moving"></i></div><div class="tower-actions"><button class="mini-game-button" id="tower-start-button" type="button">게임 시작</button><button class="mini-game-button tower-drop-button" id="tower-drop-button" type="button" disabled>블록 놓기</button></div><p class="mini-game-status" id="tower-status" role="status" aria-live="polite">게임 시작을 누르면 움직임이 시작돼요.</p></article>
   <article class="mini-game-card maze-game" id="maze-game"><div class="mini-game-topline"><span>09 · 당도 연구 미로</span><span class="mini-game-icon" aria-hidden="true">🧭</span></div><h3>차미 연구실 미로</h3><p class="mini-game-copy">당도 결정을 모아 출구까지 찾아가요. 방향 버튼이나 키보드를 사용해요.</p><div class="catch-score"><b id="maze-count">0</b><span>결정</span><small><b id="maze-clock">45</b>초</small></div><div class="maze-board" id="maze-board" aria-label="연구실 미로"></div><div class="maze-controls"><button type="button" data-maze="0,-1" aria-label="위로">▲</button><button type="button" data-maze="-1,0" aria-label="왼쪽으로">◀</button><button type="button" data-maze="0,1" aria-label="아래로">▼</button><button type="button" data-maze="1,0" aria-label="오른쪽으로">▶</button></div><button class="mini-game-button" id="maze-start-button" type="button">미로 연구 시작</button><p class="mini-game-status" id="maze-status" role="status" aria-live="polite">출구를 찾아 당도 결정을 모아요.</p></article>
 `)
+nextRadarPrompt()
 document.body.insertAdjacentHTML('beforeend', `
   <nav class="quick-dock" aria-label="빠른 게임 메뉴">
     <a href="#lab" aria-label="당도 연구실"><span aria-hidden="true">🧪</span><span class="dock-label-wide">당도 연구</span><span class="dock-label-short">연구</span></a>
@@ -1174,7 +1194,8 @@ document.querySelector('#mole-start-button').addEventListener('click', startMole
 document.querySelector('#mole-game').addEventListener('click', hitMole)
 document.querySelector('#radar-start-button').addEventListener('click', startRadarRound)
 document.querySelector('#radar-options').addEventListener('click', chooseRadarExpression)
-document.querySelector('#tower-start-button').addEventListener('click', placeTowerBlock)
+document.querySelector('#tower-start-button').addEventListener('click', startTower)
+document.querySelector('#tower-drop-button').addEventListener('click', placeTowerBlock)
 document.querySelector('#maze-start-button').addEventListener('click', startMaze)
 document.querySelector('.maze-controls').addEventListener('click', (event) => {
   const button = event.target.closest('[data-maze]')
