@@ -167,17 +167,21 @@ function makeSamples() {
 
 function renderSamples(animateId = null) {
   const board = document.querySelector('#sample-board')
-  board.innerHTML = samples.map((sample) => `
+  board.innerHTML = samples.map((sample) => {
+    const hpRatio = Math.max(0, (sample.requiredHits - sample.hits) / sample.requiredHits)
+    return `
     <article class="sample ${sample.revealed ? 'is-revealed' : ''} ${sample.winner ? 'is-sweetest' : ''} ${sample.id === animateId ? 'just-measured' : ''}" data-id="${sample.id}">
       <span class="sample-number">SAMPLE 0${sample.id}</span>
       <span class="sample-figure" style="--hit-tilt:${Math.round(Math.random() * 44 - 22)}deg; --hit-shift:${Math.round(Math.random() * 28 - 14)}px">
         <img src="${sample.sprite}" alt="" loading="lazy" fetchpriority="low" decoding="async" />
         <span class="impact" aria-hidden="true">팡!${sample.revealed ? `<small>${sample.sugar}°S</small>` : `<small>${sample.hits}/${sample.requiredHits}</small>`}</span>
       </span>
+      <span class="sample-hp" role="progressbar" aria-label="차미 체력" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(hpRatio * 100)}"><span style="transform:scaleX(${hpRatio})"></span></span>
       <span class="sugar-result">${sample.revealed ? `${sample.sugar}<small>°S</small>` : `<small>팡 ${sample.hits}/${sample.requiredHits}</small>`}</span>
       ${sample.winner ? '<span class="winner-tag">당도 1위 ✦</span>' : ''}
     </article>
-  `).join('')
+  `
+  }).join('')
 }
 
 function launchSugarBurst(sampleId) {
