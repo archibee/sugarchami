@@ -28,13 +28,5 @@ ALTER TABLE visitor_stats ADD COLUMN IF NOT EXISTS memory_plays integer NOT NULL
 ALTER TABLE visitor_stats ADD COLUMN IF NOT EXISTS best_memory_moves integer NOT NULL DEFAULT 0 CHECK (best_memory_moves >= 0);
 ALTER TABLE visitor_stats ADD COLUMN IF NOT EXISTS memory_golds integer NOT NULL DEFAULT 0 CHECK (memory_golds >= 0);
 
-CREATE TABLE IF NOT EXISTS visitor_trophies (
-  visitor_id uuid NOT NULL REFERENCES visitors(id) ON DELETE CASCADE,
-  trophy_id text NOT NULL,
-  earned_at timestamptz NOT NULL DEFAULT now(),
-  PRIMARY KEY (visitor_id, trophy_id)
-);
-
 CREATE INDEX IF NOT EXISTS visitors_last_seen_idx ON visitors(last_seen_at DESC);
-CREATE INDEX IF NOT EXISTS visitor_trophies_earned_idx ON visitor_trophies(visitor_id, earned_at DESC);
 `

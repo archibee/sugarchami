@@ -27,10 +27,10 @@ const sitriGameLines = {
   gauge: ['초록 구간에 맞추면 정밀도 보너스예요!', '바늘을 잘 보고 타이밍을 맞춰봐요!', '천천히… 지금 눌러요!'],
   fizz: ['7초 동안 기포를 빠르게 눌러봐요!', '기포가 도망가기 전에 팡팡 눌러요!', '연속 탭이에요! 연구원 손놀림을 보여줘요!'],
   catch: ['도망치는 차미를 눌러 잡아봐요!', '차미가 방향을 바꾸기 전에 잡아야 해요!', '손가락 준비됐나요? 차미가 보여요!'],
-  collection: ['트로피가 하나씩 늘고 있네요. 뿌듯해요!', '새 트로피를 모으려면 미니게임도 해봐요!', '연구 기록을 차곡차곡 모아봐요!'],
+  collection: ['연구 기록을 확인해봐요!', '차미 연구는 즐겁게 하는 게 제일이에요!', '오늘의 연구도 즐거웠어요!'],
   guideline: ['이 작품은 팬게임이에요. 이용 안내도 확인해 주세요!', '공개 전에 배포 조건을 확인하는 것, 잊지 마세요!'],
-  miniGames: ['어떤 미니게임부터 해볼까요?', '게임마다 연구 보상이 달라요!', '마음에 드는 연구를 골라 도전해봐요!'],
-  memory: ['표본 위치를 기억해 짝을 찾아봐요!', '8장 중 짝은 네 쌍이에요. 황금 트로피는 6수·30초 안에 도전해봐요!', '같은 차미도 표정이 다르네요. 차근차근 찾아봐요!'],
+  miniGames: ['어떤 미니게임부터 해볼까요?', '게임마다 즐기는 방식이 달라요!', '마음에 드는 연구를 골라 도전해봐요!'],
+  memory: ['표본 위치를 기억해 짝을 찾아봐요!', '8장 중 짝은 네 쌍이에요. 차분히 찾아봐요!', '같은 차미도 표정이 다르네요. 차근차근 찾아봐요!'],
   lab: ['차미 당도를 측정하고 있어요!', '여섯 번 팡! 해서 당도왕을 찾아봐요.', '이번 연구 결과가 궁금하네요!'],
   hero: ['앗, 저를 눌러주셨네요!', '여기 있어요! 한 번 더 눌러봐도 좋아요.', '반가워요! 오늘도 차미 연구를 시작해볼까요?'],
   default: ['어, 저를 부르셨나요?', '클릭한 곳까지 후다닥 갈게요!', '여기저기 구경하고 있었어요!'],
@@ -49,29 +49,6 @@ function randomChamiSprite() {
   return chamiSprites[Math.floor(Math.random() * chamiSprites.length)]
 }
 
-const trophyCatalog = [
-  { id: 'first-round', icon: '🧪', title: '첫 연구', detail: '첫 당도 연구를 마쳤다' },
-  { id: 'sweet-95', icon: '🍯', title: '고당도 경보', detail: '95째S 이상 차미를 발견했다' },
-  { id: 'sweet-99', icon: '👑', title: '당도 대폭발', detail: '최고 당도 99째S를 기록했다' },
-  { id: 'all-sweet', icon: '🍬', title: '전원 달콤', detail: '한 판에서 모두 80째S 이상' },
-  { id: 'rounds-5', icon: '📒', title: '성실 연구원', detail: '당도 연구 5회 완료' },
-  { id: 'rounds-20', icon: '🏅', title: '차미 박사', detail: '당도 연구 20회 완료' },
-  { id: 'precision', icon: '🎯', title: '정밀 측정', detail: '차이 2째S 이내로 측정' },
-  { id: 'precision-10', icon: '🧭', title: '영점의 달인', detail: '정밀 측정 10회 성공' },
-  { id: 'rapid-paws', icon: '🐾', title: '바쁜 앞발', detail: '거품 게임에서 18회 연타' },
-  { id: 'fizz-master', icon: '🫧', title: '거품 과학자', detail: '거품 게임에서 30회 연타' },
-  { id: 'mini-game-fan', icon: '🎮', title: '연구소 순회', detail: '다섯 가지 게임을 모두 플레이' },
-  { id: 'collection-6', icon: '✨', title: '트로피 수집가', detail: '트로피 6개 수집' },
-  { id: 'chami-catcher', icon: '🐇', title: '재빠른 앞발', detail: '도망 차미 5마리 잡기' },
-  { id: 'chami-catcher-15', icon: '🧤', title: '수집왕 차미', detail: '도망 차미 15마리 잡기' },
-  { id: 'memory-first', icon: '🧩', title: '표본 정리', detail: '차미 표본 짝맞추기 완주' },
-  { id: 'memory-analyst', icon: '🔬', title: '눈썰미 연구원', detail: '짝맞추기를 8수 이내로 완주' },
-  { id: 'memory-gold', icon: '🌟', title: '황금 기억력', detail: '6수 이하·30초 안에 완주' },
-  { id: 'memory-master', icon: '💎', title: '표본 기억의 달인', detail: '황금 기억력 연구 5회 달성' },
-  { id: 'lab-legend', icon: '🏆', title: '연구소의 전설', detail: '당도 연구 50회 완료' },
-]
-const goldTrophyIds = new Set(['sweet-99', 'precision-10', 'chami-catcher-15', 'memory-gold', 'memory-master', 'lab-legend'])
-const localBadgeTrophyMap = { 'first-round': 'first-round', 'sugar-overload': 'sweet-95', 'all-sweet': 'all-sweet', 'steady-hand': 'precision', 'rapid-paws': 'rapid-paws', veteran: 'rounds-5', 'memory-first': 'memory-first', 'memory-analyst': 'memory-analyst', 'memory-gold': 'memory-gold', 'memory-master': 'memory-master', 'lab-legend': 'lab-legend' }
 const measurementNotes = [
   '당도계가 잠깐 행복해졌습니다.',
   '시트리가 고개를 끄덕였습니다. 근거는 없습니다.',
@@ -79,35 +56,20 @@ const measurementNotes = [
   '연구소 기준으로 꽤 수상한 수치입니다.',
   '기계가 방금 작은 박수를 친 것 같습니다.',
 ]
-const badgeDefinitions = [
-  { id: 'first-round', icon: '🧪', title: '첫 실험', detail: '차미 6개 당도 측정 완료' },
-  { id: 'sugar-overload', icon: '🍯', title: '당도 초과', detail: '95°S 이상 차미 발견' },
-  { id: 'all-sweet', icon: '✦', title: '끈적한 연구실', detail: '한 판에서 전원 80°S 이상' },
-  { id: 'steady-hand', icon: '🎯', title: '정밀 연구원', detail: '눈금 맞추기 오차 2°S 이하' },
-  { id: 'rapid-paws', icon: '💨', title: '팡팡 장인', detail: '7초 안에 18번 팡!' },
-  { id: 'veteran', icon: '📔', title: '연구소 단골', detail: '당도 연구 5회 완료' },
-  { id: 'memory-first', icon: '🧩', title: '표본 정리', detail: '차미 표본 짝맞추기 완주' },
-  { id: 'memory-analyst', icon: '🔬', title: '눈썰미 연구원', detail: '짝맞추기를 8수 이내로 완주' },
-  { id: 'memory-gold', icon: '🌟', title: '황금 기억력', detail: '6수 이하·30초 안에 완주' },
-  { id: 'memory-master', icon: '💎', title: '표본 기억의 달인', detail: '황금 기억력 연구 5회 달성' },
-  { id: 'lab-legend', icon: '🏆', title: '연구소의 전설', detail: '당도 연구 50회 완료' },
-]
 let samples = []
 let roundSerial = 0
 let gaugeState = { running: false, target: 50, position: 50, startedAt: 0, frame: null }
 let fizzState = { running: false, count: 0, endsAt: 0, timer: null }
 let catchState = { running: false, count: 0, endsAt: 0, timer: null, mover: null }
 let memoryState = { active: false, locked: false, deck: [], open: [], matched: new Set(), moves: 0, startedAt: 0, mismatchTimer: null, clockTimer: null }
-let knownTrophies = null
-let trophyToastTimer = null
 let profileSyncPromise = null
-let lastServerProfile = null
 
 function loadResearch() {
-  const fresh = { completedRounds: 0, bestSugar: 0, bestMashes: 0, bestCatches: 0, catchPlays: 0, gaugePlays: 0, precisionHits: 0, mashPlays: 0, bestMemoryMoves: 0, memoryPlays: 0, memoryGolds: 0, trophies: [], badges: [] }
+  const fresh = { completedRounds: 0, bestSugar: 0, bestMashes: 0, bestCatches: 0, catchPlays: 0, gaugePlays: 0, precisionHits: 0, mashPlays: 0, bestMemoryMoves: 0, memoryPlays: 0, memoryGolds: 0 }
   try {
     const saved = JSON.parse(localStorage.getItem(saveKey))
-    return { ...fresh, ...saved, badges: Array.isArray(saved?.badges) ? saved.badges : [], trophies: Array.isArray(saved?.trophies) ? saved.trophies : [] }
+    const { badges, trophies, ...researchRecord } = saved || {}
+    return { ...fresh, ...researchRecord }
   } catch {
     return fresh
   }
@@ -123,33 +85,8 @@ function saveResearch() {
   }
 }
 
-function renderTrophies(definitions = [], earnedTrophies = []) {
-  const grid = document.querySelector('#trophy-grid')
-  if (!grid) return
-  const earned = new Map(earnedTrophies.map((item) => [item.id, item.earnedAt]))
-  grid.innerHTML = definitions.map((trophy) => {
-    const date = earned.get(trophy.id)
-    const rarity = goldTrophyIds.has(trophy.id) ? 'is-gold' : ['sweet-95', 'rounds-20', 'fizz-master', 'mini-game-fan', 'chami-catcher'].includes(trophy.id) ? 'is-silver' : ''
-    return `<article class="trophy-card ${date ? 'is-earned' : 'is-locked'} ${rarity}">
-      <span class="trophy-icon" aria-hidden="true">${date ? trophy.icon : '🔒'}</span>
-      <span class="trophy-name">${trophy.title}</span><small>${trophy.detail}</small>
-      <span class="trophy-state">${date ? '달성 완료' : '미달성'}</span>
-    </article>`
-  }).join('')
-  const count = document.querySelector('#trophy-count')
-  if (count) count.textContent = String(earned.size)
-}
-
 function applyServerProfile(profile) {
-  lastServerProfile = profile
   const stats = profile.stats || {}
-  const earnedTrophies = profile.trophies || []
-  const earned = new Set(earnedTrophies.map((trophy) => trophy.id))
-  if (knownTrophies) {
-    const newAwards = earnedTrophies.filter((trophy) => !knownTrophies.has(trophy.id))
-    if (newAwards.length) showTrophyToast(newAwards[0], profile.trophyDefinitions)
-  }
-  knownTrophies = earned
   research = {
     completedRounds: Number(stats.completed_rounds) || 0,
     bestSugar: Number(stats.best_sugar) || 0,
@@ -162,45 +99,9 @@ function applyServerProfile(profile) {
     bestMemoryMoves: Number(stats.best_memory_moves) || 0,
     memoryPlays: Number(stats.memory_plays) || 0,
     memoryGolds: Number(stats.memory_golds) || 0,
-    trophies: earnedTrophies.map((trophy) => trophy.id),
-    badges: [
-      earned.has('first-round') && 'first-round',
-      earned.has('sweet-95') && 'sugar-overload',
-      earned.has('all-sweet') && 'all-sweet',
-      earned.has('precision') && 'steady-hand',
-      earned.has('rapid-paws') && 'rapid-paws',
-      earned.has('rounds-5') && 'veteran',
-      earned.has('memory-first') && 'memory-first',
-      earned.has('memory-analyst') && 'memory-analyst',
-      earned.has('memory-gold') && 'memory-gold',
-      earned.has('memory-master') && 'memory-master',
-      earned.has('lab-legend') && 'lab-legend',
-    ].filter(Boolean),
   }
   saveResearch()
-  renderCollection()
-  renderTrophies(profile.trophyDefinitions, profile.trophies)
-}
-
-function showTrophyToast(award, definitions = []) {
-  const trophy = definitions.find((item) => item.id === award.id)
-  if (!trophy) return
-  document.querySelector('.trophy-toast')?.remove()
-  const toast = document.createElement('div')
-  toast.className = 'trophy-toast'
-  toast.setAttribute('role', 'status')
-  const icon = document.createElement('span')
-  icon.textContent = trophy.icon
-  const copy = document.createElement('span')
-  const label = document.createElement('small')
-  label.textContent = 'NEW TROPHY!'
-  const title = document.createElement('b')
-  title.textContent = trophy.title
-  copy.append(label, title)
-  toast.append(icon, copy)
-  document.body.append(toast)
-  window.clearTimeout(trophyToastTimer)
-  trophyToastTimer = window.setTimeout(() => toast.remove(), 3600)
+  renderResearchRecord()
 }
 
 async function syncServerProfile() {
@@ -228,48 +129,7 @@ async function submitGameEvent(event) {
   }
 }
 
-function unlockBadge(id) {
-  if (!research.badges.includes(id)) {
-    research.badges.push(id)
-    saveResearch()
-    renderCollection()
-    if (localBadgeTrophyMap[id]) unlockTrophy(localBadgeTrophyMap[id])
-  }
-}
-
-function unlockTrophy(id) {
-  if (research.trophies.includes(id)) return
-  research.trophies.push(id)
-  saveResearch()
-  renderTrophies(trophyCatalog, [
-    ...research.trophies.map((trophyId) => ({ id: trophyId, earnedAt: true })),
-    ...research.badges.map((badge) => localBadgeTrophyMap[badge]).filter(Boolean).map((trophyId) => ({ id: trophyId, earnedAt: true })),
-  ])
-}
-
-function checkLocalMilestones() {
-  const playedEveryGame = research.completedRounds > 0 && research.gaugePlays > 0 && research.mashPlays > 0 && research.catchPlays > 0 && research.memoryPlays > 0
-  if (playedEveryGame) unlockTrophy('mini-game-fan')
-  const localTrophies = new Set([...research.trophies, ...research.badges.map((badge) => localBadgeTrophyMap[badge]).filter(Boolean)])
-  if (localTrophies.size >= 6) unlockTrophy('collection-6')
-}
-
-function renderCollection() {
-  const grid = document.querySelector('#collection-grid')
-  if (!grid) return
-
-  grid.innerHTML = badgeDefinitions.map((badge) => {
-    const unlocked = research.badges.includes(badge.id)
-    return `
-      <article class="badge-card ${unlocked ? 'is-unlocked' : 'is-locked'}">
-        <span class="badge-icon" aria-hidden="true">${unlocked ? badge.icon : '？'}</span>
-        <span class="badge-name">${unlocked ? badge.title : '비밀 연구'}</span>
-        <small>${badge.detail}</small>
-        <span class="badge-state">${unlocked ? '수집 완료' : '미발견'}</span>
-      </article>
-    `
-  }).join('')
-  document.querySelector('#badge-count').textContent = research.badges.length
+function renderResearchRecord() {
   document.querySelector('#round-record').textContent = research.completedRounds
   document.querySelector('#sugar-record').textContent = research.bestSugar ? `${research.bestSugar}°S` : '—'
   document.querySelector('#mash-record').textContent = research.bestMashes
@@ -365,15 +225,7 @@ function measureRandomSample() {
       research.completedRounds += 1
       research.bestSugar = Math.max(research.bestSugar, highest)
       saveResearch()
-      unlockTrophy('first-round')
-      if (research.bestSugar >= 95) { unlockBadge('sugar-overload'); unlockTrophy('sweet-95') }
-      if (research.bestSugar >= 99) unlockTrophy('sweet-99')
-      if (samples.every((item) => item.sugar >= 80)) { unlockBadge('all-sweet'); unlockTrophy('all-sweet') }
-      if (research.completedRounds >= 5) unlockBadge('veteran')
-      if (research.completedRounds >= 20) unlockTrophy('rounds-20')
-      if (research.completedRounds >= 50) unlockBadge('lab-legend')
-      checkLocalMilestones()
-      renderCollection()
+      renderResearchRecord()
       renderSamples()
       const winnerIds = winners.map((winner) => `차미 ${String(winner.id).padStart(2, '0')}`).join(' · ')
       document.querySelector('#winner-title').textContent = winners.length > 1 ? '공동 당도왕 탄생!' : '오늘의 당도왕!'
@@ -448,9 +300,6 @@ function useGauge() {
       ? `근접 측정! 오차 ${difference}°S. 시트리가 안대를 벗겼어요.`
       : `오차 ${difference}°S. 차미가 살짝 움직였다고 기록합니다.`
   button.textContent = '한 번 더 측정'
-  if (difference <= 2) unlockBadge('steady-hand')
-  if (research.precisionHits >= 10) unlockTrophy('precision-10')
-  checkLocalMilestones()
 }
 
 function finishFizzRound() {
@@ -460,15 +309,10 @@ function finishFizzRound() {
   research.mashPlays += 1
   research.bestMashes = Math.max(research.bestMashes, fizzState.count)
   saveResearch()
-  renderCollection()
-  if (fizzState.count >= 18) unlockBadge('rapid-paws')
-  if (fizzState.count >= 18) unlockTrophy('rapid-paws')
-  if (research.bestMashes >= 30) unlockTrophy('fizz-master')
-  checkLocalMilestones()
   document.querySelector('#fizz-button').textContent = '한 판 더 팡팡!'
   document.querySelector('#fizz-status').textContent = fizzState.count >= 18
-    ? `${fizzState.count}회! 차미가 팝콘인 줄 알고 줄을 섰어요. 팡팡 장인 배지 획득!`
-    : `${fizzState.count}회 팡! 차미는 아직 통통합니다. 18회면 팡팡 장인이에요.`
+    ? `${fizzState.count}회! 차미가 팝콘인 줄 알고 줄을 섰어요.`
+    : `${fizzState.count}회 팡! 차미는 아직 통통합니다.`
 }
 
 function startFizzRound() {
@@ -526,9 +370,6 @@ function finishCatchRound() {
   research.catchPlays += 1
   research.bestCatches = Math.max(research.bestCatches, catchState.count)
   saveResearch()
-  if (research.bestCatches >= 5) unlockTrophy('chami-catcher')
-  if (research.bestCatches >= 15) unlockTrophy('chami-catcher-15')
-  checkLocalMilestones()
   document.querySelector('#catch-target').disabled = true
   document.querySelector('#catch-start-button').textContent = '한 판 더!'
   document.querySelector('#catch-status').textContent = `${catchState.count}마리 포착! 차미가 연구소 CCTV 사각지대로 도망갔어요.`
@@ -630,18 +471,13 @@ function finishMemoryGame() {
   research.bestMemoryMoves = research.bestMemoryMoves ? Math.min(research.bestMemoryMoves, memoryState.moves) : memoryState.moves
   if (isGold) research.memoryGolds += 1
   saveResearch()
-  unlockBadge('memory-first')
-  if (memoryState.moves <= 8) unlockBadge('memory-analyst')
-  if (isGold) unlockBadge('memory-gold')
-  if (research.memoryGolds >= 5) unlockBadge('memory-master')
-  checkLocalMilestones()
   submitGameEvent({ type: 'memory_result', moves: memoryState.moves, seconds })
   document.querySelector('#memory-game').classList.add('is-memory-complete')
   document.querySelector('#memory-start-button').textContent = '한 판 더 연구하기'
   document.querySelector('#memory-status').textContent = isGold
-    ? `${memoryState.moves}수 · ${seconds}초! 황금 기억력 트로피 획득이에요!`
+    ? `${memoryState.moves}수 · ${seconds}초! 빠르게 짝을 찾았어요!`
     : memoryState.moves <= 8
-      ? `${memoryState.moves}수 · ${seconds}초! 눈썰미 연구원 트로피 획득이에요.`
+      ? `${memoryState.moves}수 · ${seconds}초! 눈썰미가 좋네요.`
       : `${memoryState.moves}수 · ${seconds}초 만에 완주했어요! 다음엔 더 적은 수에 도전해봐요.`
 }
 
@@ -694,7 +530,7 @@ app.innerHTML = `
     <nav class="header-nav" aria-label="페이지 메뉴">
       <a href="#lab">당도 연구</a>
       <a href="#mini-games">미니게임</a>
-      <a href="#collection">수집첩</a>
+      <a href="#trophy-shelf">트로피</a>
     </nav>
   </header>
 
@@ -770,7 +606,7 @@ app.innerHTML = `
           </div>
           <div class="gauge-labels"><span>덜 달다</span><span>너무 달다</span></div>
           <button class="mini-game-button" id="gauge-button" type="button">측정 시작</button>
-          <p class="mini-game-status" id="gauge-status" role="status" aria-live="polite">초록 구간 안에서 멈추면 정밀 연구원에 가까워져요.</p>
+          <p class="mini-game-status" id="gauge-status" role="status" aria-live="polite">초록 구간을 노려서 멈춰보세요.</p>
         </article>
 
         <article class="mini-game-card fizz-game" id="fizz-game">
@@ -783,27 +619,26 @@ app.innerHTML = `
           </div>
           <div class="fizz-timer"><span id="fizz-timer-fill"></span></div>
           <button class="mini-game-button fizz-button" id="fizz-button" type="button">도전 시작</button>
-          <p class="mini-game-status" id="fizz-status" role="status" aria-live="polite">7초 안에 18번 누르면 팡팡 장인!</p>
+          <p class="mini-game-status" id="fizz-status" role="status" aria-live="polite">7초 동안 버튼을 최대한 많이 눌러요!</p>
         </article>
       </div>
     </section>
 
-    <section class="collection-section" id="collection" aria-labelledby="collection-title">
+    <section class="collection-section" id="trophy-shelf" aria-labelledby="trophy-title">
       <div class="section-heading collection-heading">
         <div>
           <p class="kicker"><span></span> 차미 연구 기록</p>
-          <h2 id="collection-title">연구원 수집첩</h2>
-          <p>실험하고, 기록하고, 괜히 뿌듯해하세요.</p>
+          <h2 id="trophy-title">트로피</h2>
+          <p>이 브라우저에 저장된 연구 기록이에요.</p>
         </div>
-        <div class="collection-count"><b id="badge-count">0</b><span> / ${String(badgeDefinitions.length).padStart(2, '0')} 배지</span></div>
       </div>
       <div class="research-stats">
         <div><span>완료한 연구</span><b id="round-record">0</b><small>ROUND</small></div>
         <div><span>역대 최고 당도</span><b id="sugar-record">—</b><small>°S</small></div>
         <div><span>기포 제거 기록</span><b id="mash-record">0</b><small>회</small></div>
       </div>
-      <div class="collection-grid" id="collection-grid"></div>
-      <p class="collection-note">연구 기록은 이 브라우저에 저장돼요. 다른 기기에서는 새 연구원이 됩니다.</p>
+      <div class="single-trophy" aria-label="트로피"><span aria-hidden="true">🏆</span><b>트로피</b></div>
+      <p class="collection-note">연구 기록은 이 브라우저에 저장돼요. 다른 기기에서는 새 연구 기록으로 시작합니다.</p>
     </section>
   </main>
 
@@ -822,16 +657,16 @@ document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
     </div>
     <div class="fizz-timer catch-timer"><span id="catch-timer-fill"></span></div>
     <button class="mini-game-button" id="catch-start-button" type="button">10초 포착 실험 시작</button>
-    <p class="mini-game-status" id="catch-status" role="status" aria-live="polite">5마리 잡으면 재빠른 앞발 트로피!</p>
+    <p class="mini-game-status" id="catch-status" role="status" aria-live="polite">움직이는 차미를 눌러 포착하세요!</p>
   </article>
   <article class="mini-game-card memory-game" id="memory-game">
     <div class="mini-game-topline"><span>05 · 차미 표본 정리</span><span class="mini-game-icon" aria-hidden="true">🧩</span></div>
     <h3>같은 차미를 찾아라!</h3>
-    <p class="mini-game-copy">8장의 표본에서 네 쌍을 찾아요. 8수 이내면 눈썰미 연구원, 6수·30초 이내면 황금 트로피에 도전할 수 있어요.</p>
+    <p class="mini-game-copy">8장의 표본에서 네 쌍을 찾아요. 위치를 잘 기억해보세요.</p>
     <div class="memory-score"><b id="memory-moves">0</b><span>뒤집은 횟수</span><small><b id="memory-clock">0</b>초</small></div>
     <div class="memory-board" id="memory-board" aria-label="차미 표본 짝맞추기 카드"></div>
     <button class="mini-game-button" id="memory-start-button" type="button">표본 연구 시작</button>
-    <p class="mini-game-status" id="memory-status" role="status" aria-live="polite">4쌍의 표본을 찾아보세요. 완주하면 트로피를 받아요!</p>
+    <p class="mini-game-status" id="memory-status" role="status" aria-live="polite">4쌍의 표본을 찾아보세요.</p>
   </article>
 `)
 document.body.insertAdjacentHTML('beforeend', `
@@ -870,7 +705,7 @@ document.body.insertAdjacentHTML('beforeend', `
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 문구와 대사, 기획·프런트엔드 코드 작성에 AI를 보조 도구로 사용했습니다. 실제 게임 동작과 팡 이펙트는 JavaScript와 CSS로 실행하며, 무작위 선택은 코드의 난수 기능을 사용합니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>음성·음악·효과음 생성</b><p>음성 합성, 캐릭터 음성 변환, AI 음악·BGM 및 AI 효과음 생성은 사용하지 않았습니다. 현재 사이트에는 음성·음악 재생 기능이 없습니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>영상 생성·모델 학습</b><p>AI 영상 생성은 사용하지 않았습니다. 이 프로젝트에서 공식 자료를 이용한 자체 모델 학습이나 파인튜닝도 하지 않았습니다. 이미지 생성 시 캐릭터와 의상 특징을 참고 입력으로 사용한 것과 모델 학습은 구분됩니다.</p></div></article>
-          <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>이미지 가공·웹 효과의 생성형 AI 사용</b><p>생성된 이미지를 웹용 크기로 줄이고, 파비콘을 만드는 작업은 코드로 처리했습니다. 업적과 트로피는 페이지에서 보기 기능만 제공합니다. CSS 흔들림, 파티클, 게임 이펙트는 코드로 만든 시각 효과이며 생성형 AI로 만든 영상·애니메이션이 아닙니다.</p></div></article>
+          <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>이미지 가공·웹 효과의 생성형 AI 사용</b><p>생성된 이미지를 웹용 크기로 줄이고, 파비콘을 만드는 작업은 코드로 처리했습니다. 트로피 표시는 정적인 장식이며, 별도 달성·보상 시스템은 없습니다. CSS 흔들림, 파티클, 게임 이펙트도 코드로 만든 시각 효과입니다.</p></div></article>
         </div>
         <p class="ai-name-note">사이트에서는 캐릭터 이름을 시트리와 차미로 표기합니다. 차미에는 별도의 공식 영문 키워드가 없어 영문 이름 표기를 사용하지 않습니다.</p>
         <p class="ai-source-links"><b>이미지 참고 출처:</b> <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">SITRY 의상 참고 VOD ↗</a> · <a href="https://www.sooplive.com/station/vlupsitry" target="_blank" rel="noopener noreferrer">시트리의 숲 공식 방송국 ↗</a></p>
@@ -888,36 +723,6 @@ document.querySelector('#guidelines-close').addEventListener('click', () => guid
 guidelinesDialog.addEventListener('click', (event) => {
   if (event.target === guidelinesDialog) guidelinesDialog.close()
 })
-document.querySelector('main')?.insertAdjacentHTML('beforeend', `
-  <section class="collection-section trophy-section" id="trophy-shelf" aria-labelledby="trophy-title">
-    <div class="section-heading collection-heading trophy-heading">
-      <div><p class="kicker"><span></span> VISITOR ACHIEVEMENTS</p><h2 id="trophy-title">연구 트로피</h2><p>이 브라우저에 저장된 연구 기록과 달성 과제를 모아요.</p></div>
-      <div class="trophy-heading-actions"><div class="collection-count"><b id="trophy-count">0</b><span> / ${trophyCatalog.length} 트로피</span></div><button class="view-trophy-button" id="view-trophy-card" type="button"><span aria-hidden="true">✦</span> 업적 카드 보기</button></div>
-    </div>
-    <div class="collection-grid trophy-grid" id="trophy-grid" aria-live="polite"></div>
-    <p class="collection-note visitor-note">로그인 없이 익명 방문 키로 저장합니다. 쿠키를 지우면 새 방문자로 시작합니다.</p>
-  </section>
-`)
-document.body.insertAdjacentHTML('beforeend', `
-  <dialog class="trophy-card-dialog" id="trophy-card-dialog" aria-labelledby="trophy-card-title">
-    <article class="trophy-showcase" id="trophy-showcase">
-      <button class="trophy-showcase-close" id="trophy-showcase-close" type="button" aria-label="업적 카드 닫기">✕</button>
-      <section class="trophy-showcase-art" aria-label="SITRY 팬 일러스트">
-        <img src="/images/sitri-hero-expanded.png" alt="시트리 팬 일러스트" loading="lazy" fetchpriority="low" decoding="async" />
-        <span class="trophy-art-label">SITRY · SUGAR RESEARCHER</span>
-      </section>
-      <section class="trophy-showcase-info">
-        <p class="kicker"><span></span> SUGAR LAB · RESEARCH FILE</p>
-      <h2 id="trophy-card-title">차미 당도 연구 카드</h2>
-        <p class="trophy-showcase-subtitle">오늘의 연구 기록과 트로피</p>
-        <div class="trophy-showcase-stats" id="trophy-showcase-stats"></div>
-        <div class="trophy-showcase-progress"><span id="trophy-showcase-progress-fill"></span></div>
-        <p class="trophy-showcase-count" id="trophy-showcase-count"></p>
-        <div class="trophy-showcase-grid" id="trophy-showcase-grid"></div>
-      </section>
-    </article>
-  </dialog>
-`)
 document.body.insertAdjacentHTML('beforeend', `
   <aside class="floating-sitri" id="floating-sitri" aria-label="시트리의 한마디">
     <div class="floating-sitri-bubble"><span class="speech-dot" aria-hidden="true"></span><span id="floating-sitri-line"></span></div>
@@ -1034,7 +839,7 @@ function respondToClick(event) {
   else if (inContext('#catch-start-button, #catch-target, #catch-game')) sayAsSitri(sitriGameLines.catch, 'sitri-wave-mascot')
   else if (inContext('#memory-start-button, #memory-board, #memory-game')) sayAsSitri(sitriGameLines.memory, 'sitri-pointing-mascot')
   else if (inContext('#guidelines-open')) sayAsSitri(sitriGameLines.guideline, 'sitri-pointing-mascot')
-  else if (inContext('#collection, #trophy-shelf')) sayAsSitri(sitriGameLines.collection, 'sitri-trophy-mascot')
+  else if (inContext('#trophy-shelf')) sayAsSitri(sitriGameLines.collection, 'sitri-trophy-mascot')
   else if (inContext('#mini-games')) sayAsSitri(sitriGameLines.miniGames, 'sitri-pointing-mascot')
   else if (inContext('#lab')) sayAsSitri(sitriGameLines.lab, 'sitri-sugar-meter-mascot')
   else sayAsSitri(sitriGameLines.default)
@@ -1095,10 +900,6 @@ mobileHeroLayout.addEventListener('change', ({ matches }) => {
   heroArt.insertAdjacentHTML('beforeend', `<div class="speech-card" aria-label="시트리의 대사"><span class="speech-dot" aria-hidden="true"></span><span class="speech-line">${sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]}</span><span class="speech-timer" aria-hidden="true"><span class="speech-timer-fill"></span></span></div>`)
   bindHeroSpeechTimer()
 })
-renderTrophies(trophyCatalog, [
-  ...research.trophies.map((id) => ({ id, earnedAt: true })),
-  ...research.badges.map((badge) => localBadgeTrophyMap[badge]).filter(Boolean).map((id) => ({ id, earnedAt: true })),
-])
 document.querySelector('#pop-button').addEventListener('click', () => {
   if (samples.every((sample) => sample.revealed)) resetLab()
   else measureRandomSample()
@@ -1142,45 +943,7 @@ function scheduleDockSectionUpdate() {
 window.addEventListener('scroll', scheduleDockSectionUpdate, { passive: true })
 window.addEventListener('resize', scheduleDockSectionUpdate)
 updateDockSection()
-const trophyCardDialog = document.querySelector('#trophy-card-dialog')
-const trophyShowcase = document.querySelector('#trophy-showcase')
-document.querySelector('#view-trophy-card').addEventListener('click', () => {
-  const stats = lastServerProfile?.stats || {
-    completed_rounds: research.completedRounds,
-    best_sugar: research.bestSugar,
-    best_mashes: research.bestMashes,
-  }
-  const visibleTrophies = [...document.querySelectorAll('#trophy-grid .trophy-card')]
-  const earnedCount = visibleTrophies.filter((card) => card.classList.contains('is-earned')).length
-  const trophyTotal = visibleTrophies.length || trophyCatalog.length
-  document.querySelector('#trophy-showcase-stats').innerHTML = [
-    ['완료 연구', Number(stats.completed_rounds) || 0, 'ROUND'],
-    ['최고 당도', Number(stats.best_sugar) || 0, '°S'],
-    ['최고 팡팡', Number(stats.best_mashes) || 0, '회'],
-  ].map(([label, value, unit]) => `<div><small>${label}</small><b>${value}<em>${unit}</em></b></div>`).join('')
-  document.querySelector('#trophy-showcase-count').textContent = `트로피 ${earnedCount} / ${trophyTotal} 달성`
-  document.querySelector('#trophy-showcase-progress-fill').style.width = `${trophyTotal ? earnedCount / trophyTotal * 100 : 0}%`
-  const previewGrid = document.querySelector('#trophy-showcase-grid')
-  previewGrid.replaceChildren(...visibleTrophies.map((card) => card.cloneNode(true)))
-  trophyCardDialog.showModal()
-})
-document.querySelector('#trophy-showcase-close').addEventListener('click', () => trophyCardDialog.close())
-trophyCardDialog.addEventListener('click', (event) => {
-  if (event.target === trophyCardDialog) trophyCardDialog.close()
-})
-trophyShowcase.addEventListener('pointermove', (event) => {
-  if (event.pointerType !== 'mouse' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return
-  const bounds = trophyShowcase.getBoundingClientRect()
-  const x = (event.clientX - bounds.left) / bounds.width - 0.5
-  const y = (event.clientY - bounds.top) / bounds.height - 0.5
-  trophyShowcase.style.setProperty('--card-tilt-x', `${x * 5}deg`)
-  trophyShowcase.style.setProperty('--card-tilt-y', `${y * -5}deg`)
-})
-trophyShowcase.addEventListener('pointerleave', () => {
-  trophyShowcase.style.setProperty('--card-tilt-x', '0deg')
-  trophyShowcase.style.setProperty('--card-tilt-y', '0deg')
-})
-renderCollection()
+renderResearchRecord()
 const beginProfileSync = () => {
   if (!profileSyncPromise) profileSyncPromise = syncServerProfile()
 }

@@ -1,6 +1,6 @@
 # Character image variants
 
-Generated PNG character assets for 시트리 and 차미 for mini-games, dialogue, collections, and rewards. The source art is retained here; Vite serves the smaller display copies from `public/images/variants/`.
+Generated PNG character assets for 시트리 and 차미 for mini-games and dialogue. The source art is retained here; Vite serves the smaller display copies from `public/images/variants/`.
 
 ## 차미
 
