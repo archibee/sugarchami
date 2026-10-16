@@ -1,5 +1,9 @@
 import './style.css'
 
+document.addEventListener('dragstart', (event) => {
+  if (event.target instanceof Element && event.target.closest('#app')) event.preventDefault()
+})
+
 if (window.matchMedia('(pointer: coarse)').matches) {
   document.addEventListener('dblclick', (event) => event.preventDefault(), { passive: false })
   for (const eventName of ['gesturestart', 'gesturechange', 'gestureend']) {
