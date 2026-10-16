@@ -795,6 +795,12 @@ function animatePingpong(timestamp) {
   if (pingpongState.vy > 0 && pingpongState.y >= 86) {
     if (Math.abs(pingpongState.x - pingpongState.paddleX) <= 14) {
       pingpongState.hits += 1
+      const court = document.querySelector('#pingpong-court')
+      court.style.setProperty('--impact-x', `${pingpongState.x}%`)
+      court.style.setProperty('--impact-y', `${pingpongState.y}%`)
+      court.classList.remove('is-pingpong-hit')
+      void court.offsetWidth
+      court.classList.add('is-pingpong-hit')
       document.querySelector('#pingpong-hits').textContent = pingpongState.hits
       document.querySelector('#pingpong-status').textContent = `${pingpongState.hits}번 받아쳤어요! 속도 단계 ${pingpongState.hits + 1} · 포인터나 방향키로 계속 받아요.`
       const offset = (pingpongState.x - pingpongState.paddleX) / 14
