@@ -160,7 +160,7 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .section-heading h2 { margin-bottom: 8px; }
 .section-heading > div > p:last-child { margin-bottom: 0; color: var(--muted); font-size: 12px; }
 .section-stamp { width: 58px; height: 58px; display: grid; place-content: center; border: 1px solid #d4cbbb; border-radius: 50%; color: #a08a6b; font-size: 9px; font-weight: 700; line-height: 1.2; text-align: center; transform: rotate(10deg); }
-.mini-game-grid { width: min(100%, 1240px); margin: 0 auto; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: 22px; }
+.mini-game-grid { width: 100%; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: stretch; gap: 22px; }
 .mini-game-card { min-width: 0; padding: 24px; display: flex; flex-direction: column; border: 1px solid #ded8cb; border-radius: 5px; background: #f8f5ee; }
 .mini-game-topline { display: flex; align-items: center; justify-content: space-between; color: #9b9587; font-size: 9px; font-weight: 700; letter-spacing: .1em; }
 .mini-game-icon { color: var(--orange); font-size: 22px; }
