@@ -28,25 +28,27 @@ const chamiSprites = [
   'chami-triple-leaf', 'chami-curled-leaf', 'chami-double-sprout', 'chami-mint-leaf', 'chami-dew-leaf', 'chami-pear-shape',
 ].map((name) => `/images/variants/chami/${name}.png`)
 const sitriDialogues = [
-  '자, 오늘은 어떤 차미가 당도왕일까요?',
-  '차미 당도는 제가 꼼꼼히 살펴볼게요.',
-  '연구 결과가 궁금하네요. 귀여움도 중요하니까요!',
-  '차미야, 오늘도 팡팡 연구에 협조해줘요!',
+  '오늘은 어떤 차미를 만날까요?',
+  '한 판 가볍게 즐겨봐요!',
+  '차미의 표정을 찾아봐요!',
+  '요정 시트리가 응원할게요!',
 ]
 const sitriGameLines = {
-  pop: ['차미 팡! 당도를 측정해볼게요!', '이번 당도왕은 누구일까요? 하나씩 확인해봐요!', '팡! 연구 결과가 곧 나와요.'],
-  gauge: ['초록 구간에 맞추면 정밀도 보너스예요!', '바늘을 잘 보고 타이밍을 맞춰봐요!', '천천히… 지금 눌러요!'],
-  fizz: ['7초 동안 기포를 빠르게 눌러봐요!', '기포가 도망가기 전에 팡팡 눌러요!', '연속 탭이에요! 연구원 손놀림을 보여줘요!'],
-  catch: ['도망치는 차미를 눌러 잡아봐요!', '차미가 방향을 바꾸기 전에 잡아야 해요!', '손가락 준비됐나요? 차미가 보여요!'],
-  collection: ['연구 기록을 확인해봐요!', '차미 연구는 즐겁게 하는 게 제일이에요!', '오늘의 연구도 즐거웠어요!'],
-  guideline: ['이 작품은 팬게임이에요. 이용 안내도 확인해 주세요!', '공개 전에 배포 조건을 확인하는 것, 잊지 마세요!'],
-  miniGames: ['어떤 미니게임부터 해볼까요?', '게임마다 즐기는 방식이 달라요!', '마음에 드는 연구를 골라 도전해봐요!'],
-  memory: ['표본 위치를 기억해 짝을 찾아봐요!', '16장 중 짝은 여덟 쌍이에요. 차분히 찾아봐요!', '같은 차미도 표정이 다르네요. 차근차근 찾아봐요!'],
-  lab: ['차미 당도를 측정하고 있어요!', '여섯 번 팡! 해서 당도왕을 찾아봐요.', '이번 연구 결과가 궁금하네요!'],
-  hero: ['앗, 저를 눌러주셨네요!', '여기 있어요! 한 번 더 눌러봐도 좋아요.', '반가워요! 오늘도 차미 연구를 시작해볼까요?'],
-  default: ['어, 저를 부르셨나요?', '클릭한 곳까지 후다닥 갈게요!', '여기저기 구경하고 있었어요!'],
+  pop: ['차미의 당도를 살펴봐요!', '표본을 눌러 당도를 재봐요!'],
+  gauge: ['초록 구간에 맞춰봐요!', '바늘을 잘 보고 눌러봐요!'],
+  fizz: ['거품을 빠르게 눌러봐요!', '연속 기록에 도전해봐요!'],
+  catch: ['도망가는 차미를 잡아봐요!', '움직임을 보고 톡 눌러요!'],
+  memory: ['같은 차미를 찾아봐요!', '힌트는 아껴서 써봐요!'],
+  mole: ['구멍 속 차미를 톡 잡아봐요!', '빠르게 눌러 기록을 올려봐요!'],
+  radar: ['설명에 맞는 표정을 찾아봐요!', '차미의 표정을 잘 살펴봐요!'],
+  tower: ['블록을 차곡차곡 쌓아봐요!', '천천히 타이밍을 맞춰봐요!'],
+  pingpong: ['공을 끝까지 받아쳐봐요!', '차미와 함께 랠리를 이어가요!'],
+  collection: ['모은 트로피를 살펴봐요!', '게임 기록이 트로피로 쌓여요!'],
+  guideline: ['이용 안내를 확인해봐요!', '게임 안내를 읽어봐요!'],
+  miniGames: ['마음에 드는 게임을 골라봐요!', '어떤 게임부터 해볼까요?'],
+  lab: ['차미 표본을 살펴봐요!', '당도 연구를 시작해봐요!'],
+  hero: ['불러줘서 반가워요!', '오늘도 함께 놀아요!'],
 }
-
 function shuffle(items) {
   const shuffled = [...items]
   for (let index = shuffled.length - 1; index > 0; index -= 1) {
@@ -806,7 +808,7 @@ function animatePingpong(timestamp) {
       void court.offsetWidth
       court.classList.add('is-pingpong-hit')
       document.querySelector('#pingpong-hits').textContent = pingpongState.hits
-      document.querySelector('#pingpong-status').textContent = `${pingpongState.hits}번 받아쳤어요! 속도 단계 ${pingpongState.hits + 1} · 포인터나 방향키로 계속 받아요.`
+      document.querySelector('#pingpong-status').textContent = `${pingpongState.hits}번 받아쳤어요! 속도 단계 ${pingpongState.hits + 1} · 계속 받아쳐봐요!`
       const offset = (pingpongState.x - pingpongState.paddleX) / 14
       const horizontalVelocity = pingpongState.vx + offset * .005
       pingpongState.vx = Math.sign(horizontalVelocity || pingpongState.vx || 1) * (Math.abs(horizontalVelocity) + .001)
@@ -831,7 +833,7 @@ function startPingpong() {
   document.querySelector('#pingpong-hits').textContent = '0'
   document.querySelector('#pingpong-start-button').textContent = '랠리 중…'
   document.querySelector('#pingpong-start-button').disabled = true
-  document.querySelector('#pingpong-status').textContent = '포인터나 방향키로 차미를 움직여 공을 받아요!'
+  document.querySelector('#pingpong-status').textContent = '포인터를 움직여 차미로 공을 받아요!'
   document.querySelector('#pingpong-ball').style.left = '50%'
   document.querySelector('#pingpong-ball').style.top = '18%'
   document.querySelector('#pingpong-paddle').style.left = '50%'
@@ -995,7 +997,7 @@ document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
   <article class="mini-game-card mole-game" id="mole-game"><div class="mini-game-topline"><span>06 · 차미 두더지팡</span><span class="mini-game-icon" aria-hidden="true">🔨</span></div><h3>두더지 차미 팡!</h3><p class="mini-game-copy">15초 동안 구멍에서 나오는 차미를 재빨리 눌러요.</p><div class="catch-score"><b id="mole-count">0</b><span>마리 포착</span><small><b id="mole-clock">15.0</b>초</small></div><div class="mole-board">${Array.from({ length: 9 }, (_, index) => `<button class="mole-hole" type="button" data-hole="${index}" aria-label="구멍 ${index + 1}" disabled><img src="${randomChamiSprite()}" alt="" loading="lazy" decoding="async"></button>`).join('')}</div><button class="mini-game-button" id="mole-start-button" type="button">두더지팡 시작</button><p class="mini-game-status" id="mole-status" role="status" aria-live="polite">차미가 나타나면 빠르게 눌러요!</p></article>
   <article class="mini-game-card radar-game" id="radar-game"><div class="mini-game-topline"><span>07 · 표정 레이더</span><span class="mini-game-icon" aria-hidden="true">🔎</span></div><h3>차미 표정 레이더</h3><p class="mini-game-copy">20초 동안 설명에 맞는 표정의 차미를 찾아요.</p><div class="radar-score"><b id="radar-correct">0</b><span>정답</span><small><b id="radar-clock">20.0</b>초</small></div><strong class="radar-prompt" id="radar-prompt">시작하면 표정이 나타나요.</strong><div class="radar-options" id="radar-options"></div><button class="mini-game-button" id="radar-start-button" type="button">표정 관찰 시작</button><p class="mini-game-status" id="radar-status" role="status" aria-live="polite">설명을 읽고 알맞은 표정을 골라봐요.</p></article>
   <article class="mini-game-card tower-game" id="tower-game"><div class="mini-game-topline"><span>08 · 차미 균형탑</span><span class="mini-game-icon" aria-hidden="true">🧱</span></div><h3>설탕 균형탑</h3><p class="mini-game-copy">게임을 시작한 뒤, 천천히 움직이는 블록을 맞춰 놓아요.</p><div class="catch-score"><b id="tower-height">0</b><span>층</span></div><div class="tower-board"><div id="tower-stack" class="tower-stack"></div><i class="tower-foundation" aria-hidden="true"></i><i id="tower-moving" class="tower-moving"></i></div><div class="tower-actions"><button class="mini-game-button" id="tower-start-button" type="button">게임 시작</button><button class="mini-game-button tower-drop-button" id="tower-drop-button" type="button" disabled>블록 놓기</button></div><p class="mini-game-status" id="tower-status" role="status" aria-live="polite">게임 시작을 누르면 움직임이 시작돼요.</p></article>
-  <article class="mini-game-card pingpong-game" id="pingpong-game"><div class="mini-game-topline"><span>09 · 차미 핑퐁</span><span class="mini-game-icon" aria-hidden="true">🏓</span></div><h3>차미 핑퐁</h3><p class="mini-game-copy">포인터나 좌우 방향키로 차미를 움직여 공을 받아쳐요. 한 번 놓치면 끝!</p><div class="catch-score"><b id="pingpong-hits">0</b><span>번 받아침</span></div><div class="pingpong-court" id="pingpong-court" aria-label="차미 핑퐁 경기장"><span class="pingpong-center-line" aria-hidden="true"></span><i class="pingpong-ball" id="pingpong-ball" aria-hidden="true"></i><img class="pingpong-paddle" id="pingpong-paddle" src="/images/variants/chami/chami-cheerful.png" alt="차미 패들"></div><button class="mini-game-button" id="pingpong-start-button" type="button">핑퐁 시작</button><p class="mini-game-status" id="pingpong-status" role="status" aria-live="polite">시작 버튼을 누르고 공을 받아쳐요!</p></article>
+  <article class="mini-game-card pingpong-game" id="pingpong-game"><div class="mini-game-topline"><span>09 · 차미 핑퐁</span><span class="mini-game-icon" aria-hidden="true">🏓</span></div><h3>차미 핑퐁</h3><p class="mini-game-copy">포인터를 움직여 차미로 공을 받아쳐요. 한 번 놓치면 끝!</p><div class="catch-score"><b id="pingpong-hits">0</b><span>번 받아침</span></div><div class="pingpong-court" id="pingpong-court" aria-label="차미 핑퐁 경기장"><span class="pingpong-center-line" aria-hidden="true"></span><i class="pingpong-ball" id="pingpong-ball" aria-hidden="true"></i><img class="pingpong-paddle" id="pingpong-paddle" src="/images/variants/chami/chami-cheerful.png" alt="차미 패들"></div><button class="mini-game-button" id="pingpong-start-button" type="button">핑퐁 시작</button><p class="mini-game-status" id="pingpong-status" role="status" aria-live="polite">시작 버튼을 누르고 공을 받아쳐요!</p></article>
 `)
 document.querySelector('#mole-clock').closest('.catch-score').insertAdjacentHTML('afterend', '<div class="fizz-timer game-countdown" aria-hidden="true"><span id="mole-timer-fill"></span></div>')
 document.querySelector('#radar-clock').closest('.radar-score').insertAdjacentHTML('afterend', '<div class="fizz-timer game-countdown" aria-hidden="true"><span id="radar-timer-fill"></span></div>')
@@ -1100,6 +1102,7 @@ let floaterY = initialMarginY + Math.random() * Math.max(1, window.innerHeight -
 let targetX = floaterX
 let targetY = floaterY
 let reactionTimer
+let sitriLastSpokeAt = -Infinity
 let clickChaseUntil = 0
 let lastFloaterFrame = 0
 let floaterFrame = null
@@ -1223,32 +1226,40 @@ function sayAsSitri(lines, pose = null) {
 
 function respondToClick(event) {
   const target = event.target instanceof Element ? event.target : null
-  if (!floatingSitriEnabled || target?.closest('#floating-sitri-toggle')) return
-  const heroSitri = target?.closest('.hero-art .sitri')
-  const inContext = (selector) => Boolean(target?.closest(selector))
-
-  if (heroSitri) sayAsSitri(sitriGameLines.hero, 'sitri-wave-mascot')
-  else if (inContext('#pop-button, .sample')) sayAsSitri(sitriGameLines.pop, 'sitri-sugar-meter-mascot')
-  else if (inContext('#gauge-button, #gauge-game')) sayAsSitri(sitriGameLines.gauge, 'sitri-pointing-mascot')
-  else if (inContext('#fizz-button, #fizz-game')) sayAsSitri(sitriGameLines.fizz, 'sitri-sugar-meter-mascot')
-  else if (inContext('#catch-start-button, #catch-target, #catch-game')) sayAsSitri(sitriGameLines.catch, 'sitri-wave-mascot')
-  else if (inContext('#memory-start-button, #memory-board, #memory-game')) sayAsSitri(sitriGameLines.memory, 'sitri-pointing-mascot')
-  else if (inContext('#guidelines-open')) sayAsSitri(sitriGameLines.guideline, 'sitri-pointing-mascot')
-  else if (inContext('#trophy-shelf')) sayAsSitri(sitriGameLines.collection, 'sitri-trophy-mascot')
-  else if (inContext('#mini-games')) sayAsSitri(sitriGameLines.miniGames, 'sitri-pointing-mascot')
-  else if (inContext('#lab')) sayAsSitri(sitriGameLines.lab, 'sitri-sugar-meter-mascot')
-  else sayAsSitri(sitriGameLines.default)
+  if (!floatingSitriEnabled || !target || target.closest('#floating-sitri-toggle')) return
+  const inContext = (selector) => Boolean(target.closest(selector))
+  const contexts = [
+    ['.hero-art .sitri', sitriGameLines.hero, 'sitri-wave-mascot'],
+    ['#pop-button, .sample', sitriGameLines.pop, 'sitri-sugar-meter-mascot'],
+    ['#gauge-button, #gauge-game', sitriGameLines.gauge, 'sitri-pointing-mascot'],
+    ['#fizz-button, #fizz-game', sitriGameLines.fizz, 'sitri-sugar-meter-mascot'],
+    ['#catch-start-button, #catch-target, #catch-game', sitriGameLines.catch, 'sitri-wave-mascot'],
+    ['#memory-start-button, #memory-board, #memory-game', sitriGameLines.memory, 'sitri-pointing-mascot'],
+    ['#mole-game', sitriGameLines.mole, 'sitri-wave-mascot'],
+    ['#radar-game', sitriGameLines.radar, 'sitri-pointing-mascot'],
+    ['#tower-game', sitriGameLines.tower, 'sitri-sugar-meter-mascot'],
+    ['#pingpong-game', sitriGameLines.pingpong, 'sitri-wave-mascot'],
+    ['#guidelines-open', sitriGameLines.guideline, 'sitri-pointing-mascot'],
+    ['#trophy-shelf, #trophy-card-dialog', sitriGameLines.collection, 'sitri-trophy-mascot'],
+    ['#mini-games', sitriGameLines.miniGames, 'sitri-pointing-mascot'],
+    ['#lab', sitriGameLines.lab, 'sitri-sugar-meter-mascot'],
+  ]
+  const context = contexts.find(([selector]) => inContext(selector))
+  if (!context) return
+  const now = performance.now()
+  if (now - sitriLastSpokeAt < 3200) return
+  sitriLastSpokeAt = now
+  sayAsSitri(context[1], context[2])
 
   let pointX = event.clientX
   let pointY = event.clientY
-  if (event.detail === 0 && target) {
+  if (event.detail === 0) {
     const bounds = target.getBoundingClientRect()
     pointX = bounds.left + bounds.width / 2
     pointY = bounds.top + bounds.height / 2
   }
   setFloaterTarget(pointX + (pointX < window.innerWidth / 2 ? 92 : -92), pointY - 76)
 }
-
 floatingSitriImage.src = `/images/variants/sitri/${sitriPoses[Math.floor(Math.random() * sitriPoses.length)]}.png`
 floatingSitriLine.textContent = sitriDialogues[Math.floor(Math.random() * sitriDialogues.length)]
 floatingSitri.style.left = `${floaterX}px`
@@ -1315,13 +1326,6 @@ document.querySelector('#tower-drop-button').addEventListener('click', placeTowe
 document.querySelector('#pingpong-start-button').addEventListener('click', startPingpong)
 document.querySelector('#pingpong-court').addEventListener('pointermove', movePingpongPaddle)
 document.querySelector('#pingpong-court').addEventListener('pointerdown', movePingpongPaddle)
-document.addEventListener('keydown', (event) => {
-  if (!pingpongState.active || !['ArrowRight', 'ArrowLeft', 'a', 'd'].includes(event.key)) return
-  if (event.target instanceof HTMLElement && /^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName)) return
-  event.preventDefault()
-  pingpongState.paddleX = Math.max(13, Math.min(87, pingpongState.paddleX + (['ArrowRight', 'd'].includes(event.key) ? 6 : -6)))
-  document.querySelector('#pingpong-paddle').style.left = `${pingpongState.paddleX}%`
-})
 const dockSectionLinks = [...document.querySelectorAll('.quick-dock a[href^="#"]')]
 const dockSections = dockSectionLinks
   .map((link) => ({ link, section: document.querySelector(link.getAttribute('href')) }))
