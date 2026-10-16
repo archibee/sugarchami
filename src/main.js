@@ -97,6 +97,7 @@ let radarState = { running: false, correct: 0, rounds: 0, endsAt: 0, timer: null
 let towerState = { running: false, height: 0, width: 34, position: 0, direction: 1, speed: 0.055, frame: null, lastFrame: 0 }
 let pingpongState = { active: false, hits: 0, x: 50, y: 18, vx: 0, vy: 0, paddleX: 50, frame: null, lastFrame: 0 }
 let profileSyncPromise = null
+let scoreToastTimeout = 0
 
 function loadResearch() {
   const fresh = { completedRounds: 0, bestSugar: 0, bestMashes: 0, bestCatches: 0, catchPlays: 0, gaugePlays: 0, precisionHits: 0, mashPlays: 0, bestMemoryMoves: 0, memoryPlays: 0, memoryGolds: 0, molePlays: 0, radarPlays: 0, towerPlays: 0, pingpongPlays: 0, totalScore: 0 }
@@ -119,12 +120,29 @@ function saveResearch() {
   }
 }
 
-function addResearchScore(points) {
+function showResearchScoreToast(earned) {
+  const toast = document.querySelector('#score-toast')
+  if (!toast) return
+  toast.hidden = false
+  toast.querySelector('.score-toast-earned').textContent = `+${earned}`
+  toast.querySelector('.score-toast-total').textContent = `${research.totalScore}점 누적`
+  toast.classList.remove('is-visible')
+  void toast.offsetWidth
+  toast.classList.add('is-visible')
+  window.clearTimeout(scoreToastTimeout)
+  scoreToastTimeout = window.setTimeout(() => {
+    toast.classList.remove('is-visible')
+    scoreToastTimeout = window.setTimeout(() => { toast.hidden = true }, 240)
+  }, 3600)
+}
+
+function addResearchScore(points, { notify = true } = {}) {
   const earned = Math.max(0, Math.round(Number(points) || 0))
   if (!earned) return
   research.totalScore = (Number(research.totalScore) || 0) + earned
   saveResearch()
   updateTrophyScoreDisplay()
+  if (notify) showResearchScoreToast(earned)
 }
 
 function totalMiniGamePlays() {
@@ -1033,6 +1051,11 @@ document.body.insertAdjacentHTML('beforeend', `
     <button id="floating-sitri-toggle" type="button" aria-pressed="true" aria-label="시트리 요정 끄기"><span aria-hidden="true">🧚</span><span class="sitri-toggle-wide">시트리 요정 켜짐</span><span class="sitri-toggle-short">요정 켜짐</span></button>
     <button class="guideline-open-button" id="guidelines-open" type="button" aria-haspopup="dialog"><span aria-hidden="true">ⓘ</span><span class="guideline-button-wide">이용 가이드</span><span class="guideline-button-short">안내</span></button>
   </nav>
+  <aside class="score-toast" id="score-toast" role="status" aria-live="polite" aria-atomic="true" hidden>
+    <span class="score-toast-icon" aria-hidden="true">🏆</span>
+    <span class="score-toast-copy"><strong>기록 업데이트</strong><span>게임 결과 <b class="score-toast-earned">+0</b>점이 트로피에 합산됐어요</span><small class="score-toast-total">0점 누적</small></span>
+    <span class="score-toast-spark" aria-hidden="true">✦</span>
+  </aside>
 `)
 
 document.body.insertAdjacentHTML('beforeend', `
@@ -1058,7 +1081,7 @@ document.body.insertAdjacentHTML('beforeend', `
         <div class="ai-disclosure-list">
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>시트리 이미지 생성</b><p>메인 시트리 일러스트와 SD 포즈 이미지를 AI 이미지 생성으로 제작했습니다. 메인 의상은 <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">참고 VOD</a>의 시트리 의상을 참고했습니다. 원본 방송 캡처를 복사한 이미지는 사용하지 않습니다.</p></div></article>
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>차미 이미지 생성</b><p>공식 캐릭터의 둥근 몸, 잎 장식 등 특징을 참고해 표정·잎 형태 변형 이미지를 새로 생성했습니다. 생성된 표본 이미지는 당도왕 차미가 시트리 뒤를 따라가는 작은 위성 캐릭터로도 사용합니다. AI가 스스로 해석한 별도의 그림체로 표현했습니다.</p></div></article>
-          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 문구와 대사(반복 클릭에 대한 단계별 경계 반응 포함), 기획·프런트엔드 코드 작성에 AI를 보조 도구로 사용했습니다. 실제 게임 동작과 팡 이펙트는 JavaScript와 CSS로 실행하며, 무작위 선택은 코드의 난수 기능을 사용합니다.</p></div></article>
+          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 문구와 대사(반복 클릭에 대한 단계별 경계 반응 포함), 점수 반영을 알리는 토스트 문구, 기획·프런트엔드 코드 작성에 AI를 보조 도구로 사용했습니다. 실제 게임 동작과 팡 이펙트는 JavaScript와 CSS로 실행하며, 무작위 선택은 코드의 난수 기능을 사용합니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>음성·음악·효과음 생성</b><p>음성 합성, 캐릭터 음성 변환, AI 음악·BGM 및 AI 효과음 생성은 사용하지 않았습니다. 현재 사이트에는 음성·음악 재생 기능이 없습니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>영상 생성·모델 학습</b><p>AI 영상 생성은 사용하지 않았습니다. 이 프로젝트에서 공식 자료를 이용한 자체 모델 학습이나 파인튜닝도 하지 않았습니다. 이미지 생성 시 캐릭터와 의상 특징을 참고 입력으로 사용한 것과 모델 학습은 구분됩니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>이미지 가공·웹 효과의 생성형 AI 사용</b><p>생성된 이미지를 웹용 크기로 줄이고, 파비콘을 만드는 작업은 코드로 처리했습니다. 9종 게임 결과의 누적 점수와 5단계 트로피 등급은 브라우저 로컬 기록과 코드 규칙으로 계산합니다. 새 두더지팡·표정 레이더·균형탑·차미 핑퐁의 동작과 게임 이펙트도 JavaScript와 CSS로 구현했으며 생성형 AI를 사용하지 않았습니다.</p></div></article>
@@ -1477,7 +1500,7 @@ window.setInterval(() => {
   const earned = Math.floor(research.siteTimeRemainderMs / 1000)
   if (earned > 0) {
     research.siteTimeRemainderMs %= 1000
-    addResearchScore(earned)
+    addResearchScore(earned, { notify: false })
     sitePresenceLastSaveAt = now
   } else if (now - sitePresenceLastSaveAt >= 15000) {
     saveResearch()
