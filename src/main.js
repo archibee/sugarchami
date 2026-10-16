@@ -37,7 +37,7 @@ const sitriGameLines = {
   collection: ['연구 기록을 확인해봐요!', '차미 연구는 즐겁게 하는 게 제일이에요!', '오늘의 연구도 즐거웠어요!'],
   guideline: ['이 작품은 팬게임이에요. 이용 안내도 확인해 주세요!', '공개 전에 배포 조건을 확인하는 것, 잊지 마세요!'],
   miniGames: ['어떤 미니게임부터 해볼까요?', '게임마다 즐기는 방식이 달라요!', '마음에 드는 연구를 골라 도전해봐요!'],
-  memory: ['표본 위치를 기억해 짝을 찾아봐요!', '8장 중 짝은 네 쌍이에요. 차분히 찾아봐요!', '같은 차미도 표정이 다르네요. 차근차근 찾아봐요!'],
+  memory: ['표본 위치를 기억해 짝을 찾아봐요!', '16장 중 짝은 여덟 쌍이에요. 차분히 찾아봐요!', '같은 차미도 표정이 다르네요. 차근차근 찾아봐요!'],
   lab: ['차미 당도를 측정하고 있어요!', '여섯 번 팡! 해서 당도왕을 찾아봐요.', '이번 연구 결과가 궁금하네요!'],
   hero: ['앗, 저를 눌러주셨네요!', '여기 있어요! 한 번 더 눌러봐도 좋아요.', '반가워요! 오늘도 차미 연구를 시작해볼까요?'],
   default: ['어, 저를 부르셨나요?', '클릭한 곳까지 후다닥 갈게요!', '여기저기 구경하고 있었어요!'],
@@ -453,7 +453,7 @@ function renderMemoryBoard() {
 }
 
 function makeMemoryDeck() {
-  const pairSprites = shuffle([...new Set(chamiSprites)]).slice(0, 4)
+  const pairSprites = shuffle([...new Set(chamiSprites)]).slice(0, 8)
   return shuffle(pairSprites.flatMap((sprite, pair) => [{ sprite, pair }, { sprite, pair }]))
 }
 
@@ -483,17 +483,17 @@ function finishMemoryGame() {
   memoryState.active = false
   window.clearTimeout(memoryState.clockTimer)
   const seconds = Math.max(1, Math.round((Date.now() - memoryState.startedAt) / 1000))
-  const isGold = memoryState.moves <= 6 && seconds <= 30
+  const isGold = memoryState.moves <= 12 && seconds <= 60
   research.memoryPlays += 1
   research.bestMemoryMoves = research.bestMemoryMoves ? Math.min(research.bestMemoryMoves, memoryState.moves) : memoryState.moves
   if (isGold) research.memoryGolds += 1
-  addResearchScore(12 + Math.max(0, 30 - memoryState.moves * 2 - Math.floor(seconds / 5)))
+  addResearchScore(24 + Math.max(0, 60 - memoryState.moves * 2 - Math.floor(seconds / 5)))
   submitGameEvent({ type: 'memory_result', moves: memoryState.moves, seconds })
   document.querySelector('#memory-game').classList.add('is-memory-complete')
   document.querySelector('#memory-start-button').textContent = '한 판 더 연구하기'
   document.querySelector('#memory-status').textContent = isGold
     ? `${memoryState.moves}수 · ${seconds}초! 빠르게 짝을 찾았어요!`
-    : memoryState.moves <= 8
+    : memoryState.moves <= 16
       ? `${memoryState.moves}수 · ${seconds}초! 눈썰미가 좋네요.`
       : `${memoryState.moves}수 · ${seconds}초 만에 완주했어요! 다음엔 더 적은 수에 도전해봐요.`
 }
@@ -518,8 +518,8 @@ function selectMemoryCard(event) {
     memoryState.matched.add(first.pair)
     memoryState.open = []
     renderMemoryBoard()
-    document.querySelector('#memory-status').textContent = `짝을 찾았어요! ${memoryState.matched.size} / 4쌍 발견`
-    if (memoryState.matched.size === 4) finishMemoryGame()
+    document.querySelector('#memory-status').textContent = `짝을 찾았어요! ${memoryState.matched.size} / 8쌍 발견`
+    if (memoryState.matched.size === 8) finishMemoryGame()
     return
   }
 
@@ -904,11 +904,11 @@ document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
   <article class="mini-game-card memory-game" id="memory-game">
     <div class="mini-game-topline"><span>05 · 차미 표본 정리</span><span class="mini-game-icon" aria-hidden="true">🧩</span></div>
     <h3>같은 차미를 찾아라!</h3>
-    <p class="mini-game-copy">8장의 표본에서 네 쌍을 찾아요. 위치를 잘 기억해보세요.</p>
+    <p class="mini-game-copy">16장의 표본에서 여덟 쌍을 찾아요. 위치를 잘 기억해보세요.</p>
     <div class="memory-score"><b id="memory-moves">0</b><span>뒤집은 횟수</span><small><b id="memory-clock">0</b>초</small></div>
     <div class="memory-board" id="memory-board" aria-label="차미 표본 짝맞추기 카드"></div>
     <button class="mini-game-button" id="memory-start-button" type="button">표본 연구 시작</button>
-    <p class="mini-game-status" id="memory-status" role="status" aria-live="polite">4쌍의 표본을 찾아보세요.</p>
+    <p class="mini-game-status" id="memory-status" role="status" aria-live="polite">8쌍의 표본을 찾아보세요.</p>
   </article>
 `)
 document.querySelector('.mini-game-grid')?.insertAdjacentHTML('beforeend', `
