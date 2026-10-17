@@ -185,6 +185,14 @@ function queueResearchSync(delay = 1800) {
     researchSyncAgain = true
     return
   }
+  if (delay === 0) {
+    window.clearTimeout(researchSyncTimer)
+    researchSyncTimer = 0
+    if (researchSyncIdleHandle) window.cancelIdleCallback(researchSyncIdleHandle)
+    researchSyncIdleHandle = 0
+    void synchronizeResearch()
+    return
+  }
   if (researchSyncTimer || researchSyncIdleHandle) return
   delay = Math.max(delay, Math.max(0, 15000 - (Date.now() - researchSyncLastAttemptAt)))
   researchSyncTimer = window.setTimeout(() => {
@@ -1243,7 +1251,7 @@ document.body.insertAdjacentHTML('beforeend', `
 시트리의 숲 방송국: https://www.sooplive.com/station/vlupsitry
 원곡·원본 콘텐츠의 공식 링크: 배포 시 실제 사용한 공식 콘텐츠 URL 추가 기재</pre><p>시트리 일러스트는 AI 생성 팬 일러스트이며, 의상 참고 출처로 위 방송 VOD를 표기합니다. 고해상도 원화·포토카드 원본·음원 원본 파일을 추출하거나 별도 배포할 수 없습니다. 원저작물을 사실상 그대로 복제해 제공하는 형태도 금지됩니다.</p></section>
       <section class="guideline-section"><h3>콘텐츠 제한</h3><p>타인 비방, 선정성, 정치·종교·사상 풍자, 반사회적 표현, 스트리머 사생활 침해·추적·사칭 등 당사 규정을 위반하는 내용은 사용할 수 없습니다.</p></section>
-      <section class="guideline-section"><h3>연구 기록과 익명 동기화</h3><p>게임 기록은 브라우저 로컬 저장소에 보관합니다. DB 연결이 설정된 Node.js 서버 또는 Vercel Function에서는 무작위 익명 식별 쿠키를 이용해 기록을 백그라운드로 동기화하고, 쿠키 원문 대신 해시를 저장합니다. 쿠키 수명은 동기화 성공 때마다 1년으로 연장되어 브라우저를 닫았다 다시 열어도 같은 익명 방문자로 이어집니다. 같은 쿠키로 확인된 DB 기록은 기존 방문자 기록으로 불러오며 새 방문자로 추가하지 않습니다. 브라우저 기록과 DB 기록은 누적 수치와 점수는 큰 값, 기억 게임 최고 기록은 더 적은 이동 수, 당도왕 차미는 같은 모양을 다시 얻어도 매번 획득 수에 포함합니다. 브라우저와 DB를 합칠 때는 모양별 획득 횟수 중 큰 값을 유지해 재접속으로 수가 줄거나 같은 기록의 반복 동기화로 수가 부풀지 않게 합니다. 합친 획득 수를 연구카드와 랭킹에 반영합니다. DB에는 획득한 당도왕 차미 목록을 포함한 연구 기록과 총점이 저장되며, DB에서 받은 상위 50개 익명 순위·점수·당도왕 차미 획득 수·등급과 내 기록 요약은 별도 로컬 저장소에 캐시됩니다. 랭킹 모달은 DB를 직접 조회하지 않고 이 캐시를 바로 표시하며, 동기화로 캐시가 바뀌면 열린 모달도 갱신됩니다. 게임 기록이 바뀌거나 랭킹 모달 또는 연구카드를 열 때 백그라운드 동기화를 예약합니다. 랭킹 자료를 한 번이라도 캐시에 저장하면 이후 DB 연결이 실패해도 랭킹 보기 버튼을 계속 사용할 수 있으며, 저장된 랭킹을 표시합니다. 아직 랭킹 자료를 받은 적이 없으면 버튼이 회색으로 비활성화됩니다. DB 연결이나 저장에 실패해도 시트리 당도 연구카드, 게임과 로컬 기록은 계속 사용할 수 있습니다. 총점과 차미 획득 수는 브라우저와 DB를 합친 기록을 바탕으로 하며 서버에서 부정 플레이를 검증하지 않으므로 랭킹은 참고용입니다. 랭킹에는 익명 순위·점수·차미 획득 수·등급만 표시합니다. 브라우저 저장 공간을 지워도 익명 쿠키가 남아 있으면 다음 동기화에서 DB 기록을 복원할 수 있습니다. 쿠키를 삭제하거나 1년 동안 동기화하지 않아 만료되면 다음 방문은 새 익명 방문자로 구분되며 기존 DB 기록과 자동으로 연결되지 않습니다. 서버에 저장된 기록은 브라우저에서 저장 공간을 지워도 자동 삭제되지 않습니다. DB 접속 정보가 설정되지 않은 서버·Vercel 환경 또는 정적 호스팅 환경에서는 로컬 기록만 사용하며, Vercel에서는 DB 환경 변수를 프로젝트 설정에 추가해야 합니다.</p></section>
+      <section class="guideline-section"><h3>연구 기록과 익명 동기화</h3><p>게임 기록은 브라우저 로컬 저장소에 보관합니다. DB 연결이 설정된 Node.js 서버 또는 Vercel Function에서는 무작위 익명 식별 쿠키를 이용해 기록을 백그라운드로 동기화하고, 쿠키 원문 대신 해시를 저장합니다. 쿠키 수명은 동기화 성공 때마다 1년으로 연장되어 브라우저를 닫았다 다시 열어도 같은 익명 방문자로 이어집니다. 같은 쿠키로 확인된 DB 기록은 기존 방문자 기록으로 불러오며 새 방문자로 추가하지 않습니다. 브라우저 기록과 DB 기록은 누적 수치와 점수는 큰 값, 기억 게임 최고 기록은 더 적은 이동 수, 당도왕 차미는 같은 모양을 다시 얻어도 매번 획득 수에 포함합니다. 브라우저와 DB를 합칠 때는 모양별 획득 횟수 중 큰 값을 유지해 재접속으로 수가 줄거나 같은 기록의 반복 동기화로 수가 부풀지 않게 합니다. 합친 획득 수를 연구카드와 랭킹에 반영합니다. DB에는 획득한 당도왕 차미 목록을 포함한 연구 기록과 총점이 저장되며, DB에서 받은 상위 50개 익명 순위·점수·당도왕 차미 획득 수·등급과 내 기록 요약은 별도 로컬 저장소에 캐시됩니다. 랭킹 모달은 DB를 직접 조회하지 않고 이 캐시를 바로 표시하며, 동기화로 캐시가 바뀌면 열린 모달도 갱신됩니다. 게임 기록이 바뀌면 백그라운드 동기화를 예약합니다. 연구카드나 랭킹 모달을 열 때는 저장된 기록을 즉시 표시하고 별도의 예약 대기 없이 DB 동기화를 시작합니다. 랭킹 자료를 한 번이라도 캐시에 저장하면 이후 DB 연결이 실패해도 랭킹 보기 버튼을 계속 사용할 수 있으며, 저장된 랭킹을 표시합니다. 아직 랭킹 자료를 받은 적이 없으면 버튼이 회색으로 비활성화됩니다. DB 연결이나 저장에 실패해도 시트리 당도 연구카드, 게임과 로컬 기록은 계속 사용할 수 있습니다. 총점과 차미 획득 수는 브라우저와 DB를 합친 기록을 바탕으로 하며 서버에서 부정 플레이를 검증하지 않으므로 랭킹은 참고용입니다. 랭킹에는 익명 순위·점수·차미 획득 수·등급만 표시합니다. 브라우저 저장 공간을 지워도 익명 쿠키가 남아 있으면 다음 동기화에서 DB 기록을 복원할 수 있습니다. 쿠키를 삭제하거나 1년 동안 동기화하지 않아 만료되면 다음 방문은 새 익명 방문자로 구분되며 기존 DB 기록과 자동으로 연결되지 않습니다. 서버에 저장된 기록은 브라우저에서 저장 공간을 지워도 자동 삭제되지 않습니다. DB 접속 정보가 설정되지 않은 서버·Vercel 환경 또는 정적 호스팅 환경에서는 로컬 기록만 사용하며, Vercel에서는 DB 환경 변수를 프로젝트 설정에 추가해야 합니다.</p></section>
       <section class="guideline-section"><h3>AI 생성물과 음성 합성</h3><p>AI 생성물은 AI 생성물임을 표시해야 하며, 당사 저작물을 학습 데이터로 사용해서는 안 됩니다. 아래 O/X 표에 이 사이트에서 실제 사용한 AI 기능을 표시했습니다. 시트리와 차미 캐릭터 및 공식 IP의 권리는 각 권리자에게 있으며 이 팬게임이 권리를 주장하지 않습니다. 넓은 화면에서는 히어로 시트리를 반복해서 누르면 1·2단계 경계 대사와 붉은 말풍선이 나타나며, 2단계에서 5초 안에 15회 이상 더 누르면 이스터에그 3단계 대사와 조금 더 크고 검붉은 글씨가 표시됩니다. 당도왕 차미가 새로 합류하면 알림 토스트가 나타납니다. 대사 게이지가 끝나면 단계·색·대사가 기본 상태로 돌아옵니다. 음성은 재생되지 않습니다.</p><p>음성 합성은 이주인, 시트리, 노이, 리미, 라즈에 한해 비영리 목적으로 허용됩니다. 벨디르 미스틸테인, 이아나 이그노시스, 베루의 음성 합성은 허용되지 않습니다. 허용 범위의 음성 합성도 당사 요청 시 즉시 중단해야 합니다.</p></section>
       <section class="guideline-section ai-disclosure" aria-labelledby="ai-disclosure-title">
         <h3 id="ai-disclosure-title">이 사이트의 AI 사용 내역 O/X</h3>
@@ -1719,7 +1727,7 @@ function renderTrophyCardStats() {
 document.querySelector('#view-trophy-card').addEventListener('click', () => {
   renderTrophyCardStats()
   trophyCardDialog.showModal()
-  queueResearchSync(1000)
+  queueResearchSync(0)
 })
 
 function readRankingCache() {
@@ -1821,7 +1829,7 @@ function renderRankingCache() {
 document.querySelector('#view-ranking').addEventListener('click', () => {
   renderRankingCache()
   rankingDialog.showModal()
-  queueResearchSync(1000)
+  queueResearchSync(0)
 })
 window.addEventListener('ranking-cache-updated', () => {
   if (rankingDialog.open) renderRankingCache()
