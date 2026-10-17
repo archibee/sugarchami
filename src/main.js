@@ -1252,10 +1252,10 @@ document.body.insertAdjacentHTML('beforeend', `
       <section class="trophy-showcase-info ranking-info">
         <p class="kicker"><span></span> SUGAR LAB · TOP 50</p>
         <h2 id="ranking-title">연구소 랭킹</h2>
-        <p class="trophy-showcase-subtitle">동기화된 익명 연구 기록을 확인해요</p>
+        <p class="trophy-showcase-subtitle">함께 쌓인 연구 기록과 순위를 살펴봐요</p>
         <div class="trophy-showcase-stats ranking-showcase-stats" aria-live="polite">
           <div><small>기록이 있는 순위</small><b id="ranking-count">0<em> / 50</em></b></div>
-          <div><small>마지막 동기화</small><b class="ranking-updated" id="ranking-updated">동기화 전</b></div>
+          <div><small>최근 반영</small><b class="ranking-updated" id="ranking-updated">기록 준비 중</b></div>
         </div>
         <div class="single-trophy trophy-modal-item ranking-personal" id="ranking-personal" data-tier="research" aria-live="polite">
           <span id="ranking-personal-icon" aria-hidden="true">🏆</span>
@@ -1750,7 +1750,7 @@ function renderRankingCache() {
   const updatedAt = cached?.syncedAt ? new Date(cached.syncedAt) : null
   document.querySelector('#ranking-updated').textContent = updatedAt && Number.isFinite(updatedAt.getTime())
     ? updatedAt.toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-    : '동기화 전'
+    : '기록 준비 중'
 }
 
 document.querySelector('#view-ranking').addEventListener('click', () => {
