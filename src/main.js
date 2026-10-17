@@ -1044,7 +1044,7 @@ app.innerHTML = `
         </div>
       </div>
       <div class="pop-action">
-        <div class="pop-explainer"><svg class="pop-star asterisk-shape" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg><span><b>당도왕 차미는 요정 시트리 뒤를 따라다녀요.</b><small>차미마다 1~5번 팡팡 눌러 당도를 측정해요.</small></span></div>
+        <div class="pop-explainer"><svg class="pop-star asterisk-shape" viewBox="0 0 100 100" aria-hidden="true"><path d="M50 0 60 34 82 12 67 40 100 50 67 60 82 88 60 66 50 100 40 66 18 88 33 60 0 50 33 40 18 12 40 34Z" fill="currentColor"/></svg><span><b>모은 수만큼 당도왕 차미가 요정 시트리 뒤를 따라다녀요.</b><small>차미마다 1~5번 팡팡 눌러 당도를 측정해요.</small></span></div>
         <button class="pop-button" id="pop-button" type="button">
           <span class="pop-title">차미 팡!</span><span class="pop-subtitle">남은 차미 팡팡 <i aria-hidden="true">↗</i></span>
         </button>
@@ -1205,8 +1205,8 @@ document.body.insertAdjacentHTML('beforeend', `
         <p class="ai-disclosure-intro">O는 실제 사용, X는 사용하지 않음을 뜻합니다. 공식 캐릭터를 참고해 새로 생성한 팬 이미지이며, 공식 원화 파일을 그대로 사이트 에셋으로 쓰지 않습니다.</p>
         <div class="ai-disclosure-list">
           <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>시트리 이미지 생성</b><p>메인 시트리 일러스트와 SD 포즈 이미지를 AI 이미지 생성으로 제작했습니다. 메인 의상은 <a href="https://vod.sooplive.com/player/209820895" target="_blank" rel="noopener noreferrer">참고 VOD</a>의 시트리 의상을 참고했습니다. 원본 방송 캡처를 복사한 이미지는 사용하지 않습니다.</p></div></article>
-          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>차미 이미지 생성</b><p>공식 캐릭터의 둥근 몸, 잎 장식 등 특징을 참고해 표정·잎 형태 변형 이미지를 새로 생성했습니다. 생성된 표본 이미지는 당도왕 차미가 시트리 뒤를 따라가는 작은 위성 캐릭터로도 사용합니다. AI가 스스로 해석한 별도의 그림체로 표현했습니다.</p></div></article>
-          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 안내와 대사(2단계 붉은 반응 뒤 5초 안에 15회 이상 추가 클릭해야 나타나는 이스터에그 3단계 경계 반응 포함), 점수 반영·당도왕 차미 합류 알림 문구, 게임 기획과 제작에 AI를 보조 도구로 사용했습니다. 연구카드에는 얻은 당도왕 차미 수와 연구 기록을 표시합니다.</p></div></article>
+          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>차미 이미지 생성</b><p>공식 캐릭터의 둥근 몸, 잎 장식 등 특징을 참고해 표정·잎 형태 변형 이미지를 새로 생성했습니다. 생성된 표본 이미지는 로컬 저장소에 모은 수만큼 시트리 뒤를 따라가는 작은 위성 캐릭터로 사용합니다. AI가 스스로 해석한 별도의 그림체로 표현했습니다.</p></div></article>
+          <article class="ai-disclosure-row is-used"><span class="ai-mark">O · 사용</span><div><b>문구·기획·코드 AI 보조</b><p>사이트 안내와 대사(2단계 붉은 반응 뒤 5초 안에 15회 이상 추가 클릭해야 나타나는 이스터에그 3단계 경계 반응 포함), 점수 반영·당도왕 차미 합류 알림 문구, 게임 기획과 제작에 AI를 보조 도구로 사용했습니다. 연구카드에는 얻은 당도왕 차미 수와 연구 기록을 표시하며, 저장된 차미 수에 따라 시트리 요정을 따라다니는 차미 수를 정합니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>음성·음악·효과음 생성</b><p>음성 합성, 캐릭터 음성 변환, AI 음악·BGM 및 AI 효과음 생성은 사용하지 않았습니다. 현재 사이트에는 음성·음악 재생 기능이 없습니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>영상 생성·모델 학습</b><p>AI 영상 생성은 사용하지 않았습니다. 이 프로젝트에서 공식 자료를 이용한 자체 모델 학습이나 파인튜닝도 하지 않았습니다. 이미지 생성 시 캐릭터와 의상 특징을 참고 입력으로 사용한 것과 모델 학습은 구분됩니다.</p></div></article>
           <article class="ai-disclosure-row is-unused"><span class="ai-mark">X · 미사용</span><div><b>이미지 가공·웹 효과의 생성형 AI 사용</b><p>웹 이미지 가공과 게임 내 움직임·효과는 생성형 AI로 만들지 않았습니다. 9종 게임의 점수와 트로피 등급은 각 게임의 규칙에 따라 계산합니다.</p></div></article>
@@ -1331,6 +1331,7 @@ function setFloatingSitriEnabled(enabled) {
 }
 
 setFloatingSitriEnabled(floatingSitriEnabled)
+research.earnedChamis.forEach(attachChamiSatellite)
 floatingSitriToggle.addEventListener('click', () => setFloatingSitriEnabled(!floatingSitriEnabled))
 
 function setFloaterTarget(x, y) {
