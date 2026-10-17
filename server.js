@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { createHash, randomBytes, randomUUID } from 'node:crypto'
 import pg from 'pg'
 import { schema } from './db/schema.js'
+import { normalizeEarnedChamis, mergeEarnedChamis } from './shared/earned-chamis.js'
 
 const { Pool } = pg
 const root = fileURLToPath(new URL('.', import.meta.url))
@@ -105,9 +106,7 @@ function normalizeResearch(input) {
     const number = Number(value)
     return Number.isFinite(number) ? Math.max(0, Math.min(max, Math.floor(number))) : 0
   }
-  const earnedChamis = Array.isArray(input.earnedChamis)
-    ? input.earnedChamis.slice(0, 10000).filter((sprite) => typeof sprite === 'string' && /^\/images\/variants\/chami\/chami-[a-z0-9-]+\.png$/.test(sprite))
-    : []
+  const earnedChamis = normalizeEarnedChamis(input.earnedChamis).slice(0, 10000)
   const record = {
     completedRounds: integer(input.completedRounds),
     bestSugar: integer(input.bestSugar, 99),
@@ -147,7 +146,7 @@ function mergeResearchRecords(existingInput, incomingInput) {
   }
   const memoryMoveRecords = [existing.bestMemoryMoves, incoming.bestMemoryMoves].filter((moves) => moves > 0)
   merged.bestMemoryMoves = memoryMoveRecords.length ? Math.min(...memoryMoveRecords) : 0
-  merged.earnedChamis = [...new Set([...existing.earnedChamis, ...incoming.earnedChamis])].slice(0, 10000)
+  merged.earnedChamis = mergeEarnedChamis(existing.earnedChamis, incoming.earnedChamis).slice(0, 10000)
   merged.earnedChamiCount = merged.earnedChamis.length
   return merged
 }

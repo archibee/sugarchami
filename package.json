@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
+    "test": "node --test",
     "dev": "node --env-file-if-exists=.env.local dev.js",
     "build": "vite build",
     "preview": "vite preview",
