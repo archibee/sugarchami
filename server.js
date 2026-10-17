@@ -6,7 +6,7 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto'
 import pg from 'pg'
 import { schema } from './db/schema.js'
 import { normalizeEarnedChamis, mergeEarnedChamis } from './shared/earned-chamis.js'
-import { parseResearcherProfile, mergeResearcherProfiles, displayResearcherName } from './shared/researcher-profile.js'
+import { parseResearcherProfile, mergeResearcherProfiles, displayResearcherName, displayResearcherMessage } from './shared/researcher-profile.js'
 
 const { Pool } = pg
 const root = fileURLToPath(new URL('.', import.meta.url))
@@ -195,20 +195,26 @@ export async function syncResearch(request, response) {
 
   try {
     await client.query('BEGIN')
-    if (!session.isNew || hasResearchActivity(record) || profile.updatedAt > 0) {
+    if (!session.isNew || hasResearchActivity(record) || profile.updatedAt > 0 || profile.messageUpdatedAt > 0) {
       const visitor = await client.query(
         `INSERT INTO visitors (id, key_hash) VALUES ($1, $2)
          ON CONFLICT (key_hash) DO UPDATE SET last_seen_at = now()
-         RETURNING id, nickname, nickname_updated_at`,
+         RETURNING id, nickname, nickname_updated_at, researcher_message, message_updated_at`,
         [randomUUID(), keyHash],
       )
       visitorId = visitor.rows[0].id
-      const storedProfile = { nickname: visitor.rows[0].nickname, updatedAt: Number(visitor.rows[0].nickname_updated_at) }
+      const storedProfile = { nickname: visitor.rows[0].nickname, updatedAt: Number(visitor.rows[0].nickname_updated_at), message: visitor.rows[0].researcher_message, messageUpdatedAt: Number(visitor.rows[0].message_updated_at) }
       syncedProfile = mergeResearcherProfiles(storedProfile, profile)
       if (syncedProfile.updatedAt > storedProfile.updatedAt) {
         await client.query(
           'UPDATE visitors SET nickname = $2, nickname_updated_at = $3 WHERE id = $1',
           [visitorId, syncedProfile.nickname, String(syncedProfile.updatedAt)],
+        )
+      }
+      if (syncedProfile.messageUpdatedAt > storedProfile.messageUpdatedAt) {
+        await client.query(
+          'UPDATE visitors SET researcher_message = $2, message_updated_at = $3 WHERE id = $1',
+          [visitorId, syncedProfile.message, String(syncedProfile.messageUpdatedAt)],
         )
       }
 
@@ -241,7 +247,7 @@ export async function syncResearch(request, response) {
 
     const rankings = await client.query(
       `WITH ranked AS (
-         SELECT r.visitor_id, r.total_score, v.nickname,
+         SELECT r.visitor_id, r.total_score, v.nickname, v.researcher_message AS message,
            CASE
              WHEN jsonb_typeof(research_record -> 'earnedChamiCount') = 'number'
                THEN (research_record ->> 'earnedChamiCount')::integer
@@ -254,7 +260,7 @@ export async function syncResearch(request, response) {
          JOIN visitors v ON v.id = r.visitor_id
          WHERE r.total_score > 0
        )
-       SELECT rank, total_score, earned_chami_count, nickname, visitor_id = $1::uuid AS is_current_visitor
+       SELECT rank, total_score, earned_chami_count, nickname, message, visitor_id = $1::uuid AS is_current_visitor
        FROM ranked
        WHERE rank <= 50 OR visitor_id = $1::uuid
        ORDER BY rank`,
@@ -277,6 +283,7 @@ export async function syncResearch(request, response) {
     return {
       rank: Number(row.rank),
       nickname: displayResearcherName(row.nickname),
+      message: displayResearcherMessage(row.message),
       score,
       earnedChamiCount: Number(row.earned_chami_count) || 0,
       tier: tierForScore(score),
@@ -292,7 +299,7 @@ export async function syncResearch(request, response) {
     profile: syncedProfile,
     currentRank: currentRecord ? Number(currentRecord.rank) : null,
     myRecord: currentRecord
-      ? { score: currentScore, nickname: displayResearcherName(currentRecord.nickname), earnedChamiCount: currentEarnedChamiCount, tier: tierForScore(currentScore) }
+      ? { score: currentScore, nickname: displayResearcherName(currentRecord.nickname), message: displayResearcherMessage(currentRecord.message), earnedChamiCount: currentEarnedChamiCount, tier: tierForScore(currentScore) }
       : null,
     entries,
   })

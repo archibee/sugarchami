@@ -1,6 +1,6 @@
 import './style.css'
 import { chamiSprites, normalizeEarnedChamis, mergeEarnedChamis } from '../shared/earned-chamis.js'
-import { validateNickname, normalizeResearcherProfile, mergeResearcherProfiles, displayResearcherName } from '../shared/researcher-profile.js'
+import { validateNickname, normalizeResearcherProfile, mergeResearcherProfiles, displayResearcherName, validateResearcherMessage, displayResearcherMessage } from '../shared/researcher-profile.js'
 
 document.addEventListener('dragstart', (event) => {
   if (event.target instanceof Element && event.target.closest('#app')) event.preventDefault()
@@ -163,7 +163,8 @@ function loadResearch() {
 let research = loadResearch()
 let researcherProfile = loadResearcherProfile()
 let nicknameEditing = !researcherProfile.nickname
-let nicknameSyncState = researcherProfile.nickname ? 'pending' : 'idle'
+let nicknameSyncState = researcherProfile.nickname || researcherProfile.messageUpdatedAt > 0 ? 'pending' : 'idle'
+let messageEditing = false
 
 function loadResearcherProfile() {
   try { return normalizeResearcherProfile(JSON.parse(localStorage.getItem(researcherProfileKey))) } catch {
@@ -173,7 +174,7 @@ function loadResearcherProfile() {
 
 function persistResearcherProfile() {
   try {
-    if (researcherProfile.updatedAt > 0) localStorage.setItem(researcherProfileKey, JSON.stringify(researcherProfile))
+    if (researcherProfile.updatedAt > 0 || researcherProfile.messageUpdatedAt > 0) localStorage.setItem(researcherProfileKey, JSON.stringify(researcherProfile))
     return true
   } catch { return false }
 }
@@ -236,6 +237,7 @@ function normalizeRankingSnapshot(snapshot) {
     rows.set(rank, {
       rank,
       nickname: displayResearcherName(entry.nickname),
+      message: displayResearcherMessage(entry.message),
       score: Math.floor(score),
       tier: trophyTierForScore(score),
       earnedChamiCount: Number.isSafeInteger(earnedChamiCount) && earnedChamiCount >= 0 ? earnedChamiCount : 0,
@@ -253,6 +255,7 @@ function normalizeRankingSnapshot(snapshot) {
       ? {
         score: Math.floor(myScore),
         nickname: displayResearcherName(snapshot.myRecord.nickname),
+        message: displayResearcherMessage(snapshot.myRecord.message),
         tier: trophyTierForScore(myScore),
         earnedChamiCount: Number.isSafeInteger(myEarnedChamiCount) && myEarnedChamiCount >= 0 ? myEarnedChamiCount : 0,
       }
@@ -290,7 +293,7 @@ async function synchronizeResearch() {
       const previousProfile = researcherProfile
       researcherProfile = mergeResearcherProfiles(databaseProfile, researcherProfile)
       if (!previousProfile.nickname && researcherProfile.nickname && !nicknameInput.value) nicknameEditing = false
-      nicknameSyncState = researcherProfile.updatedAt === databaseProfile.updatedAt ? 'saved' : 'pending'
+      nicknameSyncState = researcherProfile.updatedAt === databaseProfile.updatedAt && (researcherProfile.messageUpdatedAt || 0) === (databaseProfile.messageUpdatedAt || 0) ? 'saved' : 'pending'
       persistResearcherProfile()
       renderResearcherProfile()
       if (nicknameSyncState === 'pending') queueResearchSync(1200)
@@ -314,12 +317,12 @@ async function synchronizeResearch() {
     window.dispatchEvent(new Event('ranking-cache-updated'))
     researchSyncFailures = 0
   } catch {
-    if (researcherProfile.nickname) {
+    if (researcherProfile.nickname || researcherProfile.messageUpdatedAt > 0) {
       nicknameSyncState = 'offline'
       renderResearcherProfile()
     }
     setRankingAvailability(false, 'DB 동기화 또는 랭킹 캐시 저장에 실패해 랭킹을 사용할 수 없습니다.')
-    if (hasSavedResearchRecord() || researcherProfile.updatedAt > 0) {
+    if (hasSavedResearchRecord() || researcherProfile.updatedAt > 0 || researcherProfile.messageUpdatedAt > 0) {
       researchSyncFailures += 1
       researchSyncRetryDelay = Math.min(5 * 60 * 1000, 30000 * (2 ** Math.min(researchSyncFailures - 1, 4)))
     } else {
@@ -1205,12 +1208,20 @@ app.innerHTML = `
         <button class="view-trophy-button" id="view-trophy-card" type="button"><span aria-hidden="true">✦</span> 시트리 당도 연구카드 보기</button>
         <button class="view-trophy-button" id="view-ranking" type="button" disabled aria-disabled="true" title="DB 연결을 확인 중입니다."><span aria-hidden="true">✦</span> 연구소 랭킹 보기</button>
       </div>
+      <div class="researcher-profiles">
       <form class="researcher-profile" id="researcher-profile" aria-label="연구원 닉네임" novalidate>
         <div class="researcher-profile-heading"><span class="researcher-profile-icon" aria-hidden="true">✦</span><div><label for="researcher-nickname">나의 연구원 이름</label><p>연구카드와 랭킹에 표시할 닉네임을 정해요.</p></div><span class="researcher-profile-badge" id="nickname-badge">이름 정하기</span></div>
         <div class="researcher-profile-controls"><input id="researcher-nickname" name="nickname" type="text" placeholder="익명 연구원" maxlength="32" autocomplete="off" spellcheck="false" aria-describedby="nickname-help nickname-status" /><button id="nickname-confirm" type="submit">확정</button><button id="nickname-edit" type="button" hidden>변경</button><button class="nickname-cancel" id="nickname-cancel" type="button" hidden>취소</button></div>
         <p class="nickname-status" id="nickname-status" role="status" aria-live="polite">닉네임을 정하지 않으면 익명 연구원으로 표시돼요.</p>
         <p class="nickname-help" id="nickname-help">1~16자 · 랭킹에 공개되는 별명이에요. 개인정보·비방·사칭 표현은 쓰지 말아주세요.</p>
       </form>
+      <form class="researcher-profile researcher-message-form" id="researcher-message-form" aria-label="연구원 한마디" novalidate>
+        <div class="researcher-profile-heading"><span class="researcher-profile-icon" aria-hidden="true">“</span><div><label for="researcher-message">한마디 남기기</label><p>랭킹에 나만의 짧은 인사를 남겨요.</p></div><span class="researcher-profile-badge">최대 60자</span></div>
+        <div class="researcher-profile-controls"><input id="researcher-message" name="message" type="text" placeholder="오늘도 차미와 달콤하게!" maxlength="120" autocomplete="off" aria-describedby="message-help message-status" /><button type="submit">저장</button></div>
+        <p class="nickname-status" id="message-status" role="status" aria-live="polite">저장하면 랭킹에 한마디가 표시돼요.</p>
+        <p class="nickname-help" id="message-help">빈칸으로 저장하면 지워져요. 개인정보·비방·사칭 표현은 쓰지 말아주세요.</p>
+      </form>
+      </div>
       <p class="collection-note">당도왕 차미를 모으고 연구 기록을 쌓아봐요.</p>
     </section>
   </main>
@@ -1365,9 +1376,9 @@ document.body.insertAdjacentHTML('beforeend', `
         </div>
         <div class="single-trophy trophy-modal-item ranking-personal" id="ranking-personal" data-tier="research" aria-live="polite">
           <span id="ranking-personal-icon" aria-hidden="true">🏆</span>
-          <div><small><span id="ranking-personal-name">익명 연구원</span> · 내 기록</small><b id="ranking-personal-rank">순위 확인 전</b><strong><span id="ranking-personal-score">—</span> · 차미 <span id="ranking-personal-chami-count">—</span>마리 · <span id="ranking-personal-tier">—</span></strong></div>
+          <div><small><span id="ranking-personal-name">익명 연구원</span> · 내 기록</small><b id="ranking-personal-rank">순위 확인 전</b><strong><span id="ranking-personal-score">—</span> · 차미 <span id="ranking-personal-chami-count">—</span>마리 · <span id="ranking-personal-tier">—</span></strong><p class="ranking-personal-message" id="ranking-personal-message" hidden></p></div>
         </div>
-        <div class="ranking-list-heading" aria-hidden="true"><span>순위 · 연구원</span><span>점수 · 모은 차미 · 등급</span></div>
+        <div class="ranking-list-heading" aria-hidden="true"><span>순위 · 연구원 · 한마디</span><span>점수 · 모은 차미 · 등급</span></div>
         <ol class="ranking-list" id="ranking-list" aria-label="1위부터 50위까지"></ol>
       </section>
     </article>
@@ -1743,8 +1754,23 @@ const mobileTouchTilt = window.matchMedia('(max-width: 760px)')
 const nicknameForm = document.querySelector('#researcher-profile')
 const nicknameInput = document.querySelector('#researcher-nickname')
 const nicknameStatus = document.querySelector('#nickname-status')
+const messageInput = document.querySelector('#researcher-message')
+const messageStatus = document.querySelector('#message-status')
+
+function renderResearcherMessage() {
+  if (!messageEditing) messageInput.value = researcherProfile.message || ''
+  messageStatus.dataset.state = nicknameSyncState
+  if (messageEditing) messageStatus.textContent = '한마디를 쓰고 저장해주세요. 빈칸으로 저장하면 지워져요.'
+  else if (nicknameSyncState === 'pending' && researcherProfile.messageUpdatedAt) messageStatus.textContent = '이 브라우저에 저장했어요. DB에 반영하는 중이에요.'
+  else if (nicknameSyncState === 'offline' && researcherProfile.messageUpdatedAt) messageStatus.textContent = '이 브라우저에 저장했어요. 연결되면 랭킹에도 반영돼요.'
+  else messageStatus.textContent = researcherProfile.message ? '랭킹에 한마디가 표시돼요. 언제든 고칠 수 있어요.' : '저장하면 랭킹에 한마디가 표시돼요.'
+  const personalMessage = document.querySelector('#ranking-personal-message')
+  personalMessage.textContent = researcherProfile.message || ''
+  personalMessage.hidden = !researcherProfile.message
+}
 
 function renderResearcherProfile() {
+  renderResearcherMessage()
   const fixed = Boolean(researcherProfile.nickname) && !nicknameEditing
   nicknameInput.disabled = fixed
   if (fixed) nicknameInput.value = researcherProfile.nickname
@@ -1774,7 +1800,7 @@ nicknameForm.addEventListener('submit', (event) => {
     return
   }
   const previousProfile = researcherProfile
-  researcherProfile = { nickname, updatedAt: Math.max(Date.now(), researcherProfile.updatedAt + 1) }
+  researcherProfile = { ...researcherProfile, nickname, updatedAt: Math.max(Date.now(), researcherProfile.updatedAt + 1) }
   if (!persistResearcherProfile()) {
     researcherProfile = previousProfile
     nicknameStatus.dataset.state = 'error'
@@ -1807,6 +1833,39 @@ document.querySelector('#nickname-cancel').addEventListener('click', () => {
   document.querySelector('#nickname-edit').focus()
 })
 renderResearcherProfile()
+
+messageInput.addEventListener('input', () => {
+  messageEditing = true
+  messageInput.removeAttribute('aria-invalid')
+  renderResearcherMessage()
+})
+messageInput.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter' && event.isComposing) event.preventDefault()
+})
+document.querySelector('#researcher-message-form').addEventListener('submit', (event) => {
+  event.preventDefault()
+  let message
+  try { message = validateResearcherMessage(messageInput.value) } catch (error) {
+    messageInput.setAttribute('aria-invalid', 'true')
+    messageStatus.dataset.state = 'error'
+    messageStatus.textContent = error.message
+    return
+  }
+  const previousProfile = researcherProfile
+  researcherProfile = { ...researcherProfile, message, messageUpdatedAt: Math.max(Date.now(), (researcherProfile.messageUpdatedAt || 0) + 1) }
+  if (!persistResearcherProfile()) {
+    researcherProfile = previousProfile
+    messageStatus.dataset.state = 'error'
+    messageStatus.textContent = '한마디를 저장할 수 없어요. 브라우저의 저장 공간 설정을 확인해주세요.'
+    return
+  }
+  messageInput.removeAttribute('aria-invalid')
+  messageEditing = false
+  nicknameSyncState = 'pending'
+  renderResearcherProfile()
+  if (rankingDialog.open) renderRankingCache()
+  queueResearchSync(0)
+})
 
 function setRankingAvailability(available, message = 'DB 연결을 사용할 수 없어 랭킹을 사용할 수 없습니다.') {
   const canShowSavedRanking = available || Boolean(readRankingCache())
@@ -1880,6 +1939,11 @@ function renderRankingCache() {
       const nickname = entry.isCurrentVisitor ? displayResearcherName(researcherProfile.nickname) : entry.nickname
       visitor.textContent = `${nickname}${entry.isCurrentVisitor ? ' · 나' : ''}`
       visitor.title = nickname
+      const message = document.createElement('span')
+      message.className = 'ranking-row-message'
+      const customMessage = entry.isCurrentVisitor ? researcherProfile.message : entry.message
+      message.textContent = customMessage || '—'
+      message.title = customMessage || ''
       const points = document.createElement('b')
       points.className = 'ranking-row-score'
       points.textContent = `${score.toLocaleString('ko-KR')}점`
@@ -1890,12 +1954,12 @@ function renderRankingCache() {
       const rankTier = document.createElement('span')
       rankTier.className = 'ranking-row-tier'
       rankTier.textContent = `${tier.icon} ${tier.name}`
-      row.append(visitor, points, chamiCount, rankTier)
+      row.append(visitor, message, points, chamiCount, rankTier)
     } else {
       const emptySlot = document.createElement('span')
       emptySlot.className = 'ranking-empty-slot'
       emptySlot.setAttribute('aria-hidden', 'true')
-      row.append(emptySlot, document.createElement('span'), document.createElement('span'))
+      row.append(emptySlot)
       row.setAttribute('aria-label', `${rank}위 기록 없음`)
     }
 
@@ -1954,7 +2018,7 @@ window.addEventListener('storage', (event) => {
   if (event.key === researcherProfileKey || event.key === null) {
     researcherProfile = mergeResearcherProfiles(loadResearcherProfile(), researcherProfile)
     if (researcherProfile.nickname && !nicknameInput.value) nicknameEditing = false
-    nicknameSyncState = researcherProfile.nickname ? 'pending' : 'idle'
+    nicknameSyncState = researcherProfile.nickname || researcherProfile.messageUpdatedAt > 0 ? 'pending' : 'idle'
     renderResearcherProfile()
     if (rankingDialog.open) renderRankingCache()
     queueResearchSync(0)
