@@ -179,10 +179,10 @@ function normalizeRankingSnapshot(snapshot) {
     currentRank: Number.isSafeInteger(currentRank) && currentRank > 0 ? currentRank : null,
     myRecord: Number.isFinite(myScore) && myScore >= 0
       ? {
-          score: Math.floor(myScore),
-          tier: trophyTierForScore(myScore),
-          earnedChamiCount: Number.isSafeInteger(myEarnedChamiCount) && myEarnedChamiCount >= 0 ? myEarnedChamiCount : 0,
-        }
+        score: Math.floor(myScore),
+        tier: trophyTierForScore(myScore),
+        earnedChamiCount: Number.isSafeInteger(myEarnedChamiCount) && myEarnedChamiCount >= 0 ? myEarnedChamiCount : 0,
+      }
       : null,
     entries: Array.from({ length: 50 }, (_, index) => rows.get(index + 1) || { rank: index + 1, empty: true }),
   }
@@ -1112,7 +1112,7 @@ app.innerHTML = `
       </div>
       <div class="collection-actions">
         <button class="view-trophy-button" id="view-trophy-card" type="button"><span aria-hidden="true">✦</span> 시트리 당도 연구카드 보기</button>
-        <button class="view-trophy-button" id="view-ranking" type="button" disabled aria-disabled="true" title="DB 연결을 확인 중입니다."><span aria-hidden="true">✦</span> 랭킹 보기</button>
+        <button class="view-trophy-button" id="view-ranking" type="button" disabled aria-disabled="true" title="DB 연결을 확인 중입니다."><span aria-hidden="true">✦</span> 연구소 랭킹 보기</button>
       </div>
       <p class="collection-note">당도왕 차미를 모으고 연구 기록을 쌓아봐요.</p>
     </section>
