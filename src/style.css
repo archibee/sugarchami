@@ -382,8 +382,8 @@ button:focus-visible, a:focus-visible { outline: 3px solid #bd744b; outline-offs
   .hero-copy { width: 100%; max-width: 650px; padding: 12px 0 0; }
   h1 { font-size: clamp(41px, 11vw, 65px); }
   .hero-art { position: absolute; inset: 0; width: auto; height: auto; margin: 0; }
-  .sitri { right: auto; left: 50%; translate: -50% 0; width: auto; height: 100%; max-width: 100%; max-height: none; animation-name: sitri-sway-centered; }
-  @keyframes sitri-sway-centered { 0%, 100% { transform: translateY(4px) rotate(-.8deg) scale(1.12); } 50% { transform: translateY(-7px) rotate(.8deg) scale(1.12); } }
+  .sitri { right: auto; left: 50%; width: auto; height: 100%; max-width: 100%; max-height: none; animation-name: sitri-sway-centered; }
+  @keyframes sitri-sway-centered { 0%, 100% { transform: translate(-50%, 4px) rotate(-.8deg) scale(1.12); } 50% { transform: translate(-50%, -7px) rotate(.8deg) scale(1.12); } }
   .sun-disc { top: 7%; left: 18%; width: min(61vw, 260px); }
   .speech-card { top: 53%; right: 8%; max-width: min(300px, 62%); padding: 9px 11px 13px; font-size: 10px; }
   .spark-one { top: 14%; left: 7%; }
