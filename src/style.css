@@ -606,7 +606,7 @@ html:has(.trophy-card-dialog[open]) { overflow: hidden; }
 .ranking-personal strong { font-size: 10px; }
 .ranking-list-heading { flex: 0 0 auto; display: flex; justify-content: space-between; gap: 12px; margin: 0 2px 6px; color: rgba(255, 244, 225, .56); font-size: 8px; font-weight: 800; letter-spacing: .08em; }
 .ranking-list { flex: 1 1 auto; min-height: 0; display: grid; align-content: start; gap: 4px; overflow: auto; overscroll-behavior: contain; margin: 0; padding: 0 5px 2px 0; list-style: none; scrollbar-color: rgba(231, 171, 113, .55) rgba(255, 255, 255, .06); scrollbar-width: thin; }
-.ranking-row { min-width: 0; min-height: 34px; display: grid; grid-template-columns: 34px minmax(0, 1fr) minmax(68px, auto) minmax(88px, auto); align-items: center; gap: 7px; padding: 0 9px; overflow: hidden; border: 1px solid rgba(255, 245, 226, .11); border-radius: 7px; background: linear-gradient(100deg, rgba(255, 255, 255, .065), rgba(255, 255, 255, .025)); color: #fff7e9; transition: border-color .18s, background .18s, transform .18s; }
+.ranking-row { min-width: 0; min-height: 34px; display: grid; grid-template-columns: 34px minmax(0, 1fr) minmax(68px, auto) minmax(42px, auto) minmax(88px, auto); align-items: center; gap: 7px; padding: 0 9px; overflow: hidden; border: 1px solid rgba(255, 245, 226, .11); border-radius: 7px; background: linear-gradient(100deg, rgba(255, 255, 255, .065), rgba(255, 255, 255, .025)); color: #fff7e9; transition: border-color .18s, background .18s, transform .18s; }
 .ranking-row.is-populated:hover { transform: translateX(2px); border-color: rgba(240, 190, 133, .48); background: linear-gradient(100deg, rgba(228, 155, 98, .19), rgba(255, 255, 255, .055)); }
 .ranking-row[data-tier="silver"] { --row-accent: #d0d1d1; }
 .ranking-row[data-tier="gold"] { --row-accent: #f4c26c; }
@@ -618,6 +618,7 @@ html:has(.trophy-card-dialog[open]) { overflow: hidden; }
 .ranking-row-visitor { min-width: 0; overflow: hidden; color: rgba(255, 248, 235, .77); font-size: 9px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 .ranking-row-visitor.is-current { color: #ffe0a5; }
 .ranking-row-score { color: #fffaf0; font-size: 10px; font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.ranking-row-chami-count { color: #e4b17c; font-size: 9px; font-variant-numeric: tabular-nums; font-weight: 800; text-align: right; white-space: nowrap; }
 .ranking-row-tier { overflow: hidden; color: var(--row-accent, rgba(255, 244, 225, .62)); font-size: 9px; font-weight: 800; text-align: right; text-overflow: ellipsis; white-space: nowrap; }
 .ranking-empty-slot { height: 1px; background: linear-gradient(90deg, rgba(242, 204, 161, .15), transparent); }
 .ranking-row.is-empty { border-color: rgba(255, 245, 226, .055); background: rgba(255, 255, 255, .012); }
@@ -647,13 +648,15 @@ html:has(.trophy-card-dialog[open]) { overflow: hidden; }
   .ranking-personal strong { font-size: 9px; }
   .ranking-list-heading { margin-bottom: 4px; font-size: 7px; }
   .ranking-list { gap: 3px; }
-  .ranking-row { min-height: 30px; grid-template-columns: 27px minmax(0, 1fr) minmax(52px, auto) minmax(77px, auto); gap: 5px; padding: 0 7px; }
+  .ranking-row { min-height: 30px; grid-template-columns: 27px minmax(0, 1fr) minmax(52px, auto) minmax(34px, auto) minmax(77px, auto); gap: 5px; padding: 0 7px; }
   .ranking-row-rank { font-size: 9px; }
   .ranking-row-visitor { font-size: 8px; }
   .ranking-row-score { font-size: 9px; }
+  .ranking-row-chami-count { font-size: 8px; }
   .ranking-row-tier { font-size: 8px; }
 }
 @media (max-width: 360px) {
-  .ranking-row { grid-template-columns: 24px minmax(0, 1fr) minmax(48px, auto) minmax(70px, auto); gap: 4px; padding: 0 5px; }
+  .ranking-row { grid-template-columns: 24px minmax(0, 1fr) minmax(48px, auto) minmax(30px, auto) minmax(70px, auto); gap: 4px; padding: 0 5px; }
   .ranking-row-visitor, .ranking-row-tier { font-size: 7px; }
+  .ranking-row-chami-count { font-size: 7px; }
 }

@@ -98,6 +98,9 @@ function normalizeResearch(input) {
     const number = Number(value)
     return Number.isFinite(number) ? Math.max(0, Math.min(max, Math.floor(number))) : 0
   }
+  const earnedChamis = Array.isArray(input.earnedChamis)
+    ? input.earnedChamis.slice(0, 10000).filter((sprite) => typeof sprite === 'string' && /^\/images\/variants\/chami\/chami-[a-z0-9-]+\.png$/.test(sprite))
+    : []
   const record = {
     completedRounds: integer(input.completedRounds),
     bestSugar: integer(input.bestSugar, 99),
@@ -116,9 +119,8 @@ function normalizeResearch(input) {
     pingpongPlays: integer(input.pingpongPlays),
     totalScore: integer(input.totalScore, Number.MAX_SAFE_INTEGER),
     siteTimeRemainderMs: integer(input.siteTimeRemainderMs, 999),
-    earnedChamis: Array.isArray(input.earnedChamis)
-      ? input.earnedChamis.slice(0, 10000).filter((sprite) => typeof sprite === 'string' && /^\/images\/variants\/chami\/chami-[a-z0-9-]+\.png$/.test(sprite))
-      : [],
+    earnedChamis,
+    earnedChamiCount: earnedChamis.length,
   }
   return record
 }
@@ -179,11 +181,18 @@ export async function syncResearch(request, response) {
     const rankings = await client.query(
       `WITH ranked AS (
          SELECT visitor_id, total_score,
+           CASE
+             WHEN jsonb_typeof(research_record -> 'earnedChamiCount') = 'number'
+               THEN (research_record ->> 'earnedChamiCount')::integer
+             WHEN jsonb_typeof(research_record -> 'earnedChamis') = 'array'
+               THEN jsonb_array_length(research_record -> 'earnedChamis')
+             ELSE 0
+           END AS earned_chami_count,
            row_number() OVER (ORDER BY total_score DESC, updated_at ASC, visitor_id ASC)::integer AS rank
          FROM visitor_research
          WHERE total_score > 0
        )
-       SELECT rank, total_score, visitor_id = $1::uuid AS is_current_visitor
+       SELECT rank, total_score, earned_chami_count, visitor_id = $1::uuid AS is_current_visitor
        FROM ranked
        WHERE rank <= 50 OR visitor_id = $1::uuid
        ORDER BY rank`,
@@ -203,14 +212,23 @@ export async function syncResearch(request, response) {
 
   const entries = rankingRows.filter((row) => Number(row.rank) <= 50).map((row) => {
     const score = Number(row.total_score)
-    return { rank: Number(row.rank), score, tier: tierForScore(score), isCurrentVisitor: row.is_current_visitor }
+    return {
+      rank: Number(row.rank),
+      score,
+      earnedChamiCount: Number(row.earned_chami_count) || 0,
+      tier: tierForScore(score),
+      isCurrentVisitor: row.is_current_visitor,
+    }
   })
   const currentRecord = rankingRows.find((row) => row.is_current_visitor)
   const currentScore = currentRecord ? Number(currentRecord.total_score) : null
+  const currentEarnedChamiCount = currentRecord ? Number(currentRecord.earned_chami_count) || 0 : 0
   return sendJson(response, 200, {
     syncedAt: new Date().toISOString(),
     currentRank: currentRecord ? Number(currentRecord.rank) : null,
-    myRecord: currentRecord ? { score: currentScore, tier: tierForScore(currentScore) } : null,
+    myRecord: currentRecord
+      ? { score: currentScore, earnedChamiCount: currentEarnedChamiCount, tier: tierForScore(currentScore) }
+      : null,
     entries,
   })
 }
