@@ -331,6 +331,32 @@ h2 { margin-bottom: 8px; font-size: clamp(29px, 3.4vw, 42px); letter-spacing: -.
 .view-trophy-button:disabled, .view-trophy-button:disabled:hover { border-color: #c9c4bb; background: linear-gradient(135deg, #d7d3cc, #bdb9b1); color: #726e67; box-shadow: inset 0 -3px 0 rgba(76,72,67,.12); cursor: not-allowed; transform: none; }
 .view-trophy-button:disabled span { color: #827d75; }
 .view-trophy-button span { font-size: 16px; }
+.researcher-profile { width: min(100%, 550px); margin-top: 20px; padding: 18px; border: 1px solid #ded3bf; border-radius: 9px; background: linear-gradient(125deg, #fffdf8, #f3ede1); box-shadow: 0 4px 16px rgba(79, 62, 39, .035); }
+.researcher-profile-heading { display: flex; align-items: center; gap: 10px; margin-bottom: 13px; }
+.researcher-profile-icon { display: grid; place-items: center; flex: 0 0 34px; height: 34px; border: 1px solid #e5d4b8; border-radius: 50%; background: #f8eddb; color: #bb7041; font-size: 20px; }
+.researcher-profile-heading > div { min-width: 0; }
+.researcher-profile-heading label { display: block; color: #554736; font-size: 12px; font-weight: 800; }
+.researcher-profile-heading p { margin: 4px 0 0; color: #928675; font-size: 10px; line-height: 1.5; }
+.researcher-profile-badge { margin-left: auto; flex-shrink: 0; padding: 5px 8px; border: 1px solid #e8d8bd; border-radius: 99px; color: #a17d51; font-size: 9px; font-weight: 750; }
+.researcher-profile-controls { display: flex; align-items: stretch; gap: 7px; }
+.researcher-profile-controls input { min-width: 0; width: 100%; min-height: 43px; padding: 10px 13px; border: 1px solid #d7c5aa; border-radius: 5px; outline: none; background: #fffefa; color: #51412f; font-family: inherit; font-size: 13px; font-weight: 600; line-height: 1.4; -webkit-user-select: text; user-select: text; transition: border-color .15s, background .15s; }
+.researcher-profile-controls input:focus { border-color: #c37a48; box-shadow: 0 0 0 3px rgba(217, 120, 69, .12); }
+.researcher-profile-controls input:disabled { opacity: 1; border-color: #d5d1c9; background: #e9e6e0; color: #777168; -webkit-text-fill-color: #777168; }
+.researcher-profile-controls input[aria-invalid="true"] { border-color: #ba5843; }
+.researcher-profile-controls button { flex: 0 0 auto; min-width: 64px; padding: 0 15px; border: 1px solid #b85e37; border-radius: 5px; background: linear-gradient(135deg, #e28b57, #c46940); color: #fffaf2; font-family: inherit; font-size: 11px; font-weight: 800; cursor: pointer; }
+.researcher-profile-controls button:hover { filter: brightness(1.06); }
+.researcher-profile-controls button[hidden] { display: none; }
+.researcher-profile.is-fixed .researcher-profile-controls button, .researcher-profile-controls .nickname-cancel { border-color: #d4c4aa; background: #f9f3e7; color: #8e6945; }
+.nickname-status, .nickname-help { margin: 9px 0 0; color: #8d806d; font-size: 10px; line-height: 1.6; }
+.nickname-help { margin-top: 5px; color: #a2998c; font-size: 9px; }
+.nickname-status[data-state="error"] { color: #b04f3b; }
+.nickname-status[data-state="saved"] { color: #7a855d; }
+@media (max-width: 480px) {
+  .researcher-profile { padding: 14px; }
+  .researcher-profile-badge { padding: 4px 6px; font-size: 8px; }
+  .researcher-profile-controls input { font-size: 16px; }
+  .researcher-profile-controls button { min-width: 52px; padding: 0 10px; }
+}
 .quick-dock { position: fixed; z-index: 50; right: auto; bottom: max(14px, env(safe-area-inset-bottom)); left: 50%; width: min(590px, calc(100vw - 32px)); display: flex; align-items: center; justify-content: space-between; gap: 5px; padding: 6px; border: 1px solid rgba(255,255,255,.7); border-radius: 99px; background: rgba(45,43,36,.93); box-shadow: 0 10px 30px rgba(29,27,22,.25); color: #fffaf2; backdrop-filter: blur(12px); transform: translateX(-50%); }
 .quick-dock a, .quick-dock button { min-height: 46px; padding: 0 15px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; border: 0; border-radius: 99px; background: transparent; color: inherit; font-size: 11px; font-weight: 750; line-height: 1.2; white-space: nowrap; cursor: pointer; transition: background .16s, transform .16s; }
 .quick-dock a:hover, .quick-dock button:hover:not(:disabled) { background: rgba(255,255,255,.13); transform: translateY(-2px); }
@@ -545,6 +571,12 @@ html:has(.trophy-card-dialog[open]) { overflow: hidden; }
 .trophy-showcase-info h2 { margin: 11px 0 4px; color: #fff7e9; font-size: clamp(25px, 4vw, 38px); letter-spacing: -.065em; }
 .trophy-showcase-subtitle { margin: 0; color: rgba(255, 246, 228, .67); font-size: 12px; }
 .trophy-showcase-subtitle strong { margin-left: 4px; color: #f4c98f; font-size: 1.15em; font-weight: 850; }
+.trophy-researcher { display: flex; align-items: center; gap: 9px; width: fit-content; max-width: 100%; margin: 12px 0; padding: 8px 12px; border: 1px solid rgba(231, 184, 125, .28); border-radius: 6px; background: linear-gradient(110deg, rgba(232, 173, 104, .12), rgba(255, 255, 255, .035)); }
+.trophy-researcher > span:first-child { color: #e7b278; font-size: 19px; }
+.trophy-researcher > span:last-child { min-width: 0; }
+.trophy-researcher small { display: block; margin-bottom: 3px; color: #b19d88; font-size: 7px; letter-spacing: .18em; }
+.trophy-researcher b { display: block; overflow-wrap: anywhere; color: #f7dab0; font-size: 14px; font-weight: 750; }
+.ranking-personal #ranking-personal-name { letter-spacing: 0; text-transform: none; overflow-wrap: anywhere; }
 .trophy-showcase-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 22px 0 18px; }
 .trophy-showcase-stats > div { min-width: 0; padding: 11px 9px; border: 1px solid rgba(255, 255, 255, .22); border-radius: 10px; background: rgba(255, 255, 255, .09); box-shadow: inset 0 1px rgba(255, 255, 255, .08); backdrop-filter: blur(10px); }
 .trophy-showcase-stats small { display: block; margin-bottom: 6px; color: rgba(255, 244, 225, .68); font-size: 8px; }
@@ -571,7 +603,9 @@ html:has(.trophy-card-dialog[open]) { overflow: hidden; }
   .trophy-showcase { grid-template-columns: 1fr; grid-template-rows: minmax(185px, 30dvh) minmax(0, 1fr); max-height: 90dvh; border-radius: 14px; }
   .trophy-showcase-art { min-height: 0; }
   .trophy-showcase-art img { top: -10%; left: -15%; width: 130%; height: 120%; object-position: center 28%; }
-  .trophy-showcase-info { padding: 19px 16px 18px; }
+  .trophy-showcase-info { min-height: 0; padding: 19px 16px 18px; justify-content: flex-start; overflow-y: auto; }
+  .trophy-researcher { margin: 9px 0; padding: 7px 10px; }
+  .trophy-researcher b { font-size: 12px; }
   .trophy-showcase-info h2 { margin-top: 7px; font-size: 25px; }
   .trophy-showcase-stats { gap: 6px; margin-top: 14px; }
   .trophy-showcase-stats > div { padding: 9px 7px; }

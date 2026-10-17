@@ -2,9 +2,14 @@ export const schema = `
 CREATE TABLE IF NOT EXISTS visitors (
   id uuid PRIMARY KEY,
   key_hash bytea NOT NULL UNIQUE,
+  nickname varchar(16) NOT NULL DEFAULT '',
+  nickname_updated_at bigint NOT NULL DEFAULT 0 CHECK (nickname_updated_at >= 0),
   created_at timestamptz NOT NULL DEFAULT now(),
   last_seen_at timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE visitors ADD COLUMN IF NOT EXISTS nickname varchar(16) NOT NULL DEFAULT '';
+ALTER TABLE visitors ADD COLUMN IF NOT EXISTS nickname_updated_at bigint NOT NULL DEFAULT 0 CHECK (nickname_updated_at >= 0);
 
 CREATE TABLE IF NOT EXISTS visitor_stats (
   visitor_id uuid PRIMARY KEY REFERENCES visitors(id) ON DELETE CASCADE,

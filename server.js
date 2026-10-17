@@ -6,6 +6,7 @@ import { createHash, randomBytes, randomUUID } from 'node:crypto'
 import pg from 'pg'
 import { schema } from './db/schema.js'
 import { normalizeEarnedChamis, mergeEarnedChamis } from './shared/earned-chamis.js'
+import { parseResearcherProfile, mergeResearcherProfiles, displayResearcherName } from './shared/researcher-profile.js'
 
 const { Pool } = pg
 const root = fileURLToPath(new URL('.', import.meta.url))
@@ -176,6 +177,10 @@ export async function syncResearch(request, response) {
 
   const payload = await readJson(request)
   const record = normalizeResearch(payload.research)
+  let profile
+  try { profile = parseResearcherProfile(payload.profile) } catch (error) {
+    return sendJson(response, 400, { error: error.message })
+  }
   const revision = Number(payload.revision)
   if (!Number.isSafeInteger(revision) || revision < 0) return sendJson(response, 400, { error: 'Invalid record revision.' })
 
@@ -186,17 +191,26 @@ export async function syncResearch(request, response) {
   let rankingRows
   let visitorId = null
   let syncedResearch = null
+  let syncedProfile = { nickname: '', updatedAt: 0 }
 
   try {
     await client.query('BEGIN')
-    if (!session.isNew || hasResearchActivity(record)) {
+    if (!session.isNew || hasResearchActivity(record) || profile.updatedAt > 0) {
       const visitor = await client.query(
         `INSERT INTO visitors (id, key_hash) VALUES ($1, $2)
          ON CONFLICT (key_hash) DO UPDATE SET last_seen_at = now()
-         RETURNING id`,
+         RETURNING id, nickname, nickname_updated_at`,
         [randomUUID(), keyHash],
       )
       visitorId = visitor.rows[0].id
+      const storedProfile = { nickname: visitor.rows[0].nickname, updatedAt: Number(visitor.rows[0].nickname_updated_at) }
+      syncedProfile = mergeResearcherProfiles(storedProfile, profile)
+      if (syncedProfile.updatedAt > storedProfile.updatedAt) {
+        await client.query(
+          'UPDATE visitors SET nickname = $2, nickname_updated_at = $3 WHERE id = $1',
+          [visitorId, syncedProfile.nickname, String(syncedProfile.updatedAt)],
+        )
+      }
 
       const stored = await client.query(
         `SELECT research_record, total_score
@@ -227,7 +241,7 @@ export async function syncResearch(request, response) {
 
     const rankings = await client.query(
       `WITH ranked AS (
-         SELECT visitor_id, total_score,
+         SELECT r.visitor_id, r.total_score, v.nickname,
            CASE
              WHEN jsonb_typeof(research_record -> 'earnedChamiCount') = 'number'
                THEN (research_record ->> 'earnedChamiCount')::integer
@@ -235,11 +249,12 @@ export async function syncResearch(request, response) {
                THEN jsonb_array_length(research_record -> 'earnedChamis')
              ELSE 0
            END AS earned_chami_count,
-           row_number() OVER (ORDER BY total_score DESC, updated_at ASC, visitor_id ASC)::integer AS rank
-         FROM visitor_research
-         WHERE total_score > 0
+           row_number() OVER (ORDER BY r.total_score DESC, r.updated_at ASC, r.visitor_id ASC)::integer AS rank
+         FROM visitor_research r
+         JOIN visitors v ON v.id = r.visitor_id
+         WHERE r.total_score > 0
        )
-       SELECT rank, total_score, earned_chami_count, visitor_id = $1::uuid AS is_current_visitor
+       SELECT rank, total_score, earned_chami_count, nickname, visitor_id = $1::uuid AS is_current_visitor
        FROM ranked
        WHERE rank <= 50 OR visitor_id = $1::uuid
        ORDER BY rank`,
@@ -261,6 +276,7 @@ export async function syncResearch(request, response) {
     const score = Number(row.total_score)
     return {
       rank: Number(row.rank),
+      nickname: displayResearcherName(row.nickname),
       score,
       earnedChamiCount: Number(row.earned_chami_count) || 0,
       tier: tierForScore(score),
@@ -273,9 +289,10 @@ export async function syncResearch(request, response) {
   return sendJson(response, 200, {
     syncedAt: new Date().toISOString(),
     research: syncedResearch,
+    profile: syncedProfile,
     currentRank: currentRecord ? Number(currentRecord.rank) : null,
     myRecord: currentRecord
-      ? { score: currentScore, earnedChamiCount: currentEarnedChamiCount, tier: tierForScore(currentScore) }
+      ? { score: currentScore, nickname: displayResearcherName(currentRecord.nickname), earnedChamiCount: currentEarnedChamiCount, tier: tierForScore(currentScore) }
       : null,
     entries,
   })
