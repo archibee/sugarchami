@@ -31,6 +31,12 @@ let schemaReady = null
 
 if (pool) pool.on('error', () => {})
 
+const researchCounterFields = [
+  'completedRounds', 'catchPlays', 'gaugePlays', 'precisionHits', 'mashPlays', 'memoryPlays',
+  'memoryGolds', 'molePlays', 'radarPlays', 'towerPlays', 'pingpongPlays',
+]
+const researchBestFields = ['bestSugar', 'bestMashes', 'bestCatches']
+
 function sendJson(response, status, data) {
   const headers = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }
   if (typeof response.status === 'function' && typeof response.json === 'function') {
@@ -125,6 +131,26 @@ function normalizeResearch(input) {
   return record
 }
 
+function hasResearchActivity(record) {
+  return [...researchCounterFields, ...researchBestFields, 'bestMemoryMoves', 'totalScore', 'siteTimeRemainderMs']
+    .some((key) => record[key] > 0)
+    || record.earnedChamis.length > 0
+}
+
+function mergeResearchRecords(existingInput, incomingInput) {
+  const existing = normalizeResearch(existingInput || {})
+  const incoming = normalizeResearch(incomingInput || {})
+  const merged = { ...existing, ...incoming }
+  for (const key of [...researchCounterFields, ...researchBestFields, 'totalScore', 'siteTimeRemainderMs']) {
+    merged[key] = Math.max(existing[key], incoming[key])
+  }
+  const memoryMoveRecords = [existing.bestMemoryMoves, incoming.bestMemoryMoves].filter((moves) => moves > 0)
+  merged.bestMemoryMoves = memoryMoveRecords.length ? Math.min(...memoryMoveRecords) : 0
+  merged.earnedChamis = [...new Set([...existing.earnedChamis, ...incoming.earnedChamis])].slice(0, 10000)
+  merged.earnedChamiCount = merged.earnedChamis.length
+  return merged
+}
+
 function tierForScore(score) {
   if (score >= 5000) return { id: 'master', name: '최고 등급 마스터', icon: '👑' }
   if (score >= 2500) return { id: 'diamond', name: '다이아', icon: '💎' }
@@ -158,26 +184,47 @@ export async function syncResearch(request, response) {
   const keyHash = createHash('sha256').update(session.token).digest()
   const client = await pool.connect()
   let rankingRows
+  let visitorId = null
+  let syncedResearch = null
 
   try {
     await client.query('BEGIN')
-    const visitor = await client.query(
-      `INSERT INTO visitors (id, key_hash) VALUES ($1, $2)
-       ON CONFLICT (key_hash) DO UPDATE SET last_seen_at = now()
-       RETURNING id`,
-      [randomUUID(), keyHash],
-    )
-    const visitorId = visitor.rows[0].id
-    await client.query(
-      `INSERT INTO visitor_research (visitor_id, research_record, total_score, client_updated_at)
-       VALUES ($1, $2::jsonb, $3, $4)
-       ON CONFLICT (visitor_id) DO UPDATE SET
-         research_record = CASE WHEN EXCLUDED.client_updated_at >= visitor_research.client_updated_at THEN EXCLUDED.research_record ELSE visitor_research.research_record END,
-         total_score = GREATEST(visitor_research.total_score, EXCLUDED.total_score),
-         client_updated_at = GREATEST(visitor_research.client_updated_at, EXCLUDED.client_updated_at),
-         updated_at = CASE WHEN EXCLUDED.client_updated_at >= visitor_research.client_updated_at THEN now() ELSE visitor_research.updated_at END`,
-      [visitorId, JSON.stringify(record), String(record.totalScore), String(revision)],
-    )
+    if (!session.isNew || hasResearchActivity(record)) {
+      const visitor = await client.query(
+        `INSERT INTO visitors (id, key_hash) VALUES ($1, $2)
+         ON CONFLICT (key_hash) DO UPDATE SET last_seen_at = now()
+         RETURNING id`,
+        [randomUUID(), keyHash],
+      )
+      visitorId = visitor.rows[0].id
+
+      const stored = await client.query(
+        `SELECT research_record, total_score
+         FROM visitor_research
+         WHERE visitor_id = $1
+         FOR UPDATE`,
+        [visitorId],
+      )
+      const storedRecord = stored.rows[0]
+        ? { ...stored.rows[0].research_record, totalScore: Math.max(Number(stored.rows[0].research_record.totalScore) || 0, Number(stored.rows[0].total_score) || 0) }
+        : null
+      const mergedRecord = mergeResearchRecords(storedRecord, record)
+
+      if (stored.rows[0] || hasResearchActivity(mergedRecord)) {
+        await client.query(
+          `INSERT INTO visitor_research (visitor_id, research_record, total_score, client_updated_at)
+           VALUES ($1, $2::jsonb, $3, $4)
+           ON CONFLICT (visitor_id) DO UPDATE SET
+             research_record = EXCLUDED.research_record,
+             total_score = GREATEST(visitor_research.total_score, EXCLUDED.total_score),
+             client_updated_at = GREATEST(visitor_research.client_updated_at, EXCLUDED.client_updated_at),
+             updated_at = CASE WHEN visitor_research.research_record IS DISTINCT FROM EXCLUDED.research_record THEN now() ELSE visitor_research.updated_at END`,
+          [visitorId, JSON.stringify(mergedRecord), String(mergedRecord.totalScore), String(revision)],
+        )
+        syncedResearch = mergedRecord
+      }
+    }
+
     const rankings = await client.query(
       `WITH ranked AS (
          SELECT visitor_id, total_score,
@@ -200,7 +247,7 @@ export async function syncResearch(request, response) {
     )
     rankingRows = rankings.rows
     await client.query('COMMIT')
-    if (session.isNew) {
+    if (session.isNew && visitorId) {
       response.setHeader('Set-Cookie', `${sessionCookie}=${session.token}; Path=/; HttpOnly; SameSite=Lax${production ? '; Secure' : ''}`)
     }
   } catch (error) {
@@ -225,6 +272,7 @@ export async function syncResearch(request, response) {
   const currentEarnedChamiCount = currentRecord ? Number(currentRecord.earned_chami_count) || 0 : 0
   return sendJson(response, 200, {
     syncedAt: new Date().toISOString(),
+    research: syncedResearch,
     currentRank: currentRecord ? Number(currentRecord.rank) : null,
     myRecord: currentRecord
       ? { score: currentScore, earnedChamiCount: currentEarnedChamiCount, tier: tierForScore(currentScore) }
