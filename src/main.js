@@ -1191,7 +1191,7 @@ document.body.insertAdjacentHTML('beforeend', `
 시트리의 숲 방송국: https://www.sooplive.com/station/vlupsitry
 원곡·원본 콘텐츠의 공식 링크: 배포 시 실제 사용한 공식 콘텐츠 URL 추가 기재</pre><p>시트리 일러스트는 AI 생성 팬 일러스트이며, 의상 참고 출처로 위 방송 VOD를 표기합니다. 고해상도 원화·포토카드 원본·음원 원본 파일을 추출하거나 별도 배포할 수 없습니다. 원저작물을 사실상 그대로 복제해 제공하는 형태도 금지됩니다.</p></section>
       <section class="guideline-section"><h3>콘텐츠 제한</h3><p>타인 비방, 선정성, 정치·종교·사상 풍자, 반사회적 표현, 스트리머 사생활 침해·추적·사칭 등 당사 규정을 위반하는 내용은 사용할 수 없습니다.</p></section>
-      <section class="guideline-section"><h3>연구 기록과 익명 동기화</h3><p>게임 기록은 브라우저 로컬 저장소에 보관합니다. DB 연결이 설정된 Node.js 서버 또는 Vercel Function에서는 무작위 익명 세션 쿠키를 이용해 기록을 백그라운드로 동기화하고, 쿠키 원문 대신 해시를 저장합니다. DB에는 연구 기록과 총점이 저장되며, DB에서 받은 상위 50개 익명 순위·점수·등급과 내 기록 요약은 별도 로컬 저장소에 캐시됩니다. 랭킹 모달은 DB를 직접 조회하지 않고 이 캐시를 바로 표시하며, 동기화로 캐시가 바뀌면 열린 모달도 갱신됩니다. 게임 기록이 바뀌거나 랭킹 모달 또는 연구카드를 열 때 백그라운드 동기화를 예약합니다. DB 연결 확인 전, 동기화 실패 또는 랭킹 캐시를 저장할 수 없는 동안에는 랭킹 보기 버튼이 회색으로 비활성화됩니다. DB 연결이나 저장에 실패해도 시트리 당도 연구카드, 게임과 로컬 기록은 계속 사용할 수 있습니다. 순위는 브라우저에서 계산한 점수를 바탕으로 하며 서버에서 부정 플레이를 검증하지 않습니다. 브라우저 저장 공간을 지우면 로컬 기록과 캐시가 삭제되고, 세션 쿠키가 사라지면 다음 방문은 새 익명 방문자로 구분될 수 있습니다. 서버에 저장된 기록은 브라우저에서 저장 공간을 지워도 자동 삭제되지 않습니다. DB 접속 정보가 설정되지 않은 서버·Vercel 환경 또는 정적 호스팅 환경에서는 로컬 기록만 사용하며, Vercel에서는 DB 환경 변수를 프로젝트 설정에 추가해야 합니다.</p></section>
+      <section class="guideline-section"><h3>연구 기록과 익명 동기화</h3><p>게임 기록은 브라우저 로컬 저장소에 보관합니다. DB 연결이 설정된 Node.js 서버 또는 Vercel Function에서는 무작위 익명 세션 쿠키를 이용해 기록을 백그라운드로 동기화하고, 쿠키 원문 대신 해시를 저장합니다. DB에는 연구 기록과 총점이 저장되며, DB에서 받은 상위 50개 익명 순위·점수·등급과 내 기록 요약은 별도 로컬 저장소에 캐시됩니다. 랭킹 모달은 DB를 직접 조회하지 않고 이 캐시를 바로 표시하며, 동기화로 캐시가 바뀌면 열린 모달도 갱신됩니다. 게임 기록이 바뀌거나 랭킹 모달 또는 연구카드를 열 때 백그라운드 동기화를 예약합니다. 랭킹 자료를 한 번이라도 캐시에 저장하면 이후 DB 연결이 실패해도 랭킹 보기 버튼을 계속 사용할 수 있으며, 저장된 랭킹을 표시합니다. 아직 랭킹 자료를 받은 적이 없으면 버튼이 회색으로 비활성화됩니다. DB 연결이나 저장에 실패해도 시트리 당도 연구카드, 게임과 로컬 기록은 계속 사용할 수 있습니다. 순위는 브라우저에서 계산한 점수를 바탕으로 하며 서버에서 부정 플레이를 검증하지 않습니다. 브라우저 저장 공간을 지우면 로컬 기록과 캐시가 삭제되고, 세션 쿠키가 사라지면 다음 방문은 새 익명 방문자로 구분될 수 있습니다. 서버에 저장된 기록은 브라우저에서 저장 공간을 지워도 자동 삭제되지 않습니다. DB 접속 정보가 설정되지 않은 서버·Vercel 환경 또는 정적 호스팅 환경에서는 로컬 기록만 사용하며, Vercel에서는 DB 환경 변수를 프로젝트 설정에 추가해야 합니다.</p></section>
       <section class="guideline-section"><h3>AI 생성물과 음성 합성</h3><p>AI 생성물은 AI 생성물임을 표시해야 하며, 당사 저작물을 학습 데이터로 사용해서는 안 됩니다. 아래 O/X 표에 이 사이트에서 실제 사용한 AI 기능을 표시했습니다. 시트리와 차미 캐릭터 및 공식 IP의 권리는 각 권리자에게 있으며 이 팬게임이 권리를 주장하지 않습니다. 넓은 화면에서는 히어로 시트리를 반복해서 누르면 1·2단계 경계 대사와 붉은 말풍선이 나타나며, 2단계에서 5초 안에 15회 이상 더 누르면 이스터에그 3단계 대사와 조금 더 크고 검붉은 글씨가 표시됩니다. 당도왕 차미가 새로 합류하면 알림 토스트가 나타납니다. 대사 게이지가 끝나면 단계·색·대사가 기본 상태로 돌아옵니다. 음성은 재생되지 않습니다.</p><p>음성 합성은 이주인, 시트리, 노이, 리미, 라즈에 한해 비영리 목적으로 허용됩니다. 벨디르 미스틸테인, 이아나 이그노시스, 베루의 음성 합성은 허용되지 않습니다. 허용 범위의 음성 합성도 당사 요청 시 즉시 중단해야 합니다.</p></section>
       <section class="guideline-section ai-disclosure" aria-labelledby="ai-disclosure-title">
         <h3 id="ai-disclosure-title">이 사이트의 AI 사용 내역 O/X</h3>
@@ -1634,9 +1634,10 @@ const rankingList = document.querySelector('#ranking-list')
 const rankingButton = document.querySelector('#view-ranking')
 const mobileTouchTilt = window.matchMedia('(max-width: 760px)')
 function setRankingAvailability(available, message = 'DB 연결을 사용할 수 없어 랭킹을 사용할 수 없습니다.') {
-  rankingButton.disabled = !available
-  rankingButton.setAttribute('aria-disabled', String(!available))
-  if (available) rankingButton.removeAttribute('title')
+  const canShowSavedRanking = available || Boolean(readRankingCache())
+  rankingButton.disabled = !canShowSavedRanking
+  rankingButton.setAttribute('aria-disabled', String(!canShowSavedRanking))
+  if (canShowSavedRanking) rankingButton.removeAttribute('title')
   else rankingButton.title = message
 }
 
@@ -1762,7 +1763,10 @@ window.addEventListener('ranking-cache-updated', () => {
   if (rankingDialog.open) renderRankingCache()
 })
 window.addEventListener('storage', (event) => {
-  if (event.key === rankingCacheKey && rankingDialog.open) renderRankingCache()
+  if (event.key === rankingCacheKey || event.key === null) {
+    setRankingAvailability(Boolean(readRankingCache()))
+    if (rankingDialog.open) renderRankingCache()
+  }
 })
 
 let sitePresenceLastAt = Date.now()
