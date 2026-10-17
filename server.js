@@ -32,11 +32,36 @@ let schemaReady = null
 if (pool) pool.on('error', () => {})
 
 function sendJson(response, status, data) {
-  response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' })
+  const headers = { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }
+  if (typeof response.status === 'function' && typeof response.json === 'function') {
+    for (const [name, value] of Object.entries(headers)) response.setHeader(name, value)
+    return response.status(status).json(data)
+  }
+  response.writeHead(status, headers)
   response.end(JSON.stringify(data))
 }
 
 async function readJson(request) {
+  let parsedBody
+  try {
+    parsedBody = request.body
+  } catch {
+    throw Object.assign(new Error('Invalid JSON.'), { status: 400 })
+  }
+  if (parsedBody !== undefined) {
+    try {
+      const parsed = parsedBody
+      const rawBody = Buffer.isBuffer(parsed) ? parsed.toString('utf8') : typeof parsed === 'string' ? parsed : JSON.stringify(parsed)
+      if (Buffer.byteLength(rawBody || '') > maxBodyBytes) throw Object.assign(new Error('Request too large.'), { status: 413 })
+      if (typeof parsed === 'string' || Buffer.isBuffer(parsed)) {
+        try { return JSON.parse(rawBody || '{}') } catch { throw Object.assign(new Error('Invalid JSON.'), { status: 400 }) }
+      }
+      return parsed
+    } catch (error) {
+      if (error.status) throw error
+      throw Object.assign(new Error('Invalid JSON.'), { status: 400 })
+    }
+  }
   let body = ''
   for await (const chunk of request) {
     body += chunk
@@ -107,7 +132,7 @@ function tierForScore(score) {
   return { id: 'research', name: '연구 중', icon: '🏆' }
 }
 
-async function syncResearch(request, response) {
+export async function syncResearch(request, response) {
   if (!pool) return sendJson(response, 503, { error: 'Research storage is disabled.' })
   if (request.headers['content-type']?.split(';')[0].trim().toLowerCase() !== 'application/json') {
     return sendJson(response, 415, { error: 'JSON is required.' })
@@ -216,9 +241,11 @@ const server = createServer(async (request, response) => {
 })
 
 const port = Number(process.env.PORT || 4173)
-server.listen(port, '0.0.0.0', () => console.log(`Chami Sugar Lab server listening on ${port}`))
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  server.listen(port, '0.0.0.0', () => console.log(`Chami Sugar Lab server listening on ${port}`))
 
-for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(async () => {
-  await pool?.end().catch(() => {})
-  process.exit(0)
-}))
+  for (const signal of ['SIGINT', 'SIGTERM']) process.on(signal, () => server.close(async () => {
+    await pool?.end().catch(() => {})
+    process.exit(0)
+  }))
+}
