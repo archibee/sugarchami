@@ -15,6 +15,7 @@ const app = document.querySelector('#app')
 const mobileHeroLayout = window.matchMedia('(max-width: 760px)')
 const sampleCount = 6
 const saveKey = 'chami-sugar-lab-research-v1'
+const rankingCacheKey = 'chami-sugar-lab-ranking-v1'
 const trophyTiers = [
   { id: 'silver', name: '실버', minimum: 160, icon: '🥈' },
   { id: 'gold', name: '골드', minimum: 500, icon: '🥇' },
@@ -101,9 +102,15 @@ let moleState = { running: false, hits: 0, combo: 0, bestCombo: 0, endsAt: 0, ti
 let radarState = { running: false, correct: 0, rounds: 0, endsAt: 0, timer: null, feedbackTimer: null, target: '' }
 let towerState = { running: false, height: 0, width: 34, position: 0, direction: 1, speed: 0.055, frame: null, lastFrame: 0 }
 let pingpongState = { active: false, hits: 0, x: 50, y: 18, vx: 0, vy: 0, paddleX: 50, frame: null, lastFrame: 0 }
-let profileSyncPromise = null
 let scoreToastTimeout = 0
 let chamiToastTimeout = 0
+let researchSyncTimer = 0
+let researchSyncIdleHandle = 0
+let researchSyncInFlight = false
+let researchSyncAgain = false
+let researchSyncFailures = 0
+let researchSyncRetryDelay = 0
+let researchSyncLastAttemptAt = 0
 
 function loadResearch() {
   const fresh = { completedRounds: 0, bestSugar: 0, bestMashes: 0, bestCatches: 0, catchPlays: 0, gaugePlays: 0, precisionHits: 0, mashPlays: 0, bestMemoryMoves: 0, memoryPlays: 0, memoryGolds: 0, molePlays: 0, radarPlays: 0, towerPlays: 0, pingpongPlays: 0, totalScore: 0, earnedChamis: [] }
@@ -124,8 +131,105 @@ let research = loadResearch()
 function saveResearch() {
   try {
     localStorage.setItem(saveKey, JSON.stringify(research))
+    queueResearchSync()
   } catch {
     // Keep the current session playable when storage is unavailable.
+  }
+}
+
+function queueResearchSync(delay = 1800) {
+  if (researchSyncInFlight) {
+    researchSyncAgain = true
+    return
+  }
+  if (researchSyncTimer || researchSyncIdleHandle) return
+  delay = Math.max(delay, Math.max(0, 15000 - (Date.now() - researchSyncLastAttemptAt)))
+  researchSyncTimer = window.setTimeout(() => {
+    researchSyncTimer = 0
+    const startSync = () => {
+      researchSyncIdleHandle = 0
+      void synchronizeResearch()
+    }
+    if ('requestIdleCallback' in window) researchSyncIdleHandle = window.requestIdleCallback(startSync, { timeout: 5000 })
+    else startSync()
+  }, delay)
+}
+
+function normalizeRankingSnapshot(snapshot) {
+  const rows = new Map()
+  for (const entry of snapshot.entries.slice(0, 50)) {
+    const rank = Number(entry?.rank)
+    const score = Number(entry?.score)
+    if (!Number.isSafeInteger(rank) || rank < 1 || rank > 50 || !Number.isFinite(score) || score < 0) continue
+    rows.set(rank, {
+      rank,
+      score: Math.floor(score),
+      tier: trophyTierForScore(score),
+      isCurrentVisitor: entry.isCurrentVisitor === true,
+      empty: false,
+    })
+  }
+  const currentRank = Number(snapshot.currentRank)
+  const myScore = Number(snapshot.myRecord?.score)
+  return {
+    syncedAt: typeof snapshot.syncedAt === 'string' ? snapshot.syncedAt : new Date().toISOString(),
+    currentRank: Number.isSafeInteger(currentRank) && currentRank > 0 ? currentRank : null,
+    myRecord: Number.isFinite(myScore) && myScore >= 0
+      ? { score: Math.floor(myScore), tier: trophyTierForScore(myScore) }
+      : null,
+    entries: Array.from({ length: 50 }, (_, index) => rows.get(index + 1) || { rank: index + 1, empty: true }),
+  }
+}
+
+async function synchronizeResearch() {
+  if (researchSyncInFlight) {
+    researchSyncAgain = true
+    return
+  }
+  let localResearch
+  try {
+    const storedRecord = localStorage.getItem(saveKey)
+    if (!storedRecord) return
+    JSON.parse(storedRecord)
+    localResearch = loadResearch()
+  } catch {
+    return
+  }
+  researchSyncInFlight = true
+  researchSyncAgain = false
+  researchSyncLastAttemptAt = Date.now()
+  const controller = new AbortController()
+  const timeout = window.setTimeout(() => controller.abort(), 7000)
+
+  try {
+    const response = await fetch('/api/sync', {
+      method: 'POST',
+      credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ research: localResearch, revision: Date.now() }),
+      signal: controller.signal,
+    })
+    if (!response.ok) throw new Error('Research sync unavailable.')
+    const rankingSnapshot = await response.json()
+    if (!Array.isArray(rankingSnapshot.entries)) throw new Error('Invalid ranking snapshot.')
+    const rankingCache = normalizeRankingSnapshot(rankingSnapshot)
+    try {
+      localStorage.setItem(rankingCacheKey, JSON.stringify(rankingCache))
+      window.dispatchEvent(new Event('ranking-cache-updated'))
+    } catch {
+      // Ranking cache storage is optional; local gameplay records remain intact.
+    }
+    researchSyncFailures = 0
+  } catch {
+    researchSyncFailures += 1
+    researchSyncRetryDelay = Math.min(5 * 60 * 1000, 30000 * (2 ** Math.min(researchSyncFailures - 1, 4)))
+  } finally {
+    window.clearTimeout(timeout)
+    researchSyncInFlight = false
+    const retryDelay = researchSyncRetryDelay
+    researchSyncRetryDelay = 0
+    if (retryDelay) queueResearchSync(retryDelay)
+    else if (researchSyncAgain) queueResearchSync(1200)
   }
 }
 
@@ -178,51 +282,6 @@ function totalMiniGamePlays() {
 function trophyTierForScore(score) {
   return [...trophyTiers].reverse().find((tier) => score >= tier.minimum)
     || { id: 'research', name: '연구 중', icon: '🏆' }
-}
-
-function applyServerProfile(profile) {
-  const stats = profile.stats || {}
-  const localOnly = { molePlays: research.molePlays, radarPlays: research.radarPlays, towerPlays: research.towerPlays, pingpongPlays: research.pingpongPlays, totalScore: research.totalScore || 0, siteTimeRemainderMs: research.siteTimeRemainderMs || 0, earnedChamis: [...(research.earnedChamis || [])] }
-  research = {
-    completedRounds: Number(stats.completed_rounds) || 0,
-    bestSugar: Number(stats.best_sugar) || 0,
-    bestMashes: Number(stats.best_mashes) || 0,
-    bestCatches: Number(stats.best_catches) || 0,
-    catchPlays: Number(stats.catch_plays) || 0,
-    gaugePlays: Number(stats.gauge_plays) || 0,
-    precisionHits: Number(stats.precision_hits) || 0,
-    mashPlays: Number(stats.mash_plays) || 0,
-    bestMemoryMoves: Number(stats.best_memory_moves) || 0,
-    memoryPlays: Number(stats.memory_plays) || 0,
-    memoryGolds: Number(stats.memory_golds) || 0,
-    ...localOnly,
-  }
-  saveResearch()
-}
-
-async function syncServerProfile() {
-  try {
-    const response = await fetch('/api/profile', { credentials: 'same-origin' })
-    if (response.ok) applyServerProfile(await response.json())
-  } catch {
-    // The local research record remains available if the database is offline.
-  }
-}
-
-async function submitGameEvent(event) {
-  try {
-    if (!profileSyncPromise) profileSyncPromise = syncServerProfile()
-    await profileSyncPromise
-    const response = await fetch('/api/events', {
-      method: 'POST',
-      credentials: 'same-origin',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(event),
-    })
-    if (response.ok) applyServerProfile(await response.json())
-  } catch {
-    // Do not interrupt a game round when persistent storage is unavailable.
-  }
 }
 
 function makeSamples() {
@@ -319,7 +378,6 @@ function measureRandomSample() {
 
       const highest = Math.max(...samples.map((item) => item.sugar))
       const winners = samples.filter((item) => item.sugar === highest)
-      submitGameEvent({ type: 'round_complete', sugars: samples.map((item) => item.sugar) })
       winners.forEach((winner) => {
         winner.winner = true
         research.earnedChamis.push(winner.sprite)
@@ -393,7 +451,6 @@ function useGauge() {
   research.gaugePlays += 1
   if (difference <= 2) research.precisionHits += 1
   addResearchScore(5 + Math.max(0, 25 - difference))
-  submitGameEvent({ type: 'gauge_result', difference })
   const readout = document.querySelector('#gauge-readout')
   readout.textContent = `${actual}°S`
   document.querySelector('#gauge-needle').style.left = `${gaugeState.position}%`
@@ -409,7 +466,6 @@ function useGauge() {
 function finishFizzRound() {
   clearInterval(fizzState.timer)
   fizzState.running = false
-  submitGameEvent({ type: 'mash_result', count: fizzState.count })
   research.mashPlays += 1
   research.bestMashes = Math.max(research.bestMashes, fizzState.count)
   addResearchScore(6 + Math.min(40, fizzState.count))
@@ -470,7 +526,6 @@ function finishCatchRound() {
   clearInterval(catchState.timer)
   clearInterval(catchState.mover)
   catchState.running = false
-  submitGameEvent({ type: 'catch_result', count: catchState.count })
   research.catchPlays += 1
   research.bestCatches = Math.max(research.bestCatches, catchState.count)
   addResearchScore(6 + Math.min(40, catchState.count * 2))
@@ -608,7 +663,6 @@ function finishMemoryGame() {
   research.bestMemoryMoves = research.bestMemoryMoves ? Math.min(research.bestMemoryMoves, memoryState.moves) : memoryState.moves
   if (isGold) research.memoryGolds += 1
   addResearchScore(24 + Math.max(0, 60 - memoryState.moves * 2 - Math.floor(seconds / 5)))
-  submitGameEvent({ type: 'memory_result', moves: memoryState.moves, seconds })
   document.querySelector('#memory-game').classList.add('is-memory-complete')
   document.querySelector('#memory-start-button').textContent = '한 판 더 연구하기'
   document.querySelector('#memory-status').textContent = isGold
@@ -1043,7 +1097,10 @@ app.innerHTML = `
           <p>당도왕 차미 획득 수와 연구 기록을 카드에서 확인해보세요.</p>
         </div>
       </div>
-      <button class="view-trophy-button" id="view-trophy-card" type="button"><span aria-hidden="true">✦</span> 시트리 당도 연구카드 보기</button>
+      <div class="collection-actions">
+        <button class="view-trophy-button" id="view-trophy-card" type="button"><span aria-hidden="true">✦</span> 시트리 당도 연구카드 보기</button>
+        <button class="view-trophy-button" id="view-ranking" type="button"><span aria-hidden="true">✦</span> 랭킹 보기</button>
+      </div>
       <p class="collection-note">당도왕 차미를 모으고 연구 기록을 쌓아봐요.</p>
     </section>
   </main>
@@ -1128,6 +1185,7 @@ document.body.insertAdjacentHTML('beforeend', `
 시트리의 숲 방송국: https://www.sooplive.com/station/vlupsitry
 원곡·원본 콘텐츠의 공식 링크: 배포 시 실제 사용한 공식 콘텐츠 URL 추가 기재</pre><p>시트리 일러스트는 AI 생성 팬 일러스트이며, 의상 참고 출처로 위 방송 VOD를 표기합니다. 고해상도 원화·포토카드 원본·음원 원본 파일을 추출하거나 별도 배포할 수 없습니다. 원저작물을 사실상 그대로 복제해 제공하는 형태도 금지됩니다.</p></section>
       <section class="guideline-section"><h3>콘텐츠 제한</h3><p>타인 비방, 선정성, 정치·종교·사상 풍자, 반사회적 표현, 스트리머 사생활 침해·추적·사칭 등 당사 규정을 위반하는 내용은 사용할 수 없습니다.</p></section>
+      <section class="guideline-section"><h3>연구 기록과 익명 동기화</h3><p>게임 기록은 브라우저 로컬 저장소에 보관합니다. DB 연결이 설정된 서버에서는 무작위 익명 세션 쿠키를 이용해 기록을 백그라운드로 동기화하고, 쿠키 원문 대신 해시를 저장합니다. DB에는 연구 기록과 총점이 저장되며, DB에서 받은 상위 50개 익명 순위·점수·등급과 내 기록 요약은 별도 로컬 저장소에 캐시됩니다. 랭킹 모달은 DB를 직접 조회하지 않고 이 캐시를 바로 표시하며, 동기화로 캐시가 바뀌면 열린 모달도 갱신됩니다. 게임 기록이 바뀌거나 랭킹 모달 또는 연구카드를 열 때 백그라운드 동기화를 예약합니다. 순위는 브라우저에서 계산한 점수를 바탕으로 하며 서버에서 부정 플레이를 검증하지 않습니다. DB 연결이나 저장에 실패해도 게임과 로컬 기록은 계속 사용할 수 있습니다. 브라우저 저장 공간을 지우면 로컬 기록과 캐시가 삭제되고, 세션 쿠키가 사라지면 다음 방문은 새 익명 방문자로 구분될 수 있습니다. 서버에 저장된 기록은 브라우저에서 저장 공간을 지워도 자동 삭제되지 않습니다. DB 미설정 또는 정적 호스팅 환경에서는 로컬 기록만 사용합니다.</p></section>
       <section class="guideline-section"><h3>AI 생성물과 음성 합성</h3><p>AI 생성물은 AI 생성물임을 표시해야 하며, 당사 저작물을 학습 데이터로 사용해서는 안 됩니다. 아래 O/X 표에 이 사이트에서 실제 사용한 AI 기능을 표시했습니다. 시트리와 차미 캐릭터 및 공식 IP의 권리는 각 권리자에게 있으며 이 팬게임이 권리를 주장하지 않습니다. 넓은 화면에서는 히어로 시트리를 반복해서 누르면 1·2단계 경계 대사와 붉은 말풍선이 나타나며, 2단계에서 5초 안에 15회 이상 더 누르면 이스터에그 3단계 대사와 조금 더 크고 검붉은 글씨가 표시됩니다. 당도왕 차미가 새로 합류하면 알림 토스트가 나타납니다. 대사 게이지가 끝나면 단계·색·대사가 기본 상태로 돌아옵니다. 음성은 재생되지 않습니다.</p><p>음성 합성은 이주인, 시트리, 노이, 리미, 라즈에 한해 비영리 목적으로 허용됩니다. 벨디르 미스틸테인, 이아나 이그노시스, 베루의 음성 합성은 허용되지 않습니다. 허용 범위의 음성 합성도 당사 요청 시 즉시 중단해야 합니다.</p></section>
       <section class="guideline-section ai-disclosure" aria-labelledby="ai-disclosure-title">
         <h3 id="ai-disclosure-title">이 사이트의 AI 사용 내역 O/X</h3>
@@ -1173,6 +1231,32 @@ document.body.insertAdjacentHTML('beforeend', `
           <span id="trophy-rank-icon" aria-hidden="true">🏆</span>
           <div><small>현재 등급</small><b id="trophy-tier-name">연구 중</b><strong id="trophy-total-score">총 0점</strong></div>
         </div>
+      </section>
+    </article>
+  </dialog>
+`)
+document.body.insertAdjacentHTML('beforeend', `
+  <dialog class="trophy-card-dialog ranking-card-dialog" id="ranking-dialog" aria-labelledby="ranking-title">
+    <article class="trophy-showcase ranking-showcase" id="ranking-showcase">
+      <button class="trophy-showcase-close" id="ranking-close" type="button" aria-label="랭킹 닫기">✕</button>
+      <section class="trophy-showcase-art ranking-art" aria-label="시트리 AI 생성 팬 일러스트">
+        <img src="/images/sitri-hero-expanded.png" alt="시트리 AI 생성 팬 일러스트" loading="lazy" fetchpriority="low" decoding="async" />
+        <span class="trophy-art-label">SITRY · SUGAR RESEARCHER · AI FAN ART</span>
+      </section>
+      <section class="trophy-showcase-info ranking-info">
+        <p class="kicker"><span></span> SUGAR LAB · TOP 50</p>
+        <h2 id="ranking-title">연구소 랭킹</h2>
+        <p class="trophy-showcase-subtitle">동기화된 익명 연구 기록을 확인해요</p>
+        <div class="trophy-showcase-stats ranking-showcase-stats" aria-live="polite">
+          <div><small>기록이 있는 순위</small><b id="ranking-count">0<em> / 50</em></b></div>
+          <div><small>마지막 동기화</small><b class="ranking-updated" id="ranking-updated">동기화 전</b></div>
+        </div>
+        <div class="single-trophy trophy-modal-item ranking-personal" id="ranking-personal" data-tier="research" aria-live="polite">
+          <span id="ranking-personal-icon" aria-hidden="true">🏆</span>
+          <div><small>내 기록</small><b id="ranking-personal-rank">순위 확인 전</b><strong><span id="ranking-personal-score">—</span> · <span id="ranking-personal-tier">—</span></strong></div>
+        </div>
+        <div class="ranking-list-heading" aria-hidden="true"><span>순위 · 익명 연구원</span><span>점수 · 등급</span></div>
+        <ol class="ranking-list" id="ranking-list" aria-label="1위부터 50위까지"></ol>
       </section>
     </article>
   </dialog>
@@ -1538,6 +1622,9 @@ window.addEventListener('resize', scheduleDockSectionUpdate)
 updateDockSection()
 const trophyCardDialog = document.querySelector('#trophy-card-dialog')
 const trophyShowcase = document.querySelector('#trophy-showcase')
+const rankingDialog = document.querySelector('#ranking-dialog')
+const rankingShowcase = document.querySelector('#ranking-showcase')
+const rankingList = document.querySelector('#ranking-list')
 const mobileTouchTilt = window.matchMedia('(max-width: 760px)')
 function updateTrophyScoreDisplay() {
   const rankCard = document.querySelector('#trophy-rank-card')
@@ -1558,6 +1645,108 @@ document.querySelector('#view-trophy-card').addEventListener('click', () => {
   ].map(([label, value, unit]) => `<div><small>${label}</small><b>${value}<em>${unit}</em></b></div>`).join('')
   updateTrophyScoreDisplay()
   trophyCardDialog.showModal()
+  queueResearchSync(1000)
+})
+
+function readRankingCache() {
+  try {
+    const cached = JSON.parse(localStorage.getItem(rankingCacheKey))
+    if (!cached || !Array.isArray(cached.entries)) return null
+    return normalizeRankingSnapshot(cached)
+  } catch {
+    return null
+  }
+}
+
+function renderRankingCache() {
+  const cached = readRankingCache()
+  const cachedEntries = cached?.entries || []
+  const populated = cachedEntries.filter((entry) => !entry.empty).length
+  const previousScrollTop = rankingList.scrollTop
+  const rows = document.createDocumentFragment()
+
+  for (let index = 0; index < 50; index += 1) {
+    const rank = index + 1
+    const entry = cachedEntries[index]
+    const row = document.createElement('li')
+    row.className = `ranking-row${entry && !entry.empty ? ' is-populated' : ' is-empty'}`
+    const rankLabel = document.createElement('span')
+    rankLabel.className = 'ranking-row-rank'
+    rankLabel.textContent = String(rank).padStart(2, '0')
+    row.append(rankLabel)
+
+    if (entry && !entry.empty) {
+      const score = Math.floor(Number(entry.score) || 0)
+      const tier = trophyTierForScore(score)
+      row.dataset.tier = tier.id
+      const visitor = document.createElement('span')
+      visitor.className = `ranking-row-visitor${entry.isCurrentVisitor ? ' is-current' : ''}`
+      visitor.textContent = entry.isCurrentVisitor ? '나' : '익명 연구원'
+      const points = document.createElement('b')
+      points.className = 'ranking-row-score'
+      points.textContent = `${score.toLocaleString('ko-KR')}점`
+      const rankTier = document.createElement('span')
+      rankTier.className = 'ranking-row-tier'
+      rankTier.textContent = `${tier.icon} ${tier.name}`
+      row.append(visitor, points, rankTier)
+    } else {
+      const emptySlot = document.createElement('span')
+      emptySlot.className = 'ranking-empty-slot'
+      emptySlot.setAttribute('aria-hidden', 'true')
+      row.append(emptySlot, document.createElement('span'), document.createElement('span'))
+      row.setAttribute('aria-label', `${rank}위 기록 없음`)
+    }
+
+    rows.append(row)
+  }
+
+  rankingList.replaceChildren(rows)
+  rankingList.scrollTop = previousScrollTop
+  const rankingCount = document.querySelector('#ranking-count')
+  const rankingCountSuffix = document.createElement('em')
+  rankingCountSuffix.textContent = ' / 50'
+  rankingCount.replaceChildren(document.createTextNode(String(populated)), rankingCountSuffix)
+
+  const currentRank = cached?.currentRank
+  const myRecord = cached?.myRecord
+  const personal = document.querySelector('#ranking-personal')
+  const personalIcon = document.querySelector('#ranking-personal-icon')
+  const personalRank = document.querySelector('#ranking-personal-rank')
+  const personalScore = document.querySelector('#ranking-personal-score')
+  const personalTier = document.querySelector('#ranking-personal-tier')
+  if (myRecord) {
+    const tier = trophyTierForScore(myRecord.score)
+    personal.dataset.tier = tier.id
+    personalIcon.textContent = tier.icon
+    personalRank.textContent = currentRank
+      ? currentRank <= 50 ? `${currentRank}위` : `${currentRank}위 · 상위 50위 밖`
+      : '순위 확인 불가'
+    personalScore.textContent = `${Number(myRecord.score).toLocaleString('ko-KR')}점`
+    personalTier.textContent = tier.name
+  } else {
+    personal.dataset.tier = 'research'
+    personalIcon.textContent = '🏆'
+    personalRank.textContent = cached ? '순위 미등록' : '동기화 전'
+    personalScore.textContent = '—'
+    personalTier.textContent = '—'
+  }
+
+  const updatedAt = cached?.syncedAt ? new Date(cached.syncedAt) : null
+  document.querySelector('#ranking-updated').textContent = updatedAt && Number.isFinite(updatedAt.getTime())
+    ? updatedAt.toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+    : '동기화 전'
+}
+
+document.querySelector('#view-ranking').addEventListener('click', () => {
+  renderRankingCache()
+  rankingDialog.showModal()
+  queueResearchSync(1000)
+})
+window.addEventListener('ranking-cache-updated', () => {
+  if (rankingDialog.open) renderRankingCache()
+})
+window.addEventListener('storage', (event) => {
+  if (event.key === rankingCacheKey && rankingDialog.open) renderRankingCache()
 })
 
 let sitePresenceLastAt = Date.now()
@@ -1583,43 +1772,42 @@ document.querySelector('#trophy-showcase-close').addEventListener('click', () =>
 trophyCardDialog.addEventListener('click', (event) => {
   if (event.target === trophyCardDialog) trophyCardDialog.close()
 })
-function setTrophyTilt(x, y) {
-  trophyShowcase.style.setProperty('--card-tilt-x', `${Math.max(-9, Math.min(9, x))}deg`)
-  trophyShowcase.style.setProperty('--card-tilt-y', `${Math.max(-9, Math.min(9, y))}deg`)
-}
-function setTrophyTiltFromPointer(event) {
-  const bounds = trophyShowcase.getBoundingClientRect()
-  const x = (event.clientX - bounds.left) / bounds.width - 0.5
-  const y = (event.clientY - bounds.top) / bounds.height - 0.5
-  setTrophyTilt(x * 18, y * -18)
-}
-function resetTrophyTilt() {
-  trophyShowcase.classList.remove('is-touching')
-  trophyShowcase.style.setProperty('--card-tilt-x', '0deg')
-  trophyShowcase.style.setProperty('--card-tilt-y', '0deg')
-}
-trophyShowcase.addEventListener('pointerdown', (event) => {
-  if (!mobileTouchTilt.matches || event.pointerType === 'mouse') return
-  if (event.target instanceof Element && event.target.closest('button, a, input, select, textarea')) return
-  trophyShowcase.classList.add('is-touching')
-  setTrophyTiltFromPointer(event)
+document.querySelector('#ranking-close').addEventListener('click', () => rankingDialog.close())
+rankingDialog.addEventListener('click', (event) => {
+  if (event.target === rankingDialog) rankingDialog.close()
 })
-trophyShowcase.addEventListener('pointermove', (event) => {
-  if (event.pointerType === 'mouse') {
-    const bounds = trophyShowcase.getBoundingClientRect()
+function bindShowcaseTilt(showcase, dialog) {
+  function setTiltFromPointer(event) {
+    const bounds = showcase.getBoundingClientRect()
+    if (!bounds.width || !bounds.height) return
     const x = (event.clientX - bounds.left) / bounds.width - 0.5
     const y = (event.clientY - bounds.top) / bounds.height - 0.5
-    setTrophyTilt(x * 18, y * -18)
-  } else if (mobileTouchTilt.matches && trophyShowcase.classList.contains('is-touching')) setTrophyTiltFromPointer(event)
-})
-trophyShowcase.addEventListener('pointerup', (event) => { if (event.pointerType !== 'mouse') resetTrophyTilt() })
-trophyShowcase.addEventListener('pointercancel', resetTrophyTilt)
-trophyShowcase.addEventListener('pointerleave', resetTrophyTilt)
-trophyCardDialog.addEventListener('close', resetTrophyTilt)
-const beginProfileSync = () => {
-  if (!profileSyncPromise) profileSyncPromise = syncServerProfile()
+    showcase.style.setProperty('--card-tilt-x', `${Math.max(-9, Math.min(9, x * 18))}deg`)
+    showcase.style.setProperty('--card-tilt-y', `${Math.max(-9, Math.min(9, y * -18))}deg`)
+  }
+  function resetTilt() {
+    showcase.classList.remove('is-touching')
+    showcase.style.setProperty('--card-tilt-x', '0deg')
+    showcase.style.setProperty('--card-tilt-y', '0deg')
+  }
+  showcase.addEventListener('pointerdown', (event) => {
+    if (!mobileTouchTilt.matches || event.pointerType === 'mouse') return
+    if (event.target instanceof Element && event.target.closest('button, a, input, select, textarea')) return
+    showcase.classList.add('is-touching')
+    setTiltFromPointer(event)
+  })
+  showcase.addEventListener('pointermove', (event) => {
+    if (event.pointerType === 'mouse') setTiltFromPointer(event)
+    else if (mobileTouchTilt.matches && showcase.classList.contains('is-touching')) setTiltFromPointer(event)
+  })
+  showcase.addEventListener('pointerup', (event) => { if (event.pointerType !== 'mouse') resetTilt() })
+  showcase.addEventListener('pointercancel', resetTilt)
+  showcase.addEventListener('pointerleave', resetTilt)
+  dialog.addEventListener('close', resetTilt)
 }
-if ('requestIdleCallback' in window) window.requestIdleCallback(beginProfileSync, { timeout: 2500 })
-else window.setTimeout(beginProfileSync, 800)
+bindShowcaseTilt(trophyShowcase, trophyCardDialog)
+bindShowcaseTilt(rankingShowcase, rankingDialog)
+queueResearchSync(2500)
+window.addEventListener('online', () => queueResearchSync(1000))
 
 

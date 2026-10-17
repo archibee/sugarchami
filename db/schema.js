@@ -29,4 +29,16 @@ ALTER TABLE visitor_stats ADD COLUMN IF NOT EXISTS best_memory_moves integer NOT
 ALTER TABLE visitor_stats ADD COLUMN IF NOT EXISTS memory_golds integer NOT NULL DEFAULT 0 CHECK (memory_golds >= 0);
 
 CREATE INDEX IF NOT EXISTS visitors_last_seen_idx ON visitors(last_seen_at DESC);
+
+CREATE TABLE IF NOT EXISTS visitor_research (
+  visitor_id uuid PRIMARY KEY REFERENCES visitors(id) ON DELETE CASCADE,
+  research_record jsonb NOT NULL DEFAULT '{}'::jsonb,
+  total_score bigint NOT NULL DEFAULT 0 CHECK (total_score >= 0),
+  client_updated_at bigint NOT NULL DEFAULT 0 CHECK (client_updated_at >= 0),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS visitor_research_ranking_idx
+  ON visitor_research(total_score DESC, updated_at ASC)
+  WHERE total_score > 0;
 `
