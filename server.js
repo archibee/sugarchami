@@ -11,6 +11,7 @@ const root = fileURLToPath(new URL('.', import.meta.url))
 const production = process.env.NODE_ENV === 'production'
 const maxBodyBytes = 1024 * 1024
 const sessionCookie = 'chami_research_session'
+const sessionCookieMaxAgeSeconds = 60 * 60 * 24 * 365
 const databaseUrl = process.env.DATABASE_URL || process.env.DATABASE_URL_UNPOOLED || process.env.POSTGRES_URL_NON_POOLING || process.env.POSTGRES_URL || process.env.POSTGRES_PRISMA_URL || process.env.POSTGRES_URL_NO_SSL
 const pgConfig = databaseUrl
   ? { connectionString: databaseUrl }
@@ -247,8 +248,8 @@ export async function syncResearch(request, response) {
     )
     rankingRows = rankings.rows
     await client.query('COMMIT')
-    if (session.isNew && visitorId) {
-      response.setHeader('Set-Cookie', `${sessionCookie}=${session.token}; Path=/; HttpOnly; SameSite=Lax${production ? '; Secure' : ''}`)
+    if (visitorId) {
+      response.setHeader('Set-Cookie', `${sessionCookie}=${session.token}; Max-Age=${sessionCookieMaxAgeSeconds}; Path=/; HttpOnly; SameSite=Lax${production ? '; Secure' : ''}`)
     }
   } catch (error) {
     await client.query('ROLLBACK').catch(() => {})
